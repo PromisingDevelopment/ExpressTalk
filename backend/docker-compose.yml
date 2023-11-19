@@ -1,0 +1,34 @@
+services:
+  postgres:
+    container_name: postgres-sql
+    image: postgres
+    environment:
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: test
+    ports:
+      - "1234:5432"
+    volumes:
+      - postgres:/var/lib/postgres/data
+    networks:
+      - spring-expresstalk-network
+
+  spring-boot-app:
+    container_name: spring-expresstalk
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: spring/expresstalk
+    ports:
+      - "8088:8080"
+    networks:
+      - spring-expresstalk-network
+    depends_on:
+      - postgres
+
+volumes:
+  postgres:
+
+networks:
+  spring-expresstalk-network:
+    driver: bridge
