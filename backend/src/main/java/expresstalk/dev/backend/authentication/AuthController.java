@@ -1,8 +1,10 @@
 package expresstalk.dev.backend.authentication;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import expresstalk.dev.backend.authentication.dto.SignInUserDto;
+import expresstalk.dev.backend.authentication.dto.SignUpUserDTO;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -13,14 +15,16 @@ public class AuthController {
         this.authService = authService;
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/sign-up")
-    public void signUp() {
-        authService.signUp();
+    public void signUp(@RequestBody @Valid SignUpUserDTO signUpUserDTO) {
+        authService.signUp(signUpUserDTO);
     }
 
+    @ResponseStatus(HttpStatus.OK)
     @PostMapping("/sign-in")
-    public void signIn() {
-        authService.signIn();
+    public void signIn(@RequestBody @Valid SignInUserDto signInUserDto) {
+        authService.signIn(signInUserDto);
     }
 
     @PostMapping("/phone-verification")
