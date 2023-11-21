@@ -25,7 +25,7 @@ public class User {
 
     @NonNull
     @Column(nullable = false, unique = true)
-    private String phone;
+    private String email;
 
     @NonNull
     @Column(nullable = false)

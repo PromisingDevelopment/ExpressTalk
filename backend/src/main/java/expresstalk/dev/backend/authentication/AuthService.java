@@ -4,7 +4,6 @@ import expresstalk.dev.backend.authentication.dto.SignInUserDto;
 import expresstalk.dev.backend.authentication.dto.SignUpUserDTO;
 import expresstalk.dev.backend.user.User;
 import expresstalk.dev.backend.user.UserRepository;
-import expresstalk.dev.backend.util.PhoneConverter;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,19 +20,18 @@ public class AuthService {
     }
 
     public void signUp(SignUpUserDTO signUpUserDTO) {
-        User existedUser = userRepository.findUserByLoginOrPhone(signUpUserDTO.login(), signUpUserDTO.phone());
+        User existedUser = userRepository.findUserByLoginOrEmail(signUpUserDTO.login(), signUpUserDTO.email());
 
         if(existedUser != null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is already exists");
         }
 
         String passwordHash = passwordEncoder.encode(signUpUserDTO.password());
-        String formattedPhone = PhoneConverter.convertToDBFormat(signUpUserDTO.phone());
 
         User newUser = new User(
                 signUpUserDTO.name(),
                 signUpUserDTO.login(),
-                formattedPhone,
+                signUpUserDTO.email(),
                 passwordHash
         );
 
@@ -44,15 +42,8 @@ public class AuthService {
         User existedUser;
         String formattedPhone = "";
 
-        // signInUserDto.login() can be login or phone
-        // if signInUserDto.login() is login we pass assigning to formattedPhone
-        // because convertToDBFormat throws error (it can't convert non-phones)
-        try {
-            formattedPhone = PhoneConverter.convertToDBFormat(signInUserDto.login());
-        }
-        catch (RuntimeException exception) {}
-
-        existedUser = userRepository.findUserByLoginOrPhone(signInUserDto.login(), formattedPhone);
+        // signInUserDto.login() can be login or email
+        existedUser = userRepository.findUserByLoginOrEmail(signInUserDto.login(), signInUserDto.login());
 
         if(existedUser == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User doesn't exist.");
@@ -65,5 +56,5 @@ public class AuthService {
         }
     };
 
-    public void makePhoneVerification() {};
+    public void makeEmailVerification() {};
 }

@@ -27,8 +27,8 @@ public class AuthController {
         authService.signIn(signInUserDto);
     }
 
-    @PostMapping("/phone-verification")
-    public void makePhoneVerification() {
-        authService.makePhoneVerification();
+    @PostMapping("/email-verification")
+    public void makeEmailVerification() {
+        authService.makeEmailVerification();
     }
 }
