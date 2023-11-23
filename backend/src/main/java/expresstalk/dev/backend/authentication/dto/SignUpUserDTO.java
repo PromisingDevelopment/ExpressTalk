@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-public record SignUpUserDTO(
+public record SignUpUserDto(
         @NotBlank(message = "Name field can't be blank.")
         String name,
 

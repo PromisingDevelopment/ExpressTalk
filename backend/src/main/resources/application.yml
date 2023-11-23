@@ -3,7 +3,7 @@ server:
     include-message: always
 spring:
   profiles:
-    active: dev
+    active: docker
   jpa:
     hibernate:
       ddl-auto: update
