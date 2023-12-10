@@ -1,11 +1,11 @@
-package expresstalk.dev.backend.authentication;
+package expresstalk.dev.backend.service;
 
-import expresstalk.dev.backend.authentication.dto.EmailVerificationDto;
-import expresstalk.dev.backend.authentication.dto.SignInUserDto;
-import expresstalk.dev.backend.authentication.dto.SignUpUserDto;
+import expresstalk.dev.backend.dto.EmailVerificationDto;
+import expresstalk.dev.backend.dto.SignInUserDto;
+import expresstalk.dev.backend.dto.SignUpUserDto;
 import expresstalk.dev.backend.exception.EmailNotVerifiedException;
-import expresstalk.dev.backend.user.User;
-import expresstalk.dev.backend.user.UserRepository;
+import expresstalk.dev.backend.entity.User;
+import expresstalk.dev.backend.repository.UserRepository;
 import expresstalk.dev.backend.utils.Generator;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -49,7 +49,7 @@ public class AuthService {
         return newUser;
     };
 
-    public void signIn(SignInUserDto signInUserDto) {
+    public User signIn(SignInUserDto signInUserDto) {
         // signInUserDto.login() can be login or email
         User existedUser = userRepository.findUserByLoginOrEmail(signInUserDto.login(), signInUserDto.login());
 
@@ -66,9 +66,11 @@ public class AuthService {
         if(!isPasswordValid) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Password or email is not correct.");
         }
+
+        return existedUser;
     };
 
-    public void makeEmailVerification(EmailVerificationDto emailVerificationDto) {
+    public User makeEmailVerification(EmailVerificationDto emailVerificationDto) {
         User existedUser = userRepository.findUserByLoginOrEmail(emailVerificationDto.email(), emailVerificationDto.email());
 
         if(existedUser.getEmailCode() == null) {
@@ -81,5 +83,7 @@ public class AuthService {
 
         existedUser.setEmailCode(null);
         userRepository.save(existedUser);
+
+        return existedUser;
     };
 }

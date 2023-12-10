@@ -1,4 +1,4 @@
-package expresstalk.dev.backend.user;
+package expresstalk.dev.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

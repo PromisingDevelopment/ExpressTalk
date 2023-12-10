@@ -1,4 +1,4 @@
-package expresstalk.dev.backend.authentication.dto;
+package expresstalk.dev.backend.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

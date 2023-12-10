@@ -1,12 +1,14 @@
-package expresstalk.dev.backend.authentication;
+package expresstalk.dev.backend.controller;
 
-import expresstalk.dev.backend.authentication.dto.EmailVerificationDto;
-import expresstalk.dev.backend.authentication.dto.SignInUserDto;
-import expresstalk.dev.backend.authentication.dto.SignUpUserDto;
+import expresstalk.dev.backend.service.AuthService;
+import expresstalk.dev.backend.dto.EmailVerificationDto;
+import expresstalk.dev.backend.dto.SignInUserDto;
+import expresstalk.dev.backend.dto.SignUpUserDto;
 import expresstalk.dev.backend.email.EmailService;
 import expresstalk.dev.backend.exception.EmailNotVerifiedException;
-import expresstalk.dev.backend.user.User;
+import expresstalk.dev.backend.entity.User;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -44,14 +46,16 @@ public class AuthController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Email sending error. Try again later.");
         }
 
-        return "";
+        return "redirect:http://localhost:8080/email-verification";
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/sign-in")
-    public String signIn(@RequestBody @Valid SignInUserDto signInUserDto) {
+    public String signIn(@RequestBody @Valid SignInUserDto signInUserDto, HttpSession session) {
+        User signedUser = new User();
+
         try {
-            authService.signIn(signInUserDto);
+            signedUser = authService.signIn(signInUserDto);
         } catch (Exception ex) {
             if(ex instanceof EmailNotVerifiedException) {
                 return "redirect:http://localhost:8080/email-verification";
@@ -60,12 +64,17 @@ public class AuthController {
             throw ex;
         }
 
+        session.setAttribute(session.getId(), signedUser.getId().toString());
+
         return "";
     }
 
-    // ToDo: Make code checking not delivering
     @PostMapping("/email-verification")
-    public void makeEmailVerification(@RequestBody @Valid EmailVerificationDto emailVerificationDto) {
-        authService.makeEmailVerification(emailVerificationDto);
+    public String makeEmailVerification(@RequestBody @Valid EmailVerificationDto emailVerificationDto, HttpSession session) {
+        User verifiedUser = authService.makeEmailVerification(emailVerificationDto);
+
+        session.setAttribute(session.getId(), verifiedUser.getId().toString());
+
+        return "";
     }
 }

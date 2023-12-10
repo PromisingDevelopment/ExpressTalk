@@ -13,6 +13,17 @@ services:
     networks:
       - spring-expresstalk-network
 
+  redis:
+    container_name: redis
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_volume_data:/data
+    command: redis-server
+    networks:
+      - spring-expresstalk-network
+
   spring-boot-app:
     container_name: spring-expresstalk
     build:
@@ -24,9 +35,11 @@ services:
     networks:
       - spring-expresstalk-network
     depends_on:
+      - redis
       - postgres
 
 volumes:
+  redis_volume_data:
   postgres:
 
 networks:

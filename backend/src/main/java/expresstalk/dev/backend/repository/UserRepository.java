@@ -1,5 +1,6 @@
-package expresstalk.dev.backend.user;
+package expresstalk.dev.backend.repository;
 
+import expresstalk.dev.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
