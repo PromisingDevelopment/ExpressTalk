@@ -3,7 +3,7 @@ import { Provider } from "react-redux";
 import store from "./redux/store";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import theme from "./theme";
-import { Layout } from "./components/Layout";
+import { Main } from "./pages/Main";
 
 function App() {
   return (
@@ -11,7 +11,7 @@ function App() {
       {/*<Provider store={store}>*/}
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Layout />
+        <Main />
       </ThemeProvider>
       {/*</Provider>*/}
     </div>
