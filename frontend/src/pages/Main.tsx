@@ -1,7 +1,9 @@
 import React, { FC } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { RequireAuth } from "../hoc/RequireAuth";
 import { Auth } from "./Auth";
+import { HomeAuth } from "../modules/RegistrationForm/components/HomeAuth";
+import { NotFoundPage } from "./NotFoundPage";
 
 interface MainProps {}
 
@@ -19,8 +21,9 @@ const Main: FC<MainProps> = () => {
           }
         />
         <Route path="/auth" element={<Auth />}>
-          {/* Кроки авторизації */}
+          <Route path="home" element={<HomeAuth />} />
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );

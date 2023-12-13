@@ -3,7 +3,7 @@
   "usesStyledComponents": false,
   "component": {
     "default": {
-      "path": "src/components",
+      "path": "src/modules/RegistrationForm/components/",
       "customTemplates": {
         "component": "templates/TemplateName.tsx",
         "index": "templates/index.ts"

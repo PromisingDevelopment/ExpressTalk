@@ -9,7 +9,7 @@ const RequireAuth: FC<RequireAuthProps> = ({ children }) => {
   const isAuth = false;
 
   if (!isAuth) {
-    return <Navigate to={"/auth"} replace />;
+    return <Navigate to={"/auth/home"} replace />;
   }
 
   return children;

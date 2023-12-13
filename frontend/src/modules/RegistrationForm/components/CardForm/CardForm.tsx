@@ -11,6 +11,10 @@ const CardForm: FC<CardFormProps> = ({ children }) => {
       sx={{
         borderRadius: 6,
         background: (theme) => theme.palette.primary.dark,
+        maxWidth: 588,
+        width: 1,
+        p: 8,
+        textAlign: "center",
       }}>
       {children}
     </Box>
