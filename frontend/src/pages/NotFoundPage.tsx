@@ -1,10 +1,10 @@
-import React, { FC } from "react";
+import React from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { Box, Link, Typography } from "@mui/material";
 
 interface NotFoundPageProps {}
 
-const NotFoundPage: FC<NotFoundPageProps> = () => {
+const NotFoundPage: React.FC<NotFoundPageProps> = () => {
   return (
     <Box
       sx={{

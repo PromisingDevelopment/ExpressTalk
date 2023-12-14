@@ -1,13 +1,13 @@
-import React, { FC } from "react";
+import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { RequireAuth } from "../hoc/RequireAuth";
+import { RequireAuth } from "../modules/RegistrationForm";
+import { HomeAuth } from "../modules/RegistrationForm";
 import { Auth } from "./Auth";
-import { HomeAuth } from "../modules/RegistrationForm/components/HomeAuth";
 import { NotFoundPage } from "./NotFoundPage";
 
 interface MainProps {}
 
-const Main: FC<MainProps> = () => {
+const Main: React.FC<MainProps> = () => {
   return (
     <BrowserRouter>
       <Routes>

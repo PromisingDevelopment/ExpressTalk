@@ -1,9 +1,9 @@
-import React, { FC } from "react";
+import React from "react";
 
 interface TemplateNameProps {}
 
-const TemplateName: FC<TemplateNameProps> = () => {
-  return <div></div>;
+const TemplateName: React.FC<TemplateNameProps> = () => {
+  return <></>;
 };
 
 export { TemplateName };

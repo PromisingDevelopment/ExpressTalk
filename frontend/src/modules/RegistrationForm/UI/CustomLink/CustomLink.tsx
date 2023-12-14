@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React from "react";
 import { Button, Link, SxProps } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 
@@ -10,7 +10,7 @@ interface CustomLinkProps {
   sx?: SxProps;
 }
 
-const CustomLink: FC<CustomLinkProps> = ({
+const CustomLink: React.FC<CustomLinkProps> = ({
   children,
   to,
   background = "white",

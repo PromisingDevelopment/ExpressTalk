@@ -1,11 +1,11 @@
-import React, { FC } from "react";
+import React from "react";
 import { Navigate } from "react-router-dom";
 
 interface RequireAuthProps {
   children: React.ReactElement;
 }
 
-const RequireAuth: FC<RequireAuthProps> = ({ children }) => {
+const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
   const isAuth = false;
 
   if (!isAuth) {
