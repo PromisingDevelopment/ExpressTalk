@@ -17,9 +17,7 @@ const HomeAuth: React.FC<HomeAuthProps> = () => {
           paddingY: 3,
         },
       }}>
-      <Title sx={{ mb: { sm: 10.5, xs: 8 } }} size="large">
-        Express Talk
-      </Title>
+      <Title size="large">Express Talk</Title>
       <CustomLink to="/auth/sign-in" background="grey" sx={{ mb: { sm: 6, xs: 4 } }}>
         Sign in
       </CustomLink>
