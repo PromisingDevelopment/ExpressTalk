@@ -4,7 +4,7 @@ import expresstalk.dev.backend.service.AuthService;
 import expresstalk.dev.backend.dto.EmailVerificationDto;
 import expresstalk.dev.backend.dto.SignInUserDto;
 import expresstalk.dev.backend.dto.SignUpUserDto;
-import expresstalk.dev.backend.email.EmailService;
+import expresstalk.dev.backend.service.EmailService;
 import expresstalk.dev.backend.exception.EmailNotVerifiedException;
 import expresstalk.dev.backend.entity.User;
 import jakarta.mail.MessagingException;
