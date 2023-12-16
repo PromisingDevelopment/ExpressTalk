@@ -36,7 +36,7 @@ const CardForm: React.FC<CardFormProps> = ({ children }) => {
             px: 4,
           },
         }}>
-        {children}
+        <Box sx={{ position: "relative", pb: 7.5 }}>{children}</Box>
       </Box>
     </Box>
   );

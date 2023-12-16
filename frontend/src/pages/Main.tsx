@@ -1,6 +1,11 @@
 import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { RequireAuth, SignUp, HomeAuth } from "../modules/RegistrationForm";
+import {
+  RequireAuth,
+  SignUp,
+  HomeAuth,
+  GmailVerification,
+} from "../modules/RegistrationForm";
 import { Auth } from "./Auth";
 import { NotFoundPage } from "./NotFoundPage";
 
@@ -22,6 +27,7 @@ const Main: React.FC<MainProps> = () => {
         <Route path="/auth" element={<Auth />}>
           <Route path="home" element={<HomeAuth />} />
           <Route path="sign-up" element={<SignUp />} />
+          <Route path="gmail-verification" element={<GmailVerification />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

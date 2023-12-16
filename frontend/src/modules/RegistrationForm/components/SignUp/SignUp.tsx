@@ -1,7 +1,8 @@
 import React from "react";
 import { Title } from "../../UI/Title";
-import { Box, TextField } from "@mui/material";
 import { CustomLink } from "../../UI/CustomLink";
+import { GoBack } from "../../UI/GoBack";
+import { CustomInput } from "../../UI/CustomInput";
 
 interface SignUpProps {}
 
@@ -28,8 +29,11 @@ const SignUp: React.FC<SignUpProps> = () => {
         ))}
       </Box>
       <CustomLink uppercase to="verif">
+      <CustomLink uppercase to="/auth/gmail-verification">
         done
       </CustomLink>
+
+      <GoBack />
     </>
   );
 };
