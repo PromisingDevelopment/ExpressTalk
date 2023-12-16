@@ -5,18 +5,18 @@ import { GoBack } from "../../UI/GoBack";
 import { CustomInput } from "../../UI/CustomInput";
 import { InputsWrapper } from "../../UI/InputsWrapper";
 
-interface SignUpProps {}
+interface SignInProps {}
 
-const SignUp: React.FC<SignUpProps> = () => {
+const SignIn: React.FC<SignInProps> = () => {
   return (
     <>
-      <Title>Sign up</Title>
+      <Title>Sign in</Title>
       <InputsWrapper>
-        {["Login", "Name", "Gmail", "Password"].map((label) => (
+        {["Login or gmail", "Password"].map((label) => (
           <CustomInput label={label} />
         ))}
       </InputsWrapper>
-      <CustomLink uppercase to="/auth/gmail-verification">
+      <CustomLink uppercase to="/">
         done
       </CustomLink>
 
@@ -25,4 +25,4 @@ const SignUp: React.FC<SignUpProps> = () => {
   );
 };
 
-export { SignUp };
+export { SignIn };
