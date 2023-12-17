@@ -16,7 +16,7 @@ const CardForm: React.FC<CardFormProps> = ({ children }) => {
         justifyContent: "center",
         alignItems: "center",
         px: 2,
-        "@media (max-height: 650px)": {
+        "@media (max-height: 830px)": {
           alignItems: "flex-start",
           py: 3,
           height: 1,
