@@ -12,7 +12,6 @@ const CustomInput: React.FC<CustomInputProps> = React.forwardRef(
 
     const borderColor = errorMessage ? theme.palette.error.main : "#E9EFFF";
     const labelColor = errorMessage ? theme.palette.error.main : "#E9EFFF80";
-    console.log(theme.palette.error);
 
     return (
       <TextField

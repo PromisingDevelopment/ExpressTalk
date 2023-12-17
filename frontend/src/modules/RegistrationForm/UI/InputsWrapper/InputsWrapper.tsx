@@ -11,8 +11,8 @@ const InputsWrapper: React.FC<InputsWrapperProps> = ({ children }) => {
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: { sx: 6, xs: 3 },
-        mb: { sx: 6, xs: 5 },
+        gap: { sm: 6, xs: 3 },
+        mb: { sm: 6, xs: 5 },
       }}>
       {children}
     </Box>
