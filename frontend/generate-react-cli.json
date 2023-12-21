@@ -1,0 +1,21 @@
+{
+  "usesTypeScript": true,
+  "usesStyledComponents": false,
+  "component": {
+    "default": {
+      "path": "src/modules/RegistrationForm/components/",
+      "customTemplates": {
+        "component": "templates/TemplateName.tsx",
+        "index": "templates/index.ts"
+      },
+      "withIndex": true,
+      "withStyle": false,
+      "withTest": false,
+      "withStory": false,
+      "withLazy": false
+    }
+  },
+  "testLibrary": "None",
+  "usesCssModule": false,
+  "cssPreprocessor": "scss"
+}
