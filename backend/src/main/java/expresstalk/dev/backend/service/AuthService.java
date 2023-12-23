@@ -3,6 +3,7 @@ package expresstalk.dev.backend.service;
 import expresstalk.dev.backend.dto.EmailVerificationDto;
 import expresstalk.dev.backend.dto.SignInUserDto;
 import expresstalk.dev.backend.dto.SignUpUserDto;
+import expresstalk.dev.backend.enums.UserStatus;
 import expresstalk.dev.backend.exception.EmailNotVerifiedException;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.repository.UserRepository;
@@ -43,6 +44,7 @@ public class AuthService {
                 passwordHash
         );
         newUser.setEmailCode(emailCode);
+        newUser.setStatus(UserStatus.OFFLINE);
 
         userRepository.save(newUser);
 

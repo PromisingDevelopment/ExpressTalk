@@ -64,7 +64,7 @@ public class AuthController {
             throw ex;
         }
 
-        session.setAttribute(session.getId(), signedUser.getId().toString());
+        session.setAttribute("userId", signedUser.getId().toString());
 
         return "";
     }
@@ -73,7 +73,7 @@ public class AuthController {
     public String makeEmailVerification(@RequestBody @Valid EmailVerificationDto emailVerificationDto, HttpSession session) {
         User verifiedUser = authService.makeEmailVerification(emailVerificationDto);
 
-        session.setAttribute(session.getId(), verifiedUser.getId().toString());
+        session.setAttribute("userId", verifiedUser.getId().toString());
 
         return "";
     }

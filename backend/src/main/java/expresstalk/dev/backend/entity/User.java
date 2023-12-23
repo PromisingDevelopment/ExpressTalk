@@ -1,7 +1,9 @@
 package expresstalk.dev.backend.entity;
 
+import expresstalk.dev.backend.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.util.UUID;
 
@@ -33,4 +35,8 @@ public class User {
 
     @Column
     private String emailCode;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "varchar(7) default 'ONLINE'")
+    private UserStatus status;
 }
