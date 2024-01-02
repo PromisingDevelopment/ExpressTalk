@@ -27,14 +27,14 @@ public class AuthController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/sign-up")
-    public String signUp(@RequestBody @Valid SignUpUserDto signUpUserDto) {
+    public void signUp(@RequestBody @Valid SignUpUserDto signUpUserDto) {
         User user = new User();
 
         try {
             user = authService.signUp(signUpUserDto);
         } catch (Exception ex) {
             if(ex instanceof EmailNotVerifiedException) {
-                return "redirect:http://localhost:8080/email-verification";
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "User with these data registered but not confirmed. Please, confirm your email.");
             }
 
             throw ex;
@@ -45,36 +45,31 @@ public class AuthController {
         } catch (MessagingException ex) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Email sending error. Try again later.");
         }
-
-        return "redirect:http://localhost:8080/email-verification";
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/sign-in")
-    public String signIn(@RequestBody @Valid SignInUserDto signInUserDto, HttpSession session) {
+    public void signIn(@RequestBody @Valid SignInUserDto signInUserDto, HttpSession session) {
         User signedUser = new User();
 
         try {
             signedUser = authService.signIn(signInUserDto);
         } catch (Exception ex) {
             if(ex instanceof EmailNotVerifiedException) {
-                return "redirect:http://localhost:8080/email-verification";
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "User with these data registered but not confirmed. Please, confirm your email.");
             }
 
             throw ex;
         }
 
         session.setAttribute("userId", signedUser.getId().toString());
-
-        return "";
     }
 
+    @ResponseStatus(HttpStatus.OK)
     @PostMapping("/email-verification")
-    public String makeEmailVerification(@RequestBody @Valid EmailVerificationDto emailVerificationDto, HttpSession session) {
+    public void makeEmailVerification(@RequestBody @Valid EmailVerificationDto emailVerificationDto, HttpSession session) {
         User verifiedUser = authService.makeEmailVerification(emailVerificationDto);
 
         session.setAttribute("userId", verifiedUser.getId().toString());
-
-        return "";
     }
 }

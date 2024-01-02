@@ -1,10 +1,12 @@
 package expresstalk.dev.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import expresstalk.dev.backend.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -27,16 +29,28 @@ public class User {
 
     @NonNull
     @Column(nullable = false, unique = true)
+    @JsonIgnore
     private String email;
 
     @NonNull
     @Column(nullable = false)
+    @JsonIgnore
     private String passwordHash;
 
     @Column
+    @JsonIgnore
     private String emailCode;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "varchar(7) default 'ONLINE'")
     private UserStatus status;
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_private_chat",
+            joinColumns = @JoinColumn(name = "users_id"),
+            inverseJoinColumns = @JoinColumn(name = "private_chats_id")
+    )
+    @JsonIgnore
+    private List<PrivateChat> privateChats = new LinkedList<>();
 }

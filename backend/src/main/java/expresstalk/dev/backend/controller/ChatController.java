@@ -1,43 +1,66 @@
 package expresstalk.dev.backend.controller;
 
+import expresstalk.dev.backend.entity.PrivateChat;
 import expresstalk.dev.backend.enums.UserStatus;
+import expresstalk.dev.backend.service.ChatService;
 import expresstalk.dev.backend.service.UserService;
+import expresstalk.dev.backend.utils.RegexChecker;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
-@RestController("/")
+@RestController
+@RequestMapping("/chats")
 public class ChatController {
     private final UserService userService;
+    private final ChatService chatService;
 
-    public ChatController(UserService userService) {
+    public ChatController(UserService userService, ChatService chatService) {
         this.userService = userService;
+        this.chatService = chatService;
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public String getChatsPage(HttpSession session) {
+    @ResponseBody
+    public Object getChatsPage(HttpSession session) {
         if(session.getAttribute("userId") == null) {
-            return "redirect:http://localhost:8080/auth";
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not authenticated");
         }
 
         UUID userId = UUID.fromString(session.getAttribute("userId").toString());
 
         userService.handleStatusTo(userId, UserStatus.ONLINE);
 
-        return "";
+        Map<String, UUID> idObject = new HashMap<>();
+        idObject.put("id", userId);
+
+        return idObject;
     }
 
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/log-out")
-    public String deleteSession(HttpSession session) {
+    public void deleteSession(HttpSession session) {
         session.invalidate();
+    }
 
-        return "redirect:http://localhost:8080/auth";
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/private/{chatId}")
+    public PrivateChat getChatRoom(@PathVariable String chatId) {
+        // regex for UUID_UUID format
+        String regex = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}_[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+
+        if(!RegexChecker.isMatches(regex, chatId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect chat id provided.");
+        }
+
+        PrivateChat chat = chatService.createPrivateChatOrGetIfExists(chatId);
+
+        return chat;
     }
 }

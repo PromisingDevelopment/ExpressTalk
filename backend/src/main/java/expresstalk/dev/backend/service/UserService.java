@@ -18,14 +18,43 @@ public class UserService {
     }
 
     public void handleStatusTo(UUID userId, UserStatus userStatus) {
-        User user = userRepository.findById(userId).orElse(null);
-
-        if(user == null) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Can't handle user's status due to invalid id provided.");
-        }
+        User user = findById(userId);
 
         user.setStatus(userStatus);
 
         userRepository.save(user);
+    }
+
+    private User findById(UUID userId) {
+        User user = userRepository.findById(userId).orElse(null);
+
+        if(user == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User with id: " + userId + " doesn't exist");
+        }
+
+        return user;
+    }
+
+    private User findByLogin(String login) {
+        User user = userRepository.findUserByLogin(login);
+
+        if(user == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User with login: " + login + " doesn't exist");
+        }
+
+        return user;
+    }
+
+    public User findByLoginOrId(String loginOrId) {
+        UUID id = UUID.randomUUID();
+        String login = loginOrId;
+
+        try {
+            id = UUID.fromString(loginOrId);
+        } catch (Exception ex) {
+            return findByLogin(login);
+        }
+
+        return findById(id);
     }
 }
