@@ -1,5 +1,6 @@
 package expresstalk.dev.backend.controller;
 
+import expresstalk.dev.backend.dto.GetUserChatsDto;
 import expresstalk.dev.backend.entity.PrivateChat;
 import expresstalk.dev.backend.enums.UserStatus;
 import expresstalk.dev.backend.service.ChatService;
@@ -28,7 +29,7 @@ public class ChatController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     @ResponseBody
-    public Object getChatsPage(HttpSession session) {
+    public GetUserChatsDto getChatsPage(HttpSession session) {
         if(session.getAttribute("userId") == null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not authenticated");
         }
@@ -37,10 +38,7 @@ public class ChatController {
 
         userService.handleStatusTo(userId, UserStatus.ONLINE);
 
-        Map<String, UUID> idObject = new HashMap<>();
-        idObject.put("id", userId);
-
-        return idObject;
+        return userService.getUserIdAndChats(userId);
     }
 
     @ResponseStatus(HttpStatus.OK)

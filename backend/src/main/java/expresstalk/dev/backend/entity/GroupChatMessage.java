@@ -10,11 +10,11 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = "private_chat_messages")
+@Table(name = "group_chat_messages")
 @RequiredArgsConstructor
 @NoArgsConstructor
 @Data
-public class PrivateChatMessage {
+public class GroupChatMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -25,10 +25,6 @@ public class PrivateChatMessage {
 
     @NonNull
     @Column(nullable = false)
-    private UUID receiverId;
-
-    @NonNull
-    @Column(nullable = false)
     private String content;
 
     @NonNull
@@ -36,6 +32,6 @@ public class PrivateChatMessage {
     private Date createdAt;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "private_chats_id", referencedColumnName = "id")
-    private PrivateChat privateChat;
+    @JoinColumn(name = "group_chats_id", referencedColumnName = "id")
+    private GroupChat groupChat;
 }

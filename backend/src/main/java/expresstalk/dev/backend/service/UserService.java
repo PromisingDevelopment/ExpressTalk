@@ -1,5 +1,6 @@
 package expresstalk.dev.backend.service;
 
+import expresstalk.dev.backend.dto.GetUserChatsDto;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.enums.UserStatus;
 import expresstalk.dev.backend.repository.UserRepository;
@@ -7,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -56,5 +59,13 @@ public class UserService {
         }
 
         return findById(id);
+    }
+
+    public GetUserChatsDto getUserIdAndChats(UUID userId) {
+        User user = findById(userId);
+
+        GetUserChatsDto getUserChatsDto = new GetUserChatsDto(userId, user.getPrivateChats(), user.getGroupChats());
+
+        return getUserChatsDto;
     }
 }

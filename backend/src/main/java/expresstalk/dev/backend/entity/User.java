@@ -53,4 +53,13 @@ public class User {
     )
     @JsonIgnore
     private List<PrivateChat> privateChats = new LinkedList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_group_chat",
+            joinColumns = @JoinColumn(name = "users_id"),
+            inverseJoinColumns = @JoinColumn(name = "group_chats_id")
+    )
+    @JsonIgnore
+    private List<GroupChat> groupChats = new LinkedList<>();
 }
