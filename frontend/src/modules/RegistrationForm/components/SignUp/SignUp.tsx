@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 const scheme = object().shape({
   login: string().min(4, "login length should be more than 4 characters").required(),
   name: string().required(),
-  gmail: string().email().required(),
+  email: string().email().required(),
   password: string()
     .min(6, "password length should be more than 6 characters")
     .required(),
@@ -28,9 +28,6 @@ const SignUp: React.FC<SignUpProps> = () => {
   });
   const navigate = useNavigate();
 
-  //React.useEffect(() => {
-  //  console.log(formState.errors);
-  //}, [formState]);
 
   const onSubmit: SubmitHandler<SignUpFields> = (data) => {
     console.log(data);
@@ -44,7 +41,7 @@ const SignUp: React.FC<SignUpProps> = () => {
     <form onSubmit={handleSubmit(onSubmit)}>
       <Title>Sign up</Title>
       <InputsWrapper>
-        {["login", "name", "gmail", "password"].map((label) => (
+        {["login", "name", "email", "password"].map((label) => (
           <CustomInput
             key={label}
             label={label}

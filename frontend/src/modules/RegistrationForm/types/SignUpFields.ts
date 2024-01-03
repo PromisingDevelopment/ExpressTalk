@@ -1,7 +1,7 @@
 export interface SignUpFields {
   login: string;
   name: string;
-  gmail: string;
+  email: string;
   password: string;
 }
 

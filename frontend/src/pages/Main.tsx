@@ -4,7 +4,7 @@ import {
   RequireAuth,
   SignUp,
   HomeAuth,
-  GmailVerification,
+  EmailVerification,
   SignIn,
 } from "../modules/RegistrationForm";
 import { Auth } from "./Auth";
@@ -29,7 +29,7 @@ const Main: React.FC<MainProps> = () => {
           <Route path="home" element={<HomeAuth />} />
           <Route path="sign-in" element={<SignIn />} />
           <Route path="sign-up" element={<SignUp />} />
-          <Route path="gmail-verification" element={<GmailVerification />} />
+          <Route path="email-verification" element={<EmailVerification />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
