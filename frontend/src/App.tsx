@@ -8,12 +8,12 @@ import { Main } from "./pages/Main";
 function App() {
   return (
     <div className="App">
-      {/*<Provider store={store}>*/}
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Main />
-      </ThemeProvider>
-      {/*</Provider>*/}
+      <Provider store={store}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Main />
+        </ThemeProvider>
+      </Provider>
     </div>
   );
 }
