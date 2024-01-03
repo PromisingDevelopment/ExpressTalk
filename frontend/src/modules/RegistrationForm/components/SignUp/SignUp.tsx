@@ -9,6 +9,9 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import type { SignUpFields, SignUpLabels } from "../../types/SignUpFields";
 import { useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../../../../hooks/redux";
+import { resetStatus, signUpThunk } from "../../store/authSlice";
+import { navigateUrls } from "../../../../config";
 
 const scheme = object().shape({
   login: string().min(4, "login length should be more than 4 characters").required(),
@@ -27,14 +30,18 @@ const SignUp: React.FC<SignUpProps> = () => {
     resolver: yupResolver(scheme),
   });
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { errorMessage, status } = useAppSelector((state) => state.auth.signUp);
 
+  React.useEffect(() => {
+    if (status === "fulfilled") {
+      navigate(navigateUrls.email);
+      dispatch(resetStatus("signUp"));
+    }
+  }, [navigate, status, dispatch]);
 
-  const onSubmit: SubmitHandler<SignUpFields> = (data) => {
-    console.log(data);
-
-    /* pass data to redux */
-
-    navigate("/auth/gmail-verification");
+  const onSubmit: SubmitHandler<SignUpFields> = async (data) => {
+    await dispatch(signUpThunk(data));
   };
 
   return (

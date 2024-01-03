@@ -7,6 +7,9 @@ import { object, string } from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import type { EmailFields } from "../../types/EmailFields";
+import { useAppDispatch, useAppSelector } from "../../../../hooks/redux";
+import { emailThunk, resetStatus } from "../../store/authSlice";
+import { useNavigate } from "react-router-dom";
 
 const scheme = object().shape({
   code: string().length(6, "The length of the code must be 6 characters").required(),
@@ -19,8 +22,23 @@ const EmailVerification: React.FC<EmailVerificationProps> = () => {
     mode: "onSubmit",
     resolver: yupResolver(scheme),
   });
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { errorMessage, status } = useAppSelector(
+    (state) => state.auth.emailVerification
+  );
+
+  React.useEffect(() => {
+    if (status === "fulfilled") {
+      navigate("/");
+      dispatch(resetStatus("emailVerification"));
+    }
+  }, [navigate, status, dispatch]);
+
   const onSubmit: SubmitHandler<EmailFields> = (data) => {
+    dispatch(emailThunk(data));
   };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Title>Email verification</Title>
