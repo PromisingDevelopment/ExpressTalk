@@ -28,7 +28,7 @@ public class AuthService {
 
         if(existedUser != null) {
             if(existedUser.getEmailCode() != null) {
-                throw new EmailNotVerifiedException(HttpStatus.FORBIDDEN, "User's email needs verification");
+                throw new EmailNotVerifiedException(HttpStatus.ACCEPTED, "User's email needs verification");
             }
 
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User already exists");
@@ -60,7 +60,7 @@ public class AuthService {
         }
 
         if(existedUser.getEmailCode() != null) {
-            throw new EmailNotVerifiedException(HttpStatus.FORBIDDEN, "User's email needs verification");
+            throw new EmailNotVerifiedException(HttpStatus.ACCEPTED, "User's email needs verification");
         }
 
         Boolean isPasswordValid = passwordEncoder.matches(signInUserDto.password(), existedUser.getPasswordHash());
@@ -80,7 +80,7 @@ public class AuthService {
         }
 
         if(!emailVerificationDto.code().equals(existedUser.getEmailCode())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect code.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect code provided.");
         }
 
         existedUser.setEmailCode(null);

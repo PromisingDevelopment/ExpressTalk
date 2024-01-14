@@ -1,5 +1,7 @@
 package expresstalk.dev.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,7 +37,8 @@ public class PrivateChatMessage {
     @Column(nullable = false)
     private Date createdAt;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "private_chats_id", referencedColumnName = "id")
+    @JsonIgnore
     private PrivateChat privateChat;
 }

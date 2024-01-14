@@ -7,6 +7,8 @@ import expresstalk.dev.backend.dto.SignUpUserDto;
 import expresstalk.dev.backend.service.EmailService;
 import expresstalk.dev.backend.exception.EmailNotVerifiedException;
 import expresstalk.dev.backend.entity.User;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -25,6 +27,11 @@ public class AuthController {
         this.emailService = emailService;
     }
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "202", description = "User's email needs verification"),
+            @ApiResponse(responseCode = "403", description = "User already exists"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/sign-up")
     public void signUp(@RequestBody @Valid SignUpUserDto signUpUserDto) {
@@ -47,6 +54,12 @@ public class AuthController {
         }
     }
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "202", description = "User's email needs verification"),
+            @ApiResponse(responseCode = "403", description = "Password or email is not correct."),
+            @ApiResponse(responseCode = "404", description = "User doesn't exist."),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/sign-in")
     public void signIn(@RequestBody @Valid SignInUserDto signInUserDto, HttpSession session) {
@@ -65,6 +78,11 @@ public class AuthController {
         session.setAttribute("userId", signedUser.getId().toString());
     }
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "400", description = "Incorrect code provided."),
+            @ApiResponse(responseCode = "409", description = "User's email has already verified."),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/email-verification")
     public void makeEmailVerification(@RequestBody @Valid EmailVerificationDto emailVerificationDto, HttpSession session) {
