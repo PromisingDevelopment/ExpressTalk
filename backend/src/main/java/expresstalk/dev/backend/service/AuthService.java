@@ -3,6 +3,7 @@ package expresstalk.dev.backend.service;
 import expresstalk.dev.backend.dto.EmailVerificationDto;
 import expresstalk.dev.backend.dto.SignInUserDto;
 import expresstalk.dev.backend.dto.SignUpUserDto;
+import expresstalk.dev.backend.enums.UserStatus;
 import expresstalk.dev.backend.exception.EmailNotVerifiedException;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.repository.UserRepository;
@@ -27,7 +28,7 @@ public class AuthService {
 
         if(existedUser != null) {
             if(existedUser.getEmailCode() != null) {
-                throw new EmailNotVerifiedException(HttpStatus.FORBIDDEN, "User's email needs verification");
+                throw new EmailNotVerifiedException(HttpStatus.ACCEPTED, "User's email needs verification");
             }
 
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User already exists");
@@ -43,6 +44,7 @@ public class AuthService {
                 passwordHash
         );
         newUser.setEmailCode(emailCode);
+        newUser.setStatus(UserStatus.OFFLINE);
 
         userRepository.save(newUser);
 
@@ -58,7 +60,7 @@ public class AuthService {
         }
 
         if(existedUser.getEmailCode() != null) {
-            throw new EmailNotVerifiedException(HttpStatus.FORBIDDEN, "User's email needs verification");
+            throw new EmailNotVerifiedException(HttpStatus.ACCEPTED, "User's email needs verification");
         }
 
         Boolean isPasswordValid = passwordEncoder.matches(signInUserDto.password(), existedUser.getPasswordHash());
@@ -78,7 +80,7 @@ public class AuthService {
         }
 
         if(!emailVerificationDto.code().equals(existedUser.getEmailCode())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect code.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect code provided.");
         }
 
         existedUser.setEmailCode(null);
