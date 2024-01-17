@@ -1,7 +1,5 @@
 package expresstalk.dev.backend.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,6 +18,5 @@ public class PrivateChat {
     private List<PrivateChatMessage> messages = new LinkedList<>();
 
     @ManyToMany(mappedBy = "privateChats", fetch = FetchType.EAGER)
-    @JsonIgnore
     private List<User> members = new ArrayList<>();
 }

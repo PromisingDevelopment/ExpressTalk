@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -77,21 +76,16 @@ public class ChatService {
 
     }
 
-    public PrivateChatMessage saveMessage(SendPrivateChatMessageDto sendPrivateChatMessageDto) {
+    public PrivateChatMessage saveMessage(SendPrivateChatMessageDto sendPrivateChatMessageDto, UUID senderId, UUID receiverId) {
         PrivateChat privateChat = getPrivateChat(UUID.fromString(sendPrivateChatMessageDto.chatId()));
 
         PrivateChatMessage privateChatMessage = new PrivateChatMessage(
-                UUID.fromString(sendPrivateChatMessageDto.senderId()),
-                UUID.fromString(sendPrivateChatMessageDto.receiverId()),
+                senderId,
+                receiverId,
                 sendPrivateChatMessageDto.content(),
                 new Date(Long.parseLong(sendPrivateChatMessageDto.createdAt()))
         );
 
-        System.out.println("\n" + privateChatMessage.getId());
-        System.out.println("\n" + privateChatMessage.getSenderId());
-        System.out.println("\n" + privateChatMessage.getReceiverId());
-        System.out.println("\n" + privateChatMessage.getContent());
-        System.out.println("\n" + privateChatMessage.getCreatedAt());
         privateChat.getMessages().add(privateChatMessage);
         privateChatMessage.setPrivateChat(privateChat);
         privateChatRepository.save(privateChat);
@@ -117,49 +111,73 @@ public class ChatService {
         return isUserExistsInChat(user, privateChat);
     }
 
-    public void ensureUserPermissionToSendMessageInPrivateChat(UUID userId, UUID chatId) {
-        if(!isUserExistsInChat(userId, chatId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User with id " + userId + " can't send messages to other people's chat");
+    public boolean isUserExistsInChat(User user, UUID chatId) {
+        PrivateChat privateChat = getPrivateChat(chatId);
+
+        return isUserExistsInChat(user, privateChat);
+    }
+
+    public void ensureUserPermissionToSendMessageInPrivateChat(User user, UUID chatId) {
+        if(!isUserExistsInChat(user, chatId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User with id " + user.getId() + " can't send messages to other people's chat");
         }
     }
 
-    public User getSecondUserOfPrivateChat(User firstUser, PrivateChat privateChat) throws Exception {
-        if(!isUserExistsInChat(firstUser, privateChat)) {
+    public User getSecondUserOfPrivateChat(UUID firstUserId, PrivateChat privateChat) throws Exception {
+        if(!isUserExistsInChat(firstUserId, privateChat.getId())) {
             throw new Exception("Searching of the second user of chat was failed because the first user doesn't exist in chat");
         }
 
         User secondUser = new User();
 
         for (User user : privateChat.getMembers()) {
-            if(!user.getId().equals(firstUser)) secondUser = user;
+            if(!user.getId().equals(firstUserId)) secondUser = user;
         }
 
         return secondUser;
     }
 
-    public GetUserChatsDto getUserIdAndChats(UUID userId) {
+    public User getSecondUserOfPrivateChat(UUID firstUserId, UUID privateChatId) throws Exception {
+        PrivateChat privateChat = getPrivateChat(privateChatId);
+
+        if(!isUserExistsInChat(firstUserId, privateChat.getId())) {
+            throw new Exception("Searching of the second user of chat was failed because the first user doesn't exist in chat");
+        }
+
+        User secondUser = new User();
+
+        for (User user : privateChat.getMembers()) {
+            if(!user.getId().equals(firstUserId)) secondUser = user;
+        }
+
+        return secondUser;
+    }
+
+    public GetUserChatsDto getChats(UUID userId) {
         User user = userService.findById(userId);
         List<PrivateChatClientDto> privateChatClientDtos = new ArrayList<>();
 
         for(PrivateChat privateChat : user.getPrivateChats()) {
             User secondUser = new User();
             try {
-                secondUser = getSecondUserOfPrivateChat(user, privateChat);
+                secondUser = getSecondUserOfPrivateChat(user.getId(), privateChat);
             } catch (Exception ex) {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
             }
+
+            List<PrivateChatMessage> messages = privateChat.getMessages();
+            String lastMessage = messages.size() == 0 ? "" : messages.getLast().getContent();
 
             privateChatClientDtos.add(
                     new PrivateChatClientDto(
                             privateChat.getId(),
                             secondUser.getLogin(),
-                            privateChat.getMessages().getLast().getContent()
-
+                            lastMessage
                     )
             );
         }
 
-        GetUserChatsDto getUserChatsDto = new GetUserChatsDto(userId, privateChatClientDtos, user.getGroupChats());
+        GetUserChatsDto getUserChatsDto = new GetUserChatsDto(privateChatClientDtos, user.getGroupChats());
 
         return getUserChatsDto;
     }

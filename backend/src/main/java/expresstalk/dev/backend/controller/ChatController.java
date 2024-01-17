@@ -1,9 +1,9 @@
 package expresstalk.dev.backend.controller;
 
-import expresstalk.dev.backend.dto.GetUserChatsDto;
-import expresstalk.dev.backend.dto.SendPrivateChatMessageDto;
+import expresstalk.dev.backend.dto.*;
 import expresstalk.dev.backend.entity.PrivateChat;
 import expresstalk.dev.backend.entity.PrivateChatMessage;
+import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.enums.UserStatus;
 import expresstalk.dev.backend.service.ChatService;
 import expresstalk.dev.backend.service.SessionService;
@@ -45,7 +45,7 @@ public class ChatController {
     private void sendPrivateChatMessage(
             @DestinationVariable String chatStrId,
             @Payload SendPrivateChatMessageDto sendPrivateChatMessageDto,
-            Message message
+            Message<?> message
     ) {
         try {
             MessageHeaders headers = message.getHeaders();
@@ -62,12 +62,24 @@ public class ChatController {
             ValidationErrorChecker.<SendPrivateChatMessageDto>checkDtoForErrors(sendPrivateChatMessageDto);
 
             UUID userId = sessionService.getUserIdFromSession(session);
+            User sender = userService.findById(userId);
+            User receiver = chatService.getSecondUserOfPrivateChat(sender.getId(), chatId);
 
-            chatService.ensureUserPermissionToSendMessageInPrivateChat(userId, chatId);
+            chatService.ensureUserPermissionToSendMessageInPrivateChat(sender, chatId);
 
-             PrivateChatMessage privateChatMessage = chatService.saveMessage(sendPrivateChatMessageDto);
+            PrivateChatMessage privateChatMessage = chatService.saveMessage(sendPrivateChatMessageDto, sender.getId(), receiver.getId());
+            ClientPrivateChatMessageDto clientPrivateChatMessageDto = new ClientPrivateChatMessageDto(
+                    sender.getLogin(),
+                    privateChatMessage.getContent(),
+                    privateChatMessage.getCreatedAt()
+            );
+            LastMessageDto lastMessageDto = new LastMessageDto(
+                    chatId,
+                    privateChatMessage.getContent()
+            );
 
-            simpMessagingTemplate.convertAndSend("/private_chat/" + chatStrId, privateChatMessage);
+            simpMessagingTemplate.convertAndSend("/chats/" + receiver.getId(), lastMessageDto);
+            simpMessagingTemplate.convertAndSend("/private_chat/" + chatStrId, clientPrivateChatMessageDto);
         } catch (Exception ex) {
             simpMessagingTemplate.convertAndSend("/private_chat/" + chatStrId + "/errors", ex.getMessage());
         }
@@ -86,10 +98,11 @@ public class ChatController {
         try {
             userService.handleStatusTo(userId, UserStatus.ONLINE);
         } catch (Exception ex) {
+            System.out.println("ERROR: " + ex.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
         }
 
-        return chatService.getUserIdAndChats(userId);
+        return chatService.getChats(userId);
     }
 
     @ResponseStatus(HttpStatus.OK)
