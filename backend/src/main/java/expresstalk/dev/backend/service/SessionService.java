@@ -10,7 +10,6 @@ import java.util.UUID;
 @Service
 public class SessionService {
     public boolean isSessionWithUserExists(HttpSession session) {
-        System.out.println("\n" + session.getAttribute("userId") == null + "\n");
         return !(session.getAttribute("userId") == null);
     }
 
