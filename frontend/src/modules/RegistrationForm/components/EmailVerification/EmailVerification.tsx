@@ -10,6 +10,7 @@ import type { EmailFields } from "../../types/EmailFields";
 import { useAppDispatch, useAppSelector } from "../../../../hooks/redux";
 import { emailThunk, resetStatus } from "../../store/authSlice";
 import { useNavigate } from "react-router-dom";
+import { AlertError } from "../AlertError";
 
 const scheme = object().shape({
   code: string().length(6, "The length of the code must be 6 characters").required(),
@@ -47,10 +48,11 @@ const EmailVerification: React.FC<EmailVerificationProps> = () => {
         errorMessage={formState.errors.code?.message}
         label="Code"
       />
-      <CustomLink sx={{ mt: 6 }} uppercase submit>
+      <CustomLink sx={{ mt: 6 }} isLoading={status === "loading"} uppercase submit>
         done
       </CustomLink>
       <GoBack />
+      <AlertError errorMessage={errorMessage} field="emailVerification" status={status} />
     </form>
   );
 };

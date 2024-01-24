@@ -4,6 +4,7 @@ import { TextField, useTheme } from "@mui/material";
 interface CustomInputProps {
   label: string;
   errorMessage?: string;
+  type?: React.HTMLInputTypeAttribute;
 }
 
 const CustomInput: React.FC<CustomInputProps> = React.forwardRef(

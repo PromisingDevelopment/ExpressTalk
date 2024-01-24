@@ -6,12 +6,13 @@ import { CustomInput } from "../../UI/CustomInput";
 import { InputsWrapper } from "../../UI/InputsWrapper";
 import { object, string } from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { type SubmitHandler, useForm } from "react-hook-form";
-import type { SignUpFields, SignUpLabels } from "../../types/SignUpFields";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../../hooks/redux";
 import { resetStatus, signUpThunk } from "../../store/authSlice";
 import { navigateUrls } from "../../../../config";
+import { AlertError } from "../AlertError";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import type { SignUpFields, SignUpLabels } from "../../types/SignUpFields";
 
 const scheme = object().shape({
   login: string().min(4, "login length should be more than 4 characters").required(),
@@ -50,6 +51,7 @@ const SignUp: React.FC<SignUpProps> = () => {
       <InputsWrapper>
         {["login", "name", "email", "password"].map((label) => (
           <CustomInput
+            type={label === "password" ? "password" : "text"}
             key={label}
             label={label}
             errorMessage={formState.errors[label as SignUpLabels]?.message}
@@ -57,10 +59,11 @@ const SignUp: React.FC<SignUpProps> = () => {
           />
         ))}
       </InputsWrapper>
-      <CustomLink submit uppercase>
+      <CustomLink isLoading={status === "loading"} submit uppercase>
         done
       </CustomLink>
       <GoBack />
+      <AlertError errorMessage={errorMessage} field="signUp" status={status} />
     </form>
   );
 };
