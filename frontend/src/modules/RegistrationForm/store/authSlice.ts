@@ -2,6 +2,7 @@ import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { IUser } from "../types/IUser";
 import axios, { AxiosError } from "axios";
 import { requestUrls } from "../../../config";
+import { SignInFields } from "../types/SignInFields";
 import { EmailFields } from "../types/EmailFields";
 
 interface AuthScheme {
@@ -9,6 +10,7 @@ interface AuthScheme {
   errorMessage: string | null;
 }
 interface InitialState {
+  //token: string
   user: IUser | null;
   signUp: AuthScheme;
   signIn: AuthScheme;
@@ -48,24 +50,38 @@ const authSlice = createSlice({
         state.user = action.payload;
         state.signUp.status = "fulfilled";
       })
-      .addCase(signUpThunk.rejected, (state, action: PayloadAction<any>) => {
-        state.signUp.status = "error";
-        state.signUp.errorMessage = action.payload?.message;
+      .addCase(emailThunk.fulfilled, (state, action) => {
+        state.emailVerification.status = "fulfilled";
+      })
+      .addCase(signInThunk.fulfilled, (state, action) => {
+        state.signIn.status = "fulfilled";
       })
       .addCase(signUpThunk.pending, (state) => {
         state.signUp.status = "loading";
         state.signUp.errorMessage = null;
       })
-      .addCase(emailThunk.fulfilled, (state, action) => {
-        state.emailVerification.status = "fulfilled";
-      })
-      .addCase(emailThunk.rejected, (state, action: PayloadAction<any>) => {
-        state.emailVerification.status = "error";
-        state.emailVerification.errorMessage = action.payload?.message;
-      })
       .addCase(emailThunk.pending, (state) => {
         state.emailVerification.status = "loading";
         state.emailVerification.errorMessage = null;
+      })
+      .addCase(signInThunk.pending, (state) => {
+        state.signIn.status = "loading";
+        state.signIn.errorMessage = null;
+      })
+      .addCase(signUpThunk.rejected, (state, action: PayloadAction<any>) => {
+        state.signUp.status = "error";
+        state.signUp.errorMessage =
+          action.payload.response?.data?.message || action.payload.message;
+      })
+      .addCase(emailThunk.rejected, (state, action: PayloadAction<any>) => {
+        state.emailVerification.status = "error";
+        state.emailVerification.errorMessage =
+          action.payload.response?.data?.message || action.payload.message;
+      })
+      .addCase(signInThunk.rejected, (state, action: PayloadAction<any>) => {
+        state.signIn.status = "error";
+        state.signIn.errorMessage =
+          action.payload.response?.data?.message || action.payload.message;
       });
   },
 });
@@ -82,6 +98,23 @@ export const signUpThunk = createAsyncThunk<IUser, IUser>(
     }
   }
 );
+
+export const signInThunk = createAsyncThunk<any, SignInFields>(
+  "@@auth/sign-in",
+  async ({ loginOrEmail, password }, { rejectWithValue }) => {
+    try {
+      const data = {
+        login: loginOrEmail,
+        password: password,
+      };
+
+      await axios.post(requestUrls.sign_in, data);
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
 export const emailThunk = createAsyncThunk<
   void,
   EmailFields,
@@ -92,12 +125,12 @@ export const emailThunk = createAsyncThunk<
 
     if (!user) {
       throw new AxiosError(
-        "Email adress is not found \nPlease complete the registration by clicking the 'Back' button"
+        "Email adress is not found. Please complete the registration by clicking the 'Back' button"
       );
     }
 
     const data = {
-      email: user?.email,
+      email: user.email,
       code: code,
     };
 

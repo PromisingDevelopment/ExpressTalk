@@ -8,9 +8,13 @@ import { object, string } from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import type { SignInFields, SignInLabels } from "../../types/SignInFields";
+import { resetStatus, signInThunk } from "../../store/authSlice";
+import { useAppDispatch, useAppSelector } from "../../../../hooks/redux";
+import { useNavigate } from "react-router-dom";
+import { AlertError } from "../AlertError";
 
 const scheme = object().shape({
-  loginOrGmail: string()
+  loginOrEmail: string()
     .min(4, "This field length should be more than 4 characters")
     .required(),
   password: string()
@@ -25,11 +29,21 @@ const SignIn: React.FC<SignInProps> = () => {
     mode: "onSubmit",
     resolver: yupResolver(scheme),
   });
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { errorMessage, status } = useAppSelector((state) => state.auth.signIn);
+
+  React.useEffect(() => {
+    if (status === "fulfilled") {
+      navigate("/");
+      dispatch(resetStatus("signIn"));
+    }
+  }, [navigate, status, dispatch]);
 
   const labels = [
     {
-      label: "Login or gmail",
-      field: "loginOrGmail",
+      label: "Login or email",
+      field: "loginOrEmail",
     },
     {
       label: "Password",
@@ -38,7 +52,7 @@ const SignIn: React.FC<SignInProps> = () => {
   ];
 
   const onSubmit: SubmitHandler<SignInFields> = (data) => {
-    /* pass data to redux and redirect user to home page */
+    dispatch(signInThunk(data));
   };
 
   return (
@@ -48,17 +62,18 @@ const SignIn: React.FC<SignInProps> = () => {
         {labels.map(({ label, field }) => (
           <CustomInput
             key={label}
+            type={label.toLowerCase() === "password" ? "password" : "text"}
             {...register(field as SignInLabels)}
             errorMessage={formState.errors[field as SignInLabels]?.message}
             label={label}
           />
         ))}
       </InputsWrapper>
-      <CustomLink submit uppercase>
+      <CustomLink isLoading={status === "loading"} submit uppercase>
         done
       </CustomLink>
-
       <GoBack />
+      <AlertError errorMessage={errorMessage} field="signIn" status={status} />
     </form>
   );
 };

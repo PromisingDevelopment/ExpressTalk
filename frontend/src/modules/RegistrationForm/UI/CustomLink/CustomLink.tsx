@@ -10,10 +10,12 @@ interface CustomLinkProps {
   sx?: SxProps;
   uppercase?: boolean;
   submit?: boolean;
+  isLoading?: boolean;
 }
 
 const CustomLink: React.FC<CustomLinkProps> = ({
   children,
+  isLoading,
   background = "white",
   outlined,
   sx,
@@ -40,6 +42,7 @@ const CustomLink: React.FC<CustomLinkProps> = ({
     <Button
       type={type}
       onClick={onClick}
+      disabled={isLoading}
       sx={{
         background: backgrounds[background] + " !important",
         border: border,
