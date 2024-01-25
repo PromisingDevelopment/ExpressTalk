@@ -38,8 +38,6 @@ const SignIn: React.FC<SignInProps> = () => {
   ];
 
   const onSubmit: SubmitHandler<SignInFields> = (data) => {
-    console.log(data);
-
     /* pass data to redux and redirect user to home page */
   };
 
