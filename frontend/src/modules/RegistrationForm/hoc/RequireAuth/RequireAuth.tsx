@@ -6,7 +6,7 @@ interface RequireAuthProps {
 }
 
 const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
-  const isAuth = false;
+  const isAuth = true;
 
   if (!isAuth) {
     return <Navigate to={"/auth/home"} replace />;
