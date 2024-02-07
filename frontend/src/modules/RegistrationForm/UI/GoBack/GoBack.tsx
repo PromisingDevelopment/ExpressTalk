@@ -21,7 +21,7 @@ const GoBack: React.FC<GoBackProps> = () => {
         fontWeight: 100,
         fontSize: "1.75rem",
         position: "absolute",
-        bottom: 0,
+        bottom: -20,
         left: 0,
         textTransform: "none",
 
@@ -33,9 +33,6 @@ const GoBack: React.FC<GoBackProps> = () => {
 
         [theme.breakpoints.down("sm")]: {
           fontSize: "1.4rem",
-        },
-        [theme.breakpoints.down(500)]: {
-          bottom: -30,
         },
       }}>
       <ArrowLeftIcon sx={{ mr: 1, transition: "all .3s ease 0s" }} />
