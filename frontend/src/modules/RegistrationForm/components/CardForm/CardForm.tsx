@@ -7,22 +7,44 @@ interface CardFormProps {
 
 const CardForm: React.FC<CardFormProps> = ({ children }) => {
   const theme = useTheme();
+  const cardFormRef = React.useRef<HTMLDivElement>();
+  const [isMediaStyles, setIsMediaStyles] = React.useState(false);
+
+  React.useEffect(() => {
+    const cardForm = cardFormRef.current;
+
+    if (!cardForm) return;
+
+    const onResizeHandle = () => {
+      const formHeight = cardForm.clientHeight;
+      const bodyHeight = document.body.clientHeight;
+
+      setIsMediaStyles(formHeight + 60 > bodyHeight);
+    };
+
+    window.onresize = onResizeHandle;
+
+    onResizeHandle();
+  }, []);
 
   return (
     <Box
-      sx={{
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        px: 2,
-        "@media (max-height: 830px)": {
-          alignItems: "flex-start",
-          py: 3,
-          height: 1,
+      sx={[
+        {
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          px: 2,
         },
-      }}>
+        isMediaStyles && {
+          alignItems: "flex-start",
+          py: 6,
+          height: "auto",
+        },
+      ]}>
       <Box
+        ref={cardFormRef}
         sx={{
           borderRadius: 6,
           background: (theme) => theme.palette.primary.dark,
@@ -36,7 +58,7 @@ const CardForm: React.FC<CardFormProps> = ({ children }) => {
             px: 4,
           },
         }}>
-        <Box sx={{ position: "relative", pb: 7.5 }}>{children}</Box>
+        <Box sx={{ position: "relative" }}>{children}</Box>
       </Box>
     </Box>
   );

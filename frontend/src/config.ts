@@ -1,10 +1,9 @@
 const BASE_URL = "http://localhost:8080";
-const REQUEST_AUTH_URL = BASE_URL + "/auth";
 
 export const requestUrls = {
-  sign_up: REQUEST_AUTH_URL + "/sign-up",
-  sign_in: REQUEST_AUTH_URL + "/sign-in",
-  email: REQUEST_AUTH_URL + "/email-verification",
+  sign_up: BASE_URL + "/auth/sign-up",
+  sign_in: BASE_URL + "/auth/sign-in",
+  email: BASE_URL + "/auth/email-verification",
 };
 
 export const navigateUrls = {

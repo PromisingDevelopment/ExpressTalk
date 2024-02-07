@@ -16,6 +16,7 @@ const theme = createTheme({
     },
     background: {
       default: "#353F75",
+      paper: "#222B5A",
     },
   },
   breakpoints: {
@@ -29,6 +30,6 @@ const theme = createTheme({
   },
 });
 
-console.log(theme.breakpoints.values);
+console.log(theme);
 
 export default theme;

@@ -43,6 +43,7 @@ const CustomLink: React.FC<CustomLinkProps> = ({
       type={type}
       onClick={onClick}
       disabled={isLoading}
+      fullWidth
       sx={{
         background: backgrounds[background] + " !important",
         border: border,
