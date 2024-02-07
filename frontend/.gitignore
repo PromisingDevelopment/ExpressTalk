@@ -2,6 +2,7 @@ node_modules/
 build/
 .vscode/
 templates/
+generate-react-cli.json
 
 
 .env.local
