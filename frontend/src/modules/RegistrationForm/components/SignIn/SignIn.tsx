@@ -12,6 +12,7 @@ import { resetStatus, signInThunk } from "../../store/authSlice";
 import { useAppDispatch, useAppSelector } from "../../../../hooks/redux";
 import { useNavigate } from "react-router-dom";
 import { AlertError } from "../AlertError";
+import { Box } from "@mui/material";
 
 const scheme = object().shape({
   loginOrEmail: string()
@@ -56,7 +57,7 @@ const SignIn: React.FC<SignInProps> = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <Box component="form" sx={{ pb: 7.5 }} onSubmit={handleSubmit(onSubmit)}>
       <Title>Sign in</Title>
       <InputsWrapper>
         {labels.map(({ label, field }) => (
@@ -74,7 +75,7 @@ const SignIn: React.FC<SignInProps> = () => {
       </CustomLink>
       <GoBack />
       <AlertError errorMessage={errorMessage} field="signIn" status={status} />
-    </form>
+    </Box>
   );
 };
 

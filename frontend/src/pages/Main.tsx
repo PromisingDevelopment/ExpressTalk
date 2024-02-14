@@ -7,8 +7,9 @@ import {
   EmailVerification,
   SignIn,
 } from "../modules/RegistrationForm";
-import { Auth } from "./Auth";
 import { NotFoundPage } from "./NotFoundPage";
+import { Auth } from "./Auth";
+import { Chat } from "./Chat";
 
 interface MainProps {}
 
@@ -20,8 +21,7 @@ const Main: React.FC<MainProps> = () => {
           path="/"
           element={
             <RequireAuth>
-              {/* Основний додаток */}
-              <div>ExpressTalk</div>
+              <Chat />
             </RequireAuth>
           }
         />

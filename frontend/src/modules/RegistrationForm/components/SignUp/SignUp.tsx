@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from "../../../../hooks/redux";
 import { resetStatus, signUpThunk } from "../../store/authSlice";
 import { navigateUrls } from "../../../../config";
 import { AlertError } from "../AlertError";
+import { Box } from "@mui/material";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import type { SignUpFields, SignUpLabels } from "../../types/SignUpFields";
 
@@ -46,7 +47,7 @@ const SignUp: React.FC<SignUpProps> = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <Box component="form" sx={{ pb: 7.5 }} onSubmit={handleSubmit(onSubmit)}>
       <Title>Sign up</Title>
       <InputsWrapper>
         {["login", "name", "email", "password"].map((label) => (
@@ -64,7 +65,7 @@ const SignUp: React.FC<SignUpProps> = () => {
       </CustomLink>
       <GoBack />
       <AlertError errorMessage={errorMessage} field="signUp" status={status} />
-    </form>
+    </Box>
   );
 };
 

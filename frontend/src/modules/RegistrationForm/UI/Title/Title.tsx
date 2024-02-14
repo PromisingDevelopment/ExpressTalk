@@ -11,7 +11,7 @@ const Title: React.FC<TitleProps> = ({ children, size = "normal" }) => {
   const fontSize = size === "normal" ? "3rem" : "3.25rem";
   const marginBottoms = {
     normal: { sm: 6, xs: 5 },
-    large: { sm: 10.5, xs: 8 },
+    large: { sm: 8.5, xs: 8 },
   };
 
   return (

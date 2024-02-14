@@ -10,7 +10,6 @@ interface AuthScheme {
   errorMessage: string | null;
 }
 interface InitialState {
-  //token: string
   user: IUser | null;
   signUp: AuthScheme;
   signIn: AuthScheme;

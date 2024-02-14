@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from "../../../../hooks/redux";
 import { emailThunk, resetStatus } from "../../store/authSlice";
 import { useNavigate } from "react-router-dom";
 import { AlertError } from "../AlertError";
+import { Box } from "@mui/material";
 
 const scheme = object().shape({
   code: string().length(6, "The length of the code must be 6 characters").required(),
@@ -41,7 +42,7 @@ const EmailVerification: React.FC<EmailVerificationProps> = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <Box component="form" sx={{ pb: 7.5 }} onSubmit={handleSubmit(onSubmit)}>
       <Title>Email verification</Title>
       <CustomInput
         {...register("code")}
@@ -53,7 +54,7 @@ const EmailVerification: React.FC<EmailVerificationProps> = () => {
       </CustomLink>
       <GoBack />
       <AlertError errorMessage={errorMessage} field="emailVerification" status={status} />
-    </form>
+    </Box>
   );
 };
 
