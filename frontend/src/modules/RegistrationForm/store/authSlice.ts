@@ -107,7 +107,9 @@ export const signInThunk = createAsyncThunk<any, SignInFields>(
         password: password,
       };
 
-      await axios.post(requestUrls.sign_in, data);
+      await axios.post(requestUrls.sign_in, data, {
+        withCredentials: true
+      });
     } catch (error) {
       return rejectWithValue(error);
     }
