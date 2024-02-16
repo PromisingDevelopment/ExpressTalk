@@ -47,7 +47,7 @@ public class User {
 
     @ManyToMany
     @JoinTable(
-            name = "user_private_chat",
+            name = "user_private_chats",
             joinColumns = @JoinColumn(name = "users_id"),
             inverseJoinColumns = @JoinColumn(name = "private_chats_id")
     )
@@ -56,10 +56,19 @@ public class User {
 
     @ManyToMany
     @JoinTable(
-            name = "user_group_chat",
+            name = "user_group_chats",
             joinColumns = @JoinColumn(name = "users_id"),
             inverseJoinColumns = @JoinColumn(name = "group_chats_id")
     )
     @JsonIgnore
     private List<GroupChat> groupChats = new LinkedList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_administrated_group_chats",
+            joinColumns = @JoinColumn(name = "users_id"),
+            inverseJoinColumns = @JoinColumn(name = "group_chats_id")
+    )
+    @JsonIgnore
+    private List<GroupChat> administratedGroupChats = new LinkedList<>();
 }

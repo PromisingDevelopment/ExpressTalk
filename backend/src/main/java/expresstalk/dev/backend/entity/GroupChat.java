@@ -1,6 +1,5 @@
 package expresstalk.dev.backend.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,17 +22,15 @@ public class GroupChat {
     private UUID id;
 
     @NonNull
-    @Column(nullable = false)
-    private UUID senderId;
+    @Column
+    private String name;
 
     @OneToMany(mappedBy = "groupChat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GroupChatMessage> messages = new LinkedList<>();
 
     @ManyToMany(mappedBy = "groupChats")
-    @JsonIgnore
     private List<User> members = new ArrayList<>();
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "group_chats_names_id", referencedColumnName = "id")
-    private GroupChatName name;
+    @ManyToMany(mappedBy = "administratedGroupChats")
+    private List<User> admins = new ArrayList<>();
 }
