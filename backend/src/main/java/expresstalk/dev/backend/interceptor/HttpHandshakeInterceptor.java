@@ -1,5 +1,6 @@
 package expresstalk.dev.backend.interceptor;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -15,9 +16,9 @@ public class HttpHandshakeInterceptor implements HandshakeInterceptor {
                                    WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
         if (request instanceof ServletServerHttpRequest) {
             ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
-            HttpSession session = servletRequest.getServletRequest().getSession();
+            HttpServletRequest httpServletRequest = servletRequest.getServletRequest();
 
-            attributes.put("session", session);
+            attributes.put("request", httpServletRequest);
         }
         return true;
     }
