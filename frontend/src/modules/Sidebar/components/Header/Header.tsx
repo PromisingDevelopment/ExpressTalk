@@ -32,11 +32,6 @@ const Header: React.FC<HeaderProps> = () => {
         }}>
         Login
       </Typography>
-      <Box>
-        <CustomIconButton fontSize={44}>
-          <SettingsIcon />
-        </CustomIconButton>
-      </Box>
     </Box>
   );
 };

@@ -1,8 +1,9 @@
 import React from "react";
 import { Box } from "@mui/material";
 import { ChatItem } from "../ChatItem";
-import { useAppDispatch } from "hooks/redux";
+import { useAppDispatch, useAppSelector } from "hooks/redux";
 import { getChatsList, setSidebarOpen } from "modules/Sidebar/store/sidebarSlice";
+import { useNavigate } from "react-router-dom";
 
 interface ChatListProps {}
 
@@ -24,7 +25,9 @@ const chatsList = [
 const ChatList: React.FC<ChatListProps> = () => {
   const [listHeight, setListHeight] = React.useState<number | null>(null);
   const [currentChat, setCurrentChat] = React.useState(0);
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { errorMessage } = useAppSelector((state) => state.sidebar);
 
   React.useEffect(() => {
     const getListHeight = () => {
@@ -38,8 +41,12 @@ const ChatList: React.FC<ChatListProps> = () => {
     };
 
     window.addEventListener("resize", getListHeight);
+    if (errorMessage) {
+      return navigate("/auth/home");
+    }
+
     getListHeight();
-  }, [listHeight]);
+  }, [listHeight, errorMessage]);
 
   const onClickChat = (i: number) => {
     setCurrentChat(i);
