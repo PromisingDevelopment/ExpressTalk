@@ -10,6 +10,7 @@ import expresstalk.dev.backend.entity.User;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -62,7 +63,7 @@ public class AuthController {
     })
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/sign-in")
-    public void signIn(@RequestBody @Valid SignInUserDto signInUserDto, HttpSession session) {
+    public void signIn(@RequestBody @Valid SignInUserDto signInUserDto, HttpServletRequest request) {
         User signedUser = new User();
 
         try {
@@ -75,6 +76,7 @@ public class AuthController {
             throw ex;
         }
 
+        HttpSession session = request.getSession();
         session.setAttribute("userId", signedUser.getId().toString());
     }
 
@@ -85,9 +87,10 @@ public class AuthController {
     })
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/email-verification")
-    public void makeEmailVerification(@RequestBody @Valid EmailVerificationDto emailVerificationDto, HttpSession session) {
+    public void makeEmailVerification(@RequestBody @Valid EmailVerificationDto emailVerificationDto, HttpServletRequest request) {
         User verifiedUser = authService.makeEmailVerification(emailVerificationDto);
 
+        HttpSession session = request.getSession();
         session.setAttribute("userId", verifiedUser.getId().toString());
     }
 }

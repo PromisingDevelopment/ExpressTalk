@@ -13,6 +13,7 @@ import expresstalk.dev.backend.utils.Converter;
 import expresstalk.dev.backend.utils.ValidationErrorChecker;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -51,8 +52,8 @@ public class ChatController {
     ) {
         try {
             MessageHeaders headers = message.getHeaders();
-            HttpSession session = (HttpSession)SimpMessageHeaderAccessor.getSessionAttributes(headers).get("session");
-            sessionService.ensureSessionExistense(session);
+            HttpServletRequest request = (HttpServletRequest)SimpMessageHeaderAccessor.getSessionAttributes(headers).get("request");
+            sessionService.ensureSessionExistense(request);
 
             UUID chatId = UUID.randomUUID();
             try {
@@ -63,7 +64,7 @@ public class ChatController {
 
             ValidationErrorChecker.<SendPrivateChatMessageDto>checkDtoForErrors(sendPrivateChatMessageDto);
 
-            UUID userId = sessionService.getUserIdFromSession(session);
+            UUID userId = sessionService.getUserIdFromSession(request);
             User sender = userService.findById(userId);
             User receiver = chatService.getSecondUserOfPrivateChat(sender.getId(), chatId);
 
@@ -94,8 +95,9 @@ public class ChatController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     @ResponseBody
-    public GetUserChatsDto getChatsPage(HttpSession session) {
-        UUID userId = sessionService.getUserIdFromSession(session);
+    public GetUserChatsDto getChatsPage(HttpServletRequest request) {
+        request.getSession(false);
+        UUID userId = sessionService.getUserIdFromSession(request);
 
         try {
             userService.handleStatusTo(userId, UserStatus.ONLINE);
@@ -122,8 +124,8 @@ public class ChatController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/private/{chatStrId}")
     @ResponseBody
-    public PrivateChat getPrivateChatRoom(@PathVariable String chatStrId, HttpSession session) {
-        sessionService.ensureSessionExistense(session);
+    public PrivateChat getPrivateChatRoom(@PathVariable String chatStrId, HttpServletRequest request) {
+        sessionService.ensureSessionExistense(request);
 
         UUID chatId = UUID.randomUUID();
         try {
@@ -147,8 +149,8 @@ public class ChatController {
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/private")
     @ResponseBody
-    public PrivateChat createPrivateChatRoom(@RequestBody @Valid CreatePrivateChatRoomDto createPrivateChatRoomDto, HttpSession session) {
-        UUID userId = sessionService.getUserIdFromSession(session);
+    public PrivateChat createPrivateChatRoom(@RequestBody @Valid CreatePrivateChatRoomDto createPrivateChatRoomDto, HttpServletRequest request) {
+        UUID userId = sessionService.getUserIdFromSession(request);
         UUID secondMemberId = UUID.fromString(createPrivateChatRoomDto.secondMemberId());
         PrivateChat chat = chatService.createPrivateChat(userId, secondMemberId);
 
@@ -162,8 +164,8 @@ public class ChatController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/group")
     @ResponseBody
-    public GroupChat createGroupChatRoom(@RequestBody CreateGroupChatRoomDto createGroupChatRoomDto, HttpSession session) {
-        UUID userId = sessionService.getUserIdFromSession(session);
+    public GroupChat createGroupChatRoom(@RequestBody CreateGroupChatRoomDto createGroupChatRoomDto, HttpServletRequest request) {
+        UUID userId = sessionService.getUserIdFromSession(request);
         GroupChat chat = chatService.createGroupChat(userId, createGroupChatRoomDto.groupName());
 
         return chat;
@@ -179,14 +181,14 @@ public class ChatController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping ("/group/{chatStrId}")
     @ResponseBody
-    public GroupChat getGroupChatRoom(@PathVariable String chatStrId, HttpSession session) {
+    public GroupChat getGroupChatRoom(@PathVariable String chatStrId, HttpServletRequest request) {
         UUID chatId = UUID.randomUUID();
         try {
             chatId = Converter.convertStringToUUID(chatStrId);
         } catch (Exception ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Provided chat id in the path is not UUID");
         }
-        UUID userId = sessionService.getUserIdFromSession(session);
+        UUID userId = sessionService.getUserIdFromSession(request);
         User user = userService.findById(userId);
         GroupChat chat = chatService.getGroupChat(user, chatId);
 
@@ -206,9 +208,9 @@ public class ChatController {
     @PostMapping("/group/add")
     public void addUserToGroupChat(
             @RequestBody @Valid AddUserToGroupChatDto addUserToGroupChatDto,
-            HttpSession session
+            HttpServletRequest request
     ) {
-        UUID userId = sessionService.getUserIdFromSession(session);
+        UUID userId = sessionService.getUserIdFromSession(request);
         UUID memberId = UUID.fromString(addUserToGroupChatDto.memberId());
         UUID chatId = UUID.fromString(addUserToGroupChatDto.chatId());
         User admin = userService.findById(userId);
@@ -231,9 +233,9 @@ public class ChatController {
     @DeleteMapping("/group/remove")
     public void removeUserFromGroupChat(
             @RequestBody @Valid RemoveUserFromGroupChatDto removeUserFromGroupChatDto,
-            HttpSession session
+            HttpServletRequest request
     ) {
-        UUID userId = sessionService.getUserIdFromSession(session);
+        UUID userId = sessionService.getUserIdFromSession(request);
         UUID memberId = UUID.fromString(removeUserFromGroupChatDto.memberId());
         UUID chatId = UUID.fromString(removeUserFromGroupChatDto.chatId());
         User admin = userService.findById(userId);
@@ -258,9 +260,9 @@ public class ChatController {
     @PostMapping("/group/roles")
     public void setUserRoleInGroupChat(
             @RequestBody @Valid SetUserRoleInGroupChatDto setUserRoleInGroupChatDto,
-            HttpSession session
+            HttpServletRequest request
     ) {
-        UUID userId = sessionService.getUserIdFromSession(session);
+        UUID userId = sessionService.getUserIdFromSession(request);
         UUID memberId = UUID.fromString(setUserRoleInGroupChatDto.userToGiveRoleId());
         UUID chatId = UUID.fromString(setUserRoleInGroupChatDto.chatId());
         GroupChat groupChat = chatService.findGroupChatById(chatId);
