@@ -1,5 +1,5 @@
 import React from "react";
-import { Box } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import { Message } from "../Message";
 
 interface ChatBlockProps {}
@@ -9,9 +9,14 @@ const ChatBlock: React.FC<ChatBlockProps> = () => {
 
   React.useEffect(() => {
     const getListHeight = () => {
-      setHeight(document.body.clientHeight - (96 + 92));
-    };
+      const bodyWidth = document.body.clientWidth;
 
+      if (bodyWidth > 767) {
+        setHeight(document.body.clientHeight - (96 + 80));
+      } else {
+        setHeight(document.body.clientHeight - (70 + 80));
+      }
+    };
     window.addEventListener("resize", getListHeight);
     getListHeight();
   }, [height]);
@@ -65,7 +70,7 @@ const ChatBlock: React.FC<ChatBlockProps> = () => {
         paddingY: 4,
         display: "flex",
         flexDirection: "column",
-        gap: 3,
+        gap: 2,
         height: height,
         overflowY: "auto",
       }}>

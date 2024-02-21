@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { authReducer } from "../modules/RegistrationForm";
+import { authReducer } from "modules/RegistrationForm";
+import { sidebarReducer } from "modules/Sidebar";
 
 const store = configureStore({
   reducer: {
     auth: authReducer,
+    sidebar: sidebarReducer,
   },
   middleware(getDefaultMiddleware) {
     return getDefaultMiddleware({

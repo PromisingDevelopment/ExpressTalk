@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, IconButton, TextField } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 
@@ -11,10 +11,10 @@ const WriteMessage: React.FC<WriteMessageProps> = () => {
       component="form"
       sx={{
         bgcolor: "#1F274E",
-        height: 92,
+        height: 80,
         display: "flex",
         alignItems: "center",
-        px: 4.5,
+        px: { lg: 4.5, xs: 1.5 },
         gap: 2,
       }}>
       <Box
@@ -24,6 +24,8 @@ const WriteMessage: React.FC<WriteMessageProps> = () => {
         }}>
         <Box
           component="input"
+          placeholder="Write a message"
+          name="write-message-input"
           sx={{
             width: 1,
             height: 48,
@@ -37,8 +39,13 @@ const WriteMessage: React.FC<WriteMessageProps> = () => {
             ":focus": {
               borderColor: "#7b83b0",
             },
+            "::placeholder": {
+              color: "#6A73A6",
+            },
           }}
         />
+
+        {/* When input isn't empty hide attach button */}
         <IconButton
           sx={{
             color: "#6A73A6",
@@ -46,6 +53,7 @@ const WriteMessage: React.FC<WriteMessageProps> = () => {
             top: "50%",
             right: 10,
             transform: "translateY(-50%)",
+            bgcolor: "#1F274E",
           }}>
           <AttachFileIcon
             sx={{

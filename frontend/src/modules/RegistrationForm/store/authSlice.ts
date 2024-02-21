@@ -108,7 +108,7 @@ export const signInThunk = createAsyncThunk<any, SignInFields>(
       };
 
       await axios.post(requestUrls.sign_in, data, {
-        withCredentials: true
+        withCredentials: true,
       });
     } catch (error) {
       return rejectWithValue(error);
@@ -135,7 +135,9 @@ export const emailThunk = createAsyncThunk<
       code: code,
     };
 
-    await axios.post(requestUrls.email, data);
+    await axios.post(requestUrls.email, data, {
+      withCredentials: true,
+    });
   } catch (error) {
     return rejectWithValue(error);
   }
