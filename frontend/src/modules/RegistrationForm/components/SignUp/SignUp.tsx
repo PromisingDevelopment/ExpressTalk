@@ -14,6 +14,7 @@ import { AlertError } from "../AlertError";
 import { Box } from "@mui/material";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import type { SignUpFields, SignUpLabels } from "../../types/SignUpFields";
+import { resetError } from "modules/Sidebar";
 
 const scheme = object().shape({
   login: string().min(4, "login length should be more than 4 characters").required(),
@@ -37,6 +38,8 @@ const SignUp: React.FC<SignUpProps> = () => {
 
   React.useEffect(() => {
     if (status === "fulfilled") {
+      dispatch(resetError());
+
       navigate(navigateUrls.email);
       dispatch(resetStatus("signUp"));
     }

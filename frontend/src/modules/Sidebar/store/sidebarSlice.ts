@@ -24,6 +24,10 @@ const sidebarSlice = createSlice({
     setSidebarOpen: (state, action: PayloadAction<boolean>) => {
       state.sidebarOpen = action.payload;
     },
+    resetError: (state) => {
+      state.status = "idle";
+      state.errorMessage = null;
+    },
   },
   extraReducers(builder) {
     builder
@@ -62,5 +66,5 @@ export const getChatsList = createAsyncThunk<void, void>(
   }
 );
 
-export const { setSidebarOpen } = sidebarSlice.actions;
+export const { setSidebarOpen, resetError } = sidebarSlice.actions;
 export default sidebarSlice.reducer;

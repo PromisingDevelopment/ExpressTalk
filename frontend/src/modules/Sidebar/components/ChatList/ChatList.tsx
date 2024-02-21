@@ -41,12 +41,9 @@ const ChatList: React.FC<ChatListProps> = () => {
     };
 
     window.addEventListener("resize", getListHeight);
-    if (errorMessage) {
-      return navigate("/auth/home");
-    }
 
     getListHeight();
-  }, [listHeight, errorMessage]);
+  }, [listHeight]);
 
   const onClickChat = (i: number) => {
     setCurrentChat(i);
@@ -54,8 +51,14 @@ const ChatList: React.FC<ChatListProps> = () => {
   };
 
   React.useEffect(() => {
+    console.log(errorMessage);
+
+    if (errorMessage) {
+      navigate("/auth/home");
+    }
+
     dispatch(getChatsList());
-  }, []);
+  }, [errorMessage]);
 
   return (
     <Box
