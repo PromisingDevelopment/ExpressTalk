@@ -1,26 +1,31 @@
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import React from "react";
-import { Logo } from "../../../../components/Logo";
+import { Logo } from "components/Logo";
 
-interface ChatItemProps {
+interface PrivateChatItemProps {
+  id: string;
+  onClick: any;
   logoSrc?: string; // change to required
-  name: string;
+  receiverLogin: string;
   lastMessage: string;
   active?: boolean;
-  onClick: any;
 }
 
-const ChatItem: React.FC<ChatItemProps> = ({
+const PrivateChatItem: React.FC<PrivateChatItemProps> = ({
+  id,
   lastMessage,
+  receiverLogin,
+  onClick,
   logoSrc = "",
   active = false,
-  name,
-  onClick,
 }) => {
   const theme = useTheme();
 
+  if (!receiverLogin) return;
+
   return (
     <Button
+      id={id}
       onClick={onClick}
       sx={{
         borderBottom: "1px solid #353F75",
@@ -54,7 +59,7 @@ const ChatItem: React.FC<ChatItemProps> = ({
               fontSize: 16,
             },
           }}>
-          {name}
+          {receiverLogin}
         </Typography>
         <Typography sx={{ fontSize: 12, color: "#6A73A6" }}>{lastMessage}</Typography>
       </Box>
@@ -62,4 +67,4 @@ const ChatItem: React.FC<ChatItemProps> = ({
   );
 };
 
-export { ChatItem };
+export { PrivateChatItem };

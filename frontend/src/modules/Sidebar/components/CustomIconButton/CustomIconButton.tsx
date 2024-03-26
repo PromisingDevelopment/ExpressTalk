@@ -4,6 +4,7 @@ import React from "react";
 interface CustomIconButtonProps {
   children: React.ReactNode;
   sx?: SxProps;
+  onClick?: any;
   fontSize?: number;
   borderRight?: boolean;
 }
@@ -13,9 +14,11 @@ const CustomIconButton: React.FC<CustomIconButtonProps> = ({
   sx,
   fontSize = 24,
   borderRight = false,
+  onClick,
 }) => {
   return (
     <IconButton
+      onClick={onClick}
       sx={{
         flex: 0.5,
         textAlign: "center",

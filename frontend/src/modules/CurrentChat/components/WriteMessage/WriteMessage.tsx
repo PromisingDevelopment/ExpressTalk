@@ -2,6 +2,7 @@ import React from "react";
 import { Box, IconButton } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
+import { CustomInput } from "components/CustomInput";
 
 interface WriteMessageProps {}
 
@@ -22,28 +23,7 @@ const WriteMessage: React.FC<WriteMessageProps> = () => {
           flexGrow: 1,
           position: "relative",
         }}>
-        <Box
-          component="input"
-          placeholder="Write a message"
-          name="write-message-input"
-          sx={{
-            width: 1,
-            height: 48,
-            border: "1px solid #6A73A6",
-            borderRadius: 3,
-            py: 1,
-            px: 3,
-            color: "#6A73A6",
-            background: "none",
-            fontSize: 20,
-            ":focus": {
-              borderColor: "#7b83b0",
-            },
-            "::placeholder": {
-              color: "#6A73A6",
-            },
-          }}
-        />
+        <CustomInput label="Write a message" name="write-message-input" />
 
         {/* When input isn't empty hide attach button */}
         <IconButton
