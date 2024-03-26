@@ -4,11 +4,16 @@ import { Box } from "@mui/material";
 import { Header } from "../Header";
 import { ChatBlock } from "../ChatBlock";
 import { WriteMessage } from "../WriteMessage";
+import { connect } from "wsConfig";
 
 interface CurrentChatProps {}
 
 const CurrentChat: React.FC<CurrentChatProps> = () => {
   const chat = {};
+
+  React.useEffect(() => {
+    connect("", "");
+  }, []);
 
   if (!chat) return <NoChat />;
 

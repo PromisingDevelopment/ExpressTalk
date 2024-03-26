@@ -1,7 +1,7 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { IUser } from "../types/IUser";
 import axios, { AxiosError } from "axios";
-import { requestUrls } from "../../../config";
+import { authUrls } from "../../../config";
 import { SignInFields } from "../types/SignInFields";
 import { EmailFields } from "../types/EmailFields";
 
@@ -89,7 +89,7 @@ export const signUpThunk = createAsyncThunk<IUser, IUser>(
   "@@auth/signUp",
   async (user, { rejectWithValue }) => {
     try {
-      await axios.post(requestUrls.sign_up, user);
+      await axios.post(authUrls.sign_up, user);
 
       return user;
     } catch (error) {
@@ -107,8 +107,8 @@ export const signInThunk = createAsyncThunk<any, SignInFields>(
         password: password,
       };
 
-      await axios.post(requestUrls.sign_in, data, {
-        withCredentials: true
+      await axios.post(authUrls.sign_in, data, {
+        withCredentials: true,
       });
     } catch (error) {
       return rejectWithValue(error);
@@ -135,7 +135,9 @@ export const emailThunk = createAsyncThunk<
       code: code,
     };
 
-    await axios.post(requestUrls.email, data);
+    await axios.post(authUrls.email, data, {
+      withCredentials: true,
+    });
   } catch (error) {
     return rejectWithValue(error);
   }

@@ -1,7 +1,8 @@
 import React from "react";
-import { Box, IconButton, TextField } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
+import { CustomInput } from "components/CustomInput";
 
 interface WriteMessageProps {}
 
@@ -11,10 +12,10 @@ const WriteMessage: React.FC<WriteMessageProps> = () => {
       component="form"
       sx={{
         bgcolor: "#1F274E",
-        height: 92,
+        height: 80,
         display: "flex",
         alignItems: "center",
-        px: 4.5,
+        px: { lg: 4.5, xs: 1.5 },
         gap: 2,
       }}>
       <Box
@@ -22,23 +23,9 @@ const WriteMessage: React.FC<WriteMessageProps> = () => {
           flexGrow: 1,
           position: "relative",
         }}>
-        <Box
-          component="input"
-          sx={{
-            width: 1,
-            height: 48,
-            border: "1px solid #6A73A6",
-            borderRadius: 3,
-            py: 1,
-            px: 3,
-            color: "#6A73A6",
-            background: "none",
-            fontSize: 20,
-            ":focus": {
-              borderColor: "#7b83b0",
-            },
-          }}
-        />
+        <CustomInput label="Write a message" name="write-message-input" />
+
+        {/* When input isn't empty hide attach button */}
         <IconButton
           sx={{
             color: "#6A73A6",
@@ -46,6 +33,7 @@ const WriteMessage: React.FC<WriteMessageProps> = () => {
             top: "50%",
             right: 10,
             transform: "translateY(-50%)",
+            bgcolor: "#1F274E",
           }}>
           <AttachFileIcon
             sx={{

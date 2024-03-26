@@ -9,6 +9,7 @@
     "@mui/icons-material": "^5.14.19",
     "@mui/material": "^5.14.20",
     "@reduxjs/toolkit": "^2.0.1",
+    "@stomp/stompjs": "^7.0.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -24,7 +25,9 @@
     "react-hook-form": "^7.49.0",
     "react-redux": "^9.0.4",
     "react-router-dom": "^6.20.1",
+    "redux-persist": "^6.0.0",
     "sass": "^1.69.5",
+    "sockjs-client": "^1.6.1",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4",
     "yup": "^1.3.2"
@@ -33,7 +36,9 @@
     "start": "rsbuild dev",
     "build": "rsbuild build",
     "preview": "rsbuild preview",
-    "c": "generate-react component"
+    "c-chat": "generate-react component --type=chat",
+    "c-auth": "generate-react component --type=auth",
+    "c-sidebar": "generate-react component --type=sidebar"
   },
   "eslintConfig": {
     "extends": [
@@ -56,6 +61,7 @@
   "devDependencies": {
     "@rsbuild/core": "^0.3.8",
     "@rsbuild/plugin-react": "^0.3.8",
-    "@rsbuild/plugin-svgr": "^0.4.0"
+    "@rsbuild/plugin-svgr": "^0.4.0",
+    "@types/sockjs-client": "^1.5.4"
   }
 }

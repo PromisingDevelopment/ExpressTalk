@@ -1,8 +1,8 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, useTheme } from "@mui/material";
 import React from "react";
-import { Logo } from "../../../../components/Logo";
+import { Logo } from "components/Logo";
 
-interface ChatItemProps {
+interface GroupChatItemProps {
   logoSrc?: string; // change to required
   name: string;
   lastMessage: string;
@@ -10,13 +10,15 @@ interface ChatItemProps {
   onClick: any;
 }
 
-const ChatItem: React.FC<ChatItemProps> = ({
+const GroupChatItem: React.FC<GroupChatItemProps> = ({
   lastMessage,
   logoSrc = "",
   active = false,
   name,
   onClick,
 }) => {
+  const theme = useTheme();
+
   return (
     <Button
       onClick={onClick}
@@ -29,16 +31,29 @@ const ChatItem: React.FC<ChatItemProps> = ({
         justifyContent: "flex-start",
         textTransform: "none",
         gap: 1.5,
-        px: 3.125,
-        py: 2,
+        px: { lg: 3.125, xs: 2 },
+
         bgcolor: active ? "primary.main" : "",
         ":hover": {
           bgcolor: active ? "primary.main" : "",
         },
+        [theme.breakpoints.down(767)]: {
+          height: 60,
+        },
       }}>
       <Logo size={48} src={logoSrc} />
       <Box>
-        <Typography sx={{ fontSize: 20, lineHeight: 1, mb: 0.5, color: "#fff" }}>
+        <Typography
+          sx={{
+            fontSize: 20,
+            lineHeight: 1,
+            mb: 0.5,
+            color: "#fff",
+            textAlign: "left",
+            [theme.breakpoints.down(767)]: {
+              fontSize: 16,
+            },
+          }}>
           {name}
         </Typography>
         <Typography sx={{ fontSize: 12, color: "#6A73A6" }}>{lastMessage}</Typography>
@@ -47,4 +62,4 @@ const ChatItem: React.FC<ChatItemProps> = ({
   );
 };
 
-export { ChatItem };
+export { GroupChatItem };

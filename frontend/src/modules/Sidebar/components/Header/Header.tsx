@@ -1,12 +1,13 @@
 import React from "react";
-import { Box, IconButton, Typography } from "@mui/material";
-import SettingsIcon from "@mui/icons-material/SettingsOutlined";
-import { CustomIconButton } from "../CustomIconButton";
+import { Box, Typography, useTheme } from "@mui/material";
 import { Logo } from "../../../../components/Logo";
+import { CreateNewChat } from "../CreateNewChat";
 
 interface HeaderProps {}
 
 const Header: React.FC<HeaderProps> = () => {
+  const theme = useTheme();
+
   return (
     <Box
       sx={{
@@ -15,17 +16,22 @@ const Header: React.FC<HeaderProps> = () => {
         gap: 2,
         flexBasis: 96,
         flexShrink: 0,
-        px: 3.5,
+        px: { lg: 3.125, xs: 2 },
+        bgcolor: "#1F274E",
+        [theme.breakpoints.down(767)]: {
+          flexBasis: 70,
+          px: 2,
+        },
       }}>
-      <Logo size={64} />
-      <Typography fontSize={24} flexGrow={1}>
+      <Logo isMain size={64} />
+      <Typography
+        sx={{
+          fontSize: { lg: 24, xs: 20 },
+          flexGrow: 1,
+        }}>
         Login
       </Typography>
-      <Box>
-        <CustomIconButton fontSize={44}>
-          <SettingsIcon />
-        </CustomIconButton>
-      </Box>
+      <CreateNewChat />
     </Box>
   );
 };
