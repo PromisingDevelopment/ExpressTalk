@@ -1,8 +1,7 @@
 import React from "react";
 import { Box, Typography, useTheme } from "@mui/material";
-import SettingsIcon from "@mui/icons-material/SettingsOutlined";
-import { CustomIconButton } from "../CustomIconButton";
 import { Logo } from "../../../../components/Logo";
+import { CreateNewChat } from "../CreateNewChat";
 
 interface HeaderProps {}
 
@@ -32,6 +31,7 @@ const Header: React.FC<HeaderProps> = () => {
         }}>
         Login
       </Typography>
+      <CreateNewChat />
     </Box>
   );
 };

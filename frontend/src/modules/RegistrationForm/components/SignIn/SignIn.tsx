@@ -13,7 +13,7 @@ import { useAppDispatch, useAppSelector } from "../../../../hooks/redux";
 import { useNavigate } from "react-router-dom";
 import { AlertError } from "../AlertError";
 import { Box } from "@mui/material";
-import { resetError } from "modules/Sidebar";
+import { resetChatListError } from "modules/Sidebar";
 
 const scheme = object().shape({
   loginOrEmail: string()
@@ -37,7 +37,7 @@ const SignIn: React.FC<SignInProps> = () => {
 
   React.useEffect(() => {
     if (status === "fulfilled") {
-      dispatch(resetError());
+      dispatch(resetChatListError());
 
       navigate("/");
       dispatch(resetStatus("signIn"));
