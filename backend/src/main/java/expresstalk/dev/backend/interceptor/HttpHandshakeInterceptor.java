@@ -1,6 +1,5 @@
 package expresstalk.dev.backend.interceptor;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -12,13 +11,10 @@ import java.util.Map;
 
 public class HttpHandshakeInterceptor implements HandshakeInterceptor {
     @Override
-    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
-                                   WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-        if (request instanceof ServletServerHttpRequest) {
-            ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
-            HttpServletRequest httpServletRequest = servletRequest.getServletRequest();
-
-            attributes.put("request", httpServletRequest);
+    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
+        HttpSession session = ((ServletServerHttpRequest) request).getServletRequest().getSession(false);
+        if (session != null) {
+            attributes.put("session", session);
         }
         return true;
     }

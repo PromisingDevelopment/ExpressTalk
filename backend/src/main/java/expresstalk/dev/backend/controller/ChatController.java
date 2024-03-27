@@ -52,8 +52,8 @@ public class ChatController {
     ) {
         try {
             MessageHeaders headers = message.getHeaders();
-            HttpServletRequest request = (HttpServletRequest)SimpMessageHeaderAccessor.getSessionAttributes(headers).get("request");
-            sessionService.ensureSessionExistense(request);
+            HttpSession session = (HttpSession) SimpMessageHeaderAccessor.getSessionAttributes(headers).get("session");
+            sessionService.ensureSessionExistense(session);
 
             UUID chatId = UUID.randomUUID();
             try {
@@ -64,7 +64,7 @@ public class ChatController {
 
             ValidationErrorChecker.<SendPrivateChatMessageDto>checkDtoForErrors(sendPrivateChatMessageDto);
 
-            UUID userId = sessionService.getUserIdFromSession(request);
+            UUID userId = sessionService.getUserIdFromSession(session);
             User sender = userService.findById(userId);
             User receiver = chatService.getSecondUserOfPrivateChat(sender.getId(), chatId);
 

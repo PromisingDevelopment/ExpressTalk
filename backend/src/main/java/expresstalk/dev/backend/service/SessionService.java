@@ -24,9 +24,21 @@ public class SessionService {
         }
     }
 
+    public void ensureSessionExistense(HttpSession session) {
+        if(!isSessionWithUserExists(session)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not authenticated");
+        }
+    }
+
     public UUID getUserIdFromSession(HttpServletRequest request) {
         ensureSessionExistense(request);
 
         return UUID.fromString(request.getSession(false).getAttribute("userId").toString());
+    }
+
+    public UUID getUserIdFromSession(HttpSession session) {
+        ensureSessionExistense(session);
+
+        return UUID.fromString(session.getAttribute("userId").toString());
     }
 }
