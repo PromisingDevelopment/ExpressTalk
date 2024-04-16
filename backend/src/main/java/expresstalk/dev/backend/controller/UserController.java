@@ -5,6 +5,7 @@ import expresstalk.dev.backend.service.SessionService;
 import expresstalk.dev.backend.service.UserService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -39,8 +40,8 @@ public class UserController {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/self")
-    public User getSelf(HttpSession session) {
-        UUID userId = sessionService.getUserIdFromSession(session);
+    public User getSelf(HttpServletRequest request) {
+        UUID userId = sessionService.getUserIdFromSession(request);
 
         return userService.findById(userId);
     }

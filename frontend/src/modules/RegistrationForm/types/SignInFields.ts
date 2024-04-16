@@ -1,5 +1,5 @@
 export interface SignInFields {
-  loginOrGmail: string;
+  loginOrEmail: string;
   password: string;
 }
 export type SignInLabels = keyof SignInFields;
