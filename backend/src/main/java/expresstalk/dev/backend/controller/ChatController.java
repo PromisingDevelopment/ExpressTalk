@@ -1,15 +1,9 @@
 package expresstalk.dev.backend.controller;
 
 import expresstalk.dev.backend.dto.*;
-import expresstalk.dev.backend.entity.GroupChat;
-import expresstalk.dev.backend.entity.PrivateChat;
-import expresstalk.dev.backend.entity.PrivateChatMessage;
-import expresstalk.dev.backend.entity.User;
+import expresstalk.dev.backend.entity.*;
 import expresstalk.dev.backend.enums.UserStatus;
-import expresstalk.dev.backend.service.ChatService;
-import expresstalk.dev.backend.service.SessionService;
-import expresstalk.dev.backend.service.UserService;
-import expresstalk.dev.backend.utils.Converter;
+import expresstalk.dev.backend.service.*;
 import expresstalk.dev.backend.utils.ValidationErrorChecker;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -27,27 +21,34 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/chats")
 public class ChatController {
     private final UserService userService;
+    private final PrivateChatService privateChatService;
+    private final GroupChatSerivce groupChatSerivce;
     private final ChatService chatService;
     private final SessionService sessionService;
     private final SimpMessagingTemplate simpMessagingTemplate;
 
-    public ChatController(UserService userService, ChatService chatService, SessionService sessionService, SimpMessagingTemplate simpMessagingTemplate) {
+    public ChatController(UserService userService, PrivateChatService privateChatService,
+                          SessionService sessionService, SimpMessagingTemplate simpMessagingTemplate,
+                          GroupChatSerivce groupChatSerivce, ChatService chatService) {
         this.userService = userService;
+        this.privateChatService = privateChatService;
+        this.groupChatSerivce = groupChatSerivce;
         this.chatService = chatService;
         this.sessionService = sessionService;
         this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
-    @MessageMapping("/{chatStrId}")
+    @MessageMapping("/private/{chatStrId}")
     private void sendPrivateChatMessage(
             @DestinationVariable String chatStrId,
-            @Payload SendPrivateChatMessageDto sendPrivateChatMessageDto,
+            @Payload SendChatMessageDto sendChatMessageDto,
             Message<?> message
     ) {
         try {
@@ -55,36 +56,66 @@ public class ChatController {
             HttpSession session = (HttpSession) SimpMessageHeaderAccessor.getSessionAttributes(headers).get("session");
             sessionService.ensureSessionExistense(session);
 
-            UUID chatId = UUID.randomUUID();
-            try {
-                chatId = Converter.convertStringToUUID(chatStrId);
-            } catch (Exception ex) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Provided chat id in the path is not UUID");
-            }
+            ValidationErrorChecker.<SendChatMessageDto>checkDtoForErrors(sendChatMessageDto);
 
-            ValidationErrorChecker.<SendPrivateChatMessageDto>checkDtoForErrors(sendPrivateChatMessageDto);
-
+            UUID chatId = chatService.checkAndGetChatUUID(chatStrId);
             UUID userId = sessionService.getUserIdFromSession(session);
             User sender = userService.findById(userId);
-            User receiver = chatService.getSecondUserOfPrivateChat(sender.getId(), chatId);
 
-            chatService.ensureUserPermissionToSendMessageInPrivateChat(sender, chatId);
+            privateChatService.ensureUserPermissionToSendMessageInChat(sender, chatId);
 
-            PrivateChatMessage privateChatMessage = chatService.saveMessage(sendPrivateChatMessageDto, sender.getId(), receiver.getId());
+            User receiver = privateChatService.getSecondUserOfChat(sender.getId(), chatId);
+
+            PrivateChatMessage privateChatMessage = privateChatService.saveMessage(sendChatMessageDto, sender.getId(), receiver.getId());
             ClientPrivateChatMessageDto clientPrivateChatMessageDto = new ClientPrivateChatMessageDto(
                     sender.getLogin(),
                     privateChatMessage.getContent(),
                     privateChatMessage.getCreatedAt()
             );
-            LastMessageDto lastMessageDto = new LastMessageDto(
-                    chatId,
-                    privateChatMessage.getContent()
-            );
+            LastMessageDto lastMessageDto = new LastMessageDto(chatId,privateChatMessage.getContent());
 
             simpMessagingTemplate.convertAndSend("/chats/" + receiver.getId(), lastMessageDto);
             simpMessagingTemplate.convertAndSend("/private_chat/" + chatStrId, clientPrivateChatMessageDto);
         } catch (Exception ex) {
             simpMessagingTemplate.convertAndSend("/private_chat/" + chatStrId + "/errors", ex.getMessage());
+        }
+    }
+
+    @MessageMapping("/group/{chatStrId}")
+    private void sendGroupChatMessage(
+            @DestinationVariable String chatStrId,
+            @Payload SendChatMessageDto sendChatMessageDto,
+            Message<?> message
+    ) {
+        try {
+            MessageHeaders headers = message.getHeaders();
+            HttpSession session = (HttpSession) SimpMessageHeaderAccessor.getSessionAttributes(headers).get("session");
+            sessionService.ensureSessionExistense(session);
+
+            ValidationErrorChecker.<SendChatMessageDto>checkDtoForErrors(sendChatMessageDto);
+
+            UUID chatId = chatService.checkAndGetChatUUID(chatStrId);
+            UUID userId = sessionService.getUserIdFromSession(session);
+            User sender = userService.findById(userId);
+            groupChatSerivce.ensureUserPermissionToSendMessageInChat(sender, chatId);
+
+            List<User> receivers = groupChatSerivce.getOtherUsersOfChat(sender.getId(), chatId);
+            GroupChatMessage groupChatMessage = groupChatSerivce.saveMessage(sendChatMessageDto, sender.getId());
+
+            for(User receiver : receivers) {
+                LastMessageDto lastMessageDto = new LastMessageDto(chatId,groupChatMessage.getContent());
+
+                simpMessagingTemplate.convertAndSend("/chats/" + receiver.getId(), lastMessageDto);
+            }
+
+            ClientPrivateChatMessageDto clientPrivateChatMessageDto = new ClientPrivateChatMessageDto(
+                    sender.getLogin(),
+                    groupChatMessage.getContent(),
+                    groupChatMessage.getCreatedAt()
+            );
+            simpMessagingTemplate.convertAndSend("/group_chat/" + chatStrId, clientPrivateChatMessageDto);
+        } catch (Exception ex) {
+            simpMessagingTemplate.convertAndSend("/group_chat/" + chatStrId + "/errors", ex.getMessage());
         }
     }
 
@@ -127,14 +158,8 @@ public class ChatController {
     public PrivateChat getPrivateChatRoom(@PathVariable String chatStrId, HttpServletRequest request) {
         sessionService.ensureSessionExistense(request);
 
-        UUID chatId = UUID.randomUUID();
-        try {
-            chatId = Converter.convertStringToUUID(chatStrId);
-        } catch (Exception ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Provided chat id in the path is not UUID");
-        }
-
-        PrivateChat chat = chatService.getPrivateChat(chatId);
+        UUID chatId = chatService.checkAndGetChatUUID(chatStrId);
+        PrivateChat chat = privateChatService.getChat(chatId);
 
         return chat;
     }
@@ -152,7 +177,7 @@ public class ChatController {
     public PrivateChat createPrivateChatRoom(@RequestBody @Valid CreatePrivateChatRoomDto createPrivateChatRoomDto, HttpServletRequest request) {
         UUID userId = sessionService.getUserIdFromSession(request);
         UUID secondMemberId = UUID.fromString(createPrivateChatRoomDto.secondMemberId());
-        PrivateChat chat = chatService.createPrivateChat(userId, secondMemberId);
+        PrivateChat chat = privateChatService.createPrivateChat(userId, secondMemberId);
 
         return chat;
     }
@@ -166,7 +191,7 @@ public class ChatController {
     @ResponseBody
     public GroupChat createGroupChatRoom(@RequestBody CreateGroupChatRoomDto createGroupChatRoomDto, HttpServletRequest request) {
         UUID userId = sessionService.getUserIdFromSession(request);
-        GroupChat chat = chatService.createGroupChat(userId, createGroupChatRoomDto.groupName());
+        GroupChat chat = groupChatSerivce.createChat(userId, createGroupChatRoomDto.groupName());
 
         return chat;
     }
@@ -182,15 +207,10 @@ public class ChatController {
     @GetMapping ("/group/{chatStrId}")
     @ResponseBody
     public GroupChat getGroupChatRoom(@PathVariable String chatStrId, HttpServletRequest request) {
-        UUID chatId = UUID.randomUUID();
-        try {
-            chatId = Converter.convertStringToUUID(chatStrId);
-        } catch (Exception ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Provided chat id in the path is not UUID");
-        }
+        UUID chatId = chatService.checkAndGetChatUUID(chatStrId);
         UUID userId = sessionService.getUserIdFromSession(request);
         User user = userService.findById(userId);
-        GroupChat chat = chatService.getGroupChat(user, chatId);
+        GroupChat chat = groupChatSerivce.getChat(user, chatId);
 
         return chat;
     }
@@ -215,9 +235,9 @@ public class ChatController {
         UUID chatId = UUID.fromString(addUserToGroupChatDto.chatId());
         User admin = userService.findById(userId);
         User member = userService.findById(memberId);
-        GroupChat groupChat = chatService.findGroupChatById(chatId);
+        GroupChat groupChat = groupChatSerivce.getChat(chatId);
 
-        chatService.addMemberToGroupChat(groupChat, admin, member);
+        groupChatSerivce.addMemberToChat(groupChat, admin, member);
     }
 
     @ApiResponses(value = {
@@ -240,9 +260,9 @@ public class ChatController {
         UUID chatId = UUID.fromString(removeUserFromGroupChatDto.chatId());
         User admin = userService.findById(userId);
         User member = userService.findById(memberId);
-        GroupChat groupChat = chatService.findGroupChatById(chatId);
+        GroupChat groupChat = groupChatSerivce.getChat(chatId);
 
-        chatService.removeMemberFromGroupChat(groupChat, admin, member);
+        groupChatSerivce.removeMember(groupChat, admin, member);
     }
 
     @ApiResponses(value = {
@@ -265,10 +285,10 @@ public class ChatController {
         UUID userId = sessionService.getUserIdFromSession(request);
         UUID memberId = UUID.fromString(setUserRoleInGroupChatDto.userToGiveRoleId());
         UUID chatId = UUID.fromString(setUserRoleInGroupChatDto.chatId());
-        GroupChat groupChat = chatService.findGroupChatById(chatId);
+        GroupChat groupChat = groupChatSerivce.getChat(chatId);
         User admin = userService.findById(userId);
         User member = userService.findById(memberId);
 
-        chatService.setRoleInGroupChat(groupChat, admin, member, setUserRoleInGroupChatDto.groupChatRole());
+        groupChatSerivce.setRole(groupChat, admin, member, setUserRoleInGroupChatDto.groupChatRole());
     }
 }
