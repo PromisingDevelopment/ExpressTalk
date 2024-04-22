@@ -4,6 +4,7 @@ import expresstalk.dev.backend.dto.*;
 import expresstalk.dev.backend.entity.*;
 import expresstalk.dev.backend.enums.UserStatus;
 import expresstalk.dev.backend.service.*;
+import expresstalk.dev.backend.utils.Converter;
 import expresstalk.dev.backend.utils.ValidationErrorChecker;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -13,7 +14,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -21,6 +21,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,9 +46,8 @@ public class ChatController {
         this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
-    @MessageMapping("/private/{chatStrId}")
+    @MessageMapping("/private/sendMessage")
     private void sendPrivateChatMessage(
-            @DestinationVariable String chatStrId,
             @Payload SendChatMessageDto sendChatMessageDto,
             Message<?> message
     ) {
@@ -58,7 +58,7 @@ public class ChatController {
 
             ValidationErrorChecker.<SendChatMessageDto>checkDtoForErrors(sendChatMessageDto);
 
-            UUID chatId = chatService.checkAndGetChatUUID(chatStrId);
+            UUID chatId = chatService.checkAndGetChatUUID(sendChatMessageDto.chatId());
             UUID userId = sessionService.getUserIdFromSession(session);
             User sender = userService.findById(userId);
 
@@ -67,23 +67,22 @@ public class ChatController {
             User receiver = privateChatService.getSecondUserOfChat(sender.getId(), chatId);
 
             PrivateChatMessage privateChatMessage = privateChatService.saveMessage(sendChatMessageDto, sender.getId(), receiver.getId());
-            ClientPrivateChatMessageDto clientPrivateChatMessageDto = new ClientPrivateChatMessageDto(
+            ClientChatMessageDto clientChatMessageDto = new ClientChatMessageDto(
                     sender.getLogin(),
                     privateChatMessage.getContent(),
                     privateChatMessage.getCreatedAt()
             );
             LastMessageDto lastMessageDto = new LastMessageDto(chatId,privateChatMessage.getContent());
 
-            simpMessagingTemplate.convertAndSend("/chats/" + receiver.getId(), lastMessageDto);
-            simpMessagingTemplate.convertAndSend("/private_chat/" + chatStrId, clientPrivateChatMessageDto);
+            simpMessagingTemplate.convertAndSend("/chats/lastMessages" + receiver.getId(), lastMessageDto);
+            simpMessagingTemplate.convertAndSend("/private_chat/messages" + sendChatMessageDto.chatId(), clientChatMessageDto);
         } catch (Exception ex) {
-            simpMessagingTemplate.convertAndSend("/private_chat/" + chatStrId + "/errors", ex.getMessage());
+            simpMessagingTemplate.convertAndSend("/private_chat/messages" + sendChatMessageDto.chatId() + "/errors", ex.getMessage());
         }
     }
 
-    @MessageMapping("/group/{chatStrId}")
+    @MessageMapping("/group_chat/sendMessage")
     private void sendGroupChatMessage(
-            @DestinationVariable String chatStrId,
             @Payload SendChatMessageDto sendChatMessageDto,
             Message<?> message
     ) {
@@ -94,7 +93,7 @@ public class ChatController {
 
             ValidationErrorChecker.<SendChatMessageDto>checkDtoForErrors(sendChatMessageDto);
 
-            UUID chatId = chatService.checkAndGetChatUUID(chatStrId);
+            UUID chatId = chatService.checkAndGetChatUUID(sendChatMessageDto.chatId());
             UUID userId = sessionService.getUserIdFromSession(session);
             User sender = userService.findById(userId);
             groupChatSerivce.ensureUserPermissionToSendMessageInChat(sender, chatId);
@@ -105,17 +104,56 @@ public class ChatController {
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,groupChatMessage.getContent());
 
-                simpMessagingTemplate.convertAndSend("/chats/" + receiver.getId(), lastMessageDto);
+                simpMessagingTemplate.convertAndSend("/chats/lastMessages" + receiver.getId(), lastMessageDto);
             }
 
-            ClientPrivateChatMessageDto clientPrivateChatMessageDto = new ClientPrivateChatMessageDto(
+            ClientChatMessageDto clientChatMessageDto = new ClientChatMessageDto(
                     sender.getLogin(),
                     groupChatMessage.getContent(),
                     groupChatMessage.getCreatedAt()
             );
-            simpMessagingTemplate.convertAndSend("/group_chat/" + chatStrId, clientPrivateChatMessageDto);
+            simpMessagingTemplate.convertAndSend("/group_chat/messages" + sendChatMessageDto.chatId(), clientChatMessageDto);
         } catch (Exception ex) {
-            simpMessagingTemplate.convertAndSend("/group_chat/" + chatStrId + "/errors", ex.getMessage());
+            simpMessagingTemplate.convertAndSend("/group_chat/messages" + sendChatMessageDto.chatId() + "/errors", ex.getMessage());
+        }
+    }
+
+    @MessageMapping("/group_chat/add")
+    private void addMemberToGroupChat(
+            @Payload AddUserToGroupChatDto addUserToGroupChatDto,
+            Message<?> message
+    ) {
+        try {
+            MessageHeaders headers = message.getHeaders();
+            HttpSession session = (HttpSession) SimpMessageHeaderAccessor.getSessionAttributes(headers).get("session");
+            sessionService.ensureSessionExistense(session);
+
+            ValidationErrorChecker.<AddUserToGroupChatDto>checkDtoForErrors(addUserToGroupChatDto);
+
+            UUID chatId = chatService.checkAndGetChatUUID(addUserToGroupChatDto.chatId());
+            UUID userId = sessionService.getUserIdFromSession(session);
+            User admin = userService.findById(userId);
+            User member = userService.findById(Converter.convertStringToUUID(addUserToGroupChatDto.memberId()));
+            GroupChat groupChat = groupChatSerivce.getChat(chatId);
+
+            groupChatSerivce.addMemberToChat(groupChat, admin, member);
+
+            String addMemberMessage = admin.getLogin() + " has added " + member.getLogin();
+
+            List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin.getId(), chatId);
+            for(User receiver : receivers) {
+                LastMessageDto lastMessageDto = new LastMessageDto(chatId,addMemberMessage);
+
+                simpMessagingTemplate.convertAndSend("/chats/lastMessages" + receiver.getId(), lastMessageDto);
+            }
+
+            AnonymousClientChatMessageDto anonChatMessageDto = new AnonymousClientChatMessageDto(addMemberMessage,new Date());
+            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
+
+            simpMessagingTemplate.convertAndSend("/group_chat/updatedMembers" + addUserToGroupChatDto.chatId(), updatedMembersDto);
+            simpMessagingTemplate.convertAndSend("/group_chat/anon_messages" + addUserToGroupChatDto.chatId(), anonChatMessageDto);
+        } catch (Exception ex) {
+            simpMessagingTemplate.convertAndSend("/group_chat/add" + addUserToGroupChatDto.chatId() + "/errors", ex.getMessage());
         }
     }
 
@@ -213,31 +251,6 @@ public class ChatController {
         GroupChat chat = groupChatSerivce.getChat(user, chatId);
 
         return chat;
-    }
-
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "400", description = "Chat id must be a type of UUID"),
-            @ApiResponse(responseCode = "400", description = "Member's id must be a type of UUID"),
-            @ApiResponse(responseCode = "401", description = "User can not add new members to chat because user is not admin"),
-            @ApiResponse(responseCode = "403", description = "User is not authenticated"),
-            @ApiResponse(responseCode = "404", description = "Chat with provided id wasn't found"),
-            @ApiResponse(responseCode = "409", description = "The member is already in this chat"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    @ResponseStatus(HttpStatus.OK)
-    @PostMapping("/group/add")
-    public void addUserToGroupChat(
-            @RequestBody @Valid AddUserToGroupChatDto addUserToGroupChatDto,
-            HttpServletRequest request
-    ) {
-        UUID userId = sessionService.getUserIdFromSession(request);
-        UUID memberId = UUID.fromString(addUserToGroupChatDto.memberId());
-        UUID chatId = UUID.fromString(addUserToGroupChatDto.chatId());
-        User admin = userService.findById(userId);
-        User member = userService.findById(memberId);
-        GroupChat groupChat = groupChatSerivce.getChat(chatId);
-
-        groupChatSerivce.addMemberToChat(groupChat, admin, member);
     }
 
     @ApiResponses(value = {

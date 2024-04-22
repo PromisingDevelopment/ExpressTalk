@@ -40,7 +40,7 @@ public class GroupChatSerivce {
         return false;
     }
 
-    private boolean isUserAdminInChat(GroupChat groupChat, User user) {
+    private boolean isAdmin(GroupChat groupChat, User user) {
         for(User groupChatUser : groupChat.getAdmins()) {
             if(groupChatUser.getId().equals(user.getId())) {
                 return true;
@@ -63,7 +63,7 @@ public class GroupChatSerivce {
 
     public void addMemberToChat(GroupChat groupChat, User admin, User member) {
         boolean isMemberAlreadyInChat = isUserExistsInChat(groupChat, member);
-        boolean isAdmin = isUserAdminInChat(groupChat, admin);
+        boolean isAdmin = isAdmin(groupChat, admin);
 
         if(isMemberAlreadyInChat) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "The member is already in this chat");
@@ -102,7 +102,7 @@ public class GroupChatSerivce {
 
     public void removeMember(GroupChat groupChat, User admin, User member) {
         boolean isMemberInChat = isUserExistsInChat(groupChat, member);
-        boolean isAdmin = isUserAdminInChat(groupChat, admin);
+        boolean isAdmin = isAdmin(groupChat, admin);
 
         if(!isMemberInChat) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The member is not present in the chat");
@@ -121,7 +121,7 @@ public class GroupChatSerivce {
 
     public void setRole(GroupChat groupChat, User admin, User member, GroupChatRole role) {
         boolean isMemberInChat = isUserExistsInChat(groupChat, member);
-        boolean isAdmin = isUserAdminInChat(groupChat, admin);
+        boolean isAdmin = isAdmin(groupChat, admin);
 
         if(!isMemberInChat) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The member is not present in the chat");
@@ -133,7 +133,7 @@ public class GroupChatSerivce {
 
         if(role.equals(GroupChatRole.ADMIN)) {
             System.out.println("\nADMIN\n");
-            boolean isMemberAdmin = isUserAdminInChat(groupChat, member);
+            boolean isMemberAdmin = isAdmin(groupChat, member);
 
             if(isMemberAdmin) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can not give admin role to the member. The member is already admin in the chat");
@@ -145,7 +145,7 @@ public class GroupChatSerivce {
 
         if(role.equals(GroupChatRole.MEMBER)) {
             System.out.println("\nMEMBER\n");
-            boolean isMemberAdmin = isUserAdminInChat(groupChat, member);
+            boolean isMemberAdmin = isAdmin(groupChat, member);
 
             if(isMemberAdmin) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin can not take off admin rights from another admin");
