@@ -80,6 +80,25 @@ public class GroupChatSerivce {
         userRepository.save(member);
     }
 
+    public void removeMemberFromChat(GroupChat groupChat, User admin, User member) {
+        boolean isMemberInChat = isUserExistsInChat(groupChat, member);
+        boolean isAdmin = isAdmin(groupChat, admin);
+
+        if(!isMemberInChat) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The member is not present in the chat");
+        }
+
+        if(!isAdmin) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User can not remove members from the chat because user is not admin");
+        }
+
+        groupChat.getMembers().remove(member);
+        member.getGroupChats().remove(groupChat);
+
+        groupChatRepository.save(groupChat);
+        userRepository.save(member);
+    }
+
     public GroupChat createChat(UUID userId, String groupName) {
         User user = new User();
         try {
@@ -98,25 +117,6 @@ public class GroupChatSerivce {
         userRepository.save(user);
 
         return groupChat;
-    }
-
-    public void removeMember(GroupChat groupChat, User admin, User member) {
-        boolean isMemberInChat = isUserExistsInChat(groupChat, member);
-        boolean isAdmin = isAdmin(groupChat, admin);
-
-        if(!isMemberInChat) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The member is not present in the chat");
-        }
-
-        if(!isAdmin) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User can not remove members from the chat because user is not admin");
-        }
-
-        groupChat.getMembers().remove(member);
-        member.getGroupChats().remove(groupChat);
-
-        groupChatRepository.save(groupChat);
-        userRepository.save(member);
     }
 
     public void setRole(GroupChat groupChat, User admin, User member, GroupChatRole role) {
