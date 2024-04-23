@@ -19,8 +19,8 @@ import java.util.List;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.setApplicationDestinationPrefixes("/app");
-        registry.enableSimpleBroker("/private_chat", "/chats");
+        registry.setApplicationDestinationPrefixes("/private_chat", "/group_chat");
+        registry.enableSimpleBroker("/private_chat", "/group_chat", "/chats");
     }
 
     @Override

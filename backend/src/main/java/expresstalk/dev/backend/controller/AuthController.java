@@ -93,4 +93,10 @@ public class AuthController {
         HttpSession session = request.getSession();
         session.setAttribute("userId", verifiedUser.getId().toString());
     }
+
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping("/log-out")
+    public void deleteSession(HttpSession session) {
+        session.invalidate();
+    }
 }
