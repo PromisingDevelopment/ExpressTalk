@@ -2,13 +2,20 @@ import React from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 import SearchIcon from "@mui/icons-material/SearchOutlined";
 
-interface SearchProps {}
+interface SearchProps {
+  setValue: any;
+}
 
-const Search: React.FC<SearchProps> = () => {
+const Search = React.forwardRef<HTMLFormElement, SearchProps>(({ setValue }, ref) => {
   const theme = useTheme();
+
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(e.target.value);
+  };
 
   return (
     <Box
+      ref={ref}
       component="form"
       sx={{
         position: "relative",
@@ -32,6 +39,7 @@ const Search: React.FC<SearchProps> = () => {
         },
       }}>
       <Box
+        onChange={onChange}
         component="input"
         name="search-chat"
         sx={{
@@ -65,6 +73,6 @@ const Search: React.FC<SearchProps> = () => {
       </Typography>
     </Box>
   );
-};
+});
 
 export { Search };
