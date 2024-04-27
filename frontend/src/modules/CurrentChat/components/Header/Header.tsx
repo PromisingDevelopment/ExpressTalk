@@ -1,21 +1,15 @@
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import React from "react";
 import { Logo } from "../../../../components/Logo";
-import MenuIcon from "@mui/icons-material/MenuRounded";
-import { useAppDispatch } from "hooks/redux";
-import { setSidebarOpen } from "modules/Sidebar/store/sidebarSlice";
-import { useIsMobile } from "hooks/useIsMobile";
+import { useAppSelector } from "hooks/redux";
+import { BurgerMenu } from "../BurgerMenu";
 
-interface HeaderProps {}
+interface HeaderProps {
+  secondMemberLogin: string | undefined;
+}
 
-const Header: React.FC<HeaderProps> = () => {
+const Header: React.FC<HeaderProps> = ({ secondMemberLogin }) => {
   const theme = useTheme();
-  const dispatch = useAppDispatch();
-  const isMobile = useIsMobile();
-
-  const onClickMenu = () => {
-    dispatch(setSidebarOpen(true));
-  };
 
   return (
     <Box
@@ -32,18 +26,12 @@ const Header: React.FC<HeaderProps> = () => {
           px: 1.5,
         },
       }}>
-      {isMobile && (
-        <IconButton onClick={onClickMenu} sx={{ mr: 1 }}>
-          <MenuIcon
-            sx={{
-              color: "#6972A5",
-              fontSize: 40,
-            }}
-          />
-        </IconButton>
-      )}
+      <BurgerMenu />
       <Logo isMain size={52} />
-      <Typography fontSize={20}>Login</Typography>
+      <Typography fontSize={20} textTransform="capitalize">
+        {!secondMemberLogin && "User"}
+        {secondMemberLogin && secondMemberLogin}
+      </Typography>
     </Box>
   );
 };
