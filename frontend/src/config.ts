@@ -25,7 +25,8 @@ export const chatDeleteUrls = {
 };
 
 export const userUrls = {
-  user: (id: string) => BASE_URL + "/users/" + id,
+  user: (login: string) => BASE_URL + "/users/" + login,
+  self: BASE_URL + "/users/self",
 };
 
 export const navigateUrls = {

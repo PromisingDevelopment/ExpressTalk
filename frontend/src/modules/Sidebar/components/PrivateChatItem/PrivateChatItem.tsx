@@ -3,16 +3,14 @@ import React from "react";
 import { Logo } from "components/Logo";
 
 interface PrivateChatItemProps {
-  id: string;
   onClick: any;
-  logoSrc?: string; // change to required
+  logoSrc?: string;
   receiverLogin: string;
   lastMessage: string;
   active?: boolean;
 }
 
 const PrivateChatItem: React.FC<PrivateChatItemProps> = ({
-  id,
   lastMessage,
   receiverLogin,
   onClick,
@@ -25,7 +23,6 @@ const PrivateChatItem: React.FC<PrivateChatItemProps> = ({
 
   return (
     <Button
-      id={id}
       onClick={onClick}
       sx={{
         borderBottom: "1px solid #353F75",
@@ -47,7 +44,7 @@ const PrivateChatItem: React.FC<PrivateChatItemProps> = ({
         },
       }}>
       <Logo size={48} src={logoSrc} />
-      <Box>
+      <Box textAlign="start">
         <Typography
           sx={{
             fontSize: 20,

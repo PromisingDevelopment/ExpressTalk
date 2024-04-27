@@ -5,14 +5,23 @@ interface GroupChatMessage {
   createdAt: string;
   groupChat: string;
 }
+interface GroupChatMember {
+  id: string;
+  name: string;
+  login: string;
+  status: "ONLINE" | "OFFLINE";
+}
+interface GroupChatAdmin {
+  id: string;
+  name: string;
+  login: string;
+  status: "ONLINE";
+}
 
 export interface GroupChat {
   id: string;
-  senderId: string;
+  name: string;
   messages: GroupChatMessage[];
-  name: {
-    id: string;
-    name: string;
-    groupSiblings: string[];
-  };
+  members: GroupChatMember[];
+  admins: GroupChatAdmin[];
 }
