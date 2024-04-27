@@ -5,23 +5,80 @@ import { getChatsList, setSidebarOpen } from "modules/Sidebar/store/sidebarSlice
 import { useNavigate } from "react-router-dom";
 import { GroupChatItem } from "../GroupChatItem";
 import { PrivateChatItem } from "../PrivateChatItem";
+import { connect } from "wsConfig";
+import { findPrivateChatId } from "helpers/findPrivateChatId";
+import { getSecondMember, setCurrentChatId } from "redux/rootSlice";
+import { PrivateChat } from "modules/Sidebar/types/PrivateChat";
+import { GroupChat } from "modules/Sidebar/types/GroupChat";
 
 interface ChatListProps {
   currentChatMode: number;
+  filterChatsValue: string;
+  subtractedHeight: number;
 }
 
-const ChatList: React.FC<ChatListProps> = ({ currentChatMode }) => {
+const ChatList: React.FC<ChatListProps> = ({
+  currentChatMode,
+  filterChatsValue,
+  subtractedHeight,
+}) => {
   const [listHeight, setListHeight] = React.useState<number | null>(null);
-  const [currentChat, setCurrentChat] = React.useState(0);
+  const [chatId, setChatId] = React.useState<string>();
+  const [currentChatIndex, setCurrentChatIndex] = React.useState<number | null>(null);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const [isPrivateChatsList, setIsPrivateChatsList] = React.useState(true);
   const { errorMessage, list, status, errorCode } = useAppSelector(
     (state) => state.sidebar.chatsList
   );
+  const currentUser = useAppSelector((state) => state.root.currentUser);
+  const currentChatId = useAppSelector((state) => state.root.currentChatId);
+  const getFilteredChats = (type: "private" | "group") => {
+    if (type === "private") {
+      return list?.privateChats.filter((chat) => {
+        return chat.receiverLogin.includes(filterChatsValue);
+      });
+    } else {
+      return list?.groupChats.filter((chat) => {
+        return chat.name.includes(filterChatsValue);
+      });
+    }
+  };
 
-  const isPrivateChatsList = currentChatMode === 0;
+  React.useEffect(() => {
+    const getListHeight = () => {
+      setListHeight(document.body.clientHeight - subtractedHeight);
+    };
 
-  const setIsEmptyContent = () => {
+    window.addEventListener("resize", getListHeight);
+
+    getListHeight();
+  }, [subtractedHeight]);
+
+  React.useEffect(() => {
+    dispatch(getChatsList());
+  }, []);
+
+  React.useEffect(() => {
+    if (errorCode === 403) {
+      navigate("/auth/home");
+    }
+  }, [errorCode]);
+
+  React.useEffect(() => {
+    setIsPrivateChatsList(currentChatMode === 0);
+  }, [currentChatMode]);
+
+  React.useEffect(() => {
+    const currentUserId = currentUser.user?.id;
+
+    if (chatId && currentUserId) {
+      dispatch(setCurrentChatId(chatId));
+      connect(currentUserId, chatId);
+    }
+  }, [currentUser, chatId]);
+
+  const setEmptyContent = () => {
     if (isPrivateChatsList) {
       if (list?.privateChats.length === 0) {
         return (
@@ -41,36 +98,20 @@ const ChatList: React.FC<ChatListProps> = ({ currentChatMode }) => {
     }
   };
 
-  React.useEffect(() => {
-    const getListHeight = () => {
-      const bodyWidth = document.body.clientWidth;
+  const onClickChat = async (i: number, login: string) => {
+    if (i === currentChatIndex) return;
 
-      if (bodyWidth > 767) {
-        setListHeight(document.body.clientHeight - (96 + 56 + 80));
-      } else {
-        setListHeight(document.body.clientHeight - (71 + 56 + 80));
-      }
-    };
+    setCurrentChatIndex(i);
 
-    window.addEventListener("resize", getListHeight);
+    if (!list?.privateChats) return;
 
-    getListHeight();
-  }, [listHeight]);
+    const id = findPrivateChatId(list.privateChats, login);
+    setChatId(id);
 
-  const onClickChat = (i: number) => {
-    setCurrentChat(i);
+    dispatch(getSecondMember(login));
+
     dispatch(setSidebarOpen(false));
   };
-
-  React.useEffect(() => {
-    dispatch(getChatsList());
-  }, []);
-
-  React.useEffect(() => {
-    if (errorCode === 403) {
-      navigate("/auth/home");
-    }
-  }, [errorCode]);
 
   return (
     <Box
@@ -88,24 +129,24 @@ const ChatList: React.FC<ChatListProps> = ({ currentChatMode }) => {
       {status === "loading" && <AlertMessage>Loading...</AlertMessage>}
       {errorMessage && <AlertMessage>{errorMessage} :(</AlertMessage>}
 
-      {setIsEmptyContent()}
+      {setEmptyContent()}
 
       {isPrivateChatsList
-        ? list?.privateChats.map((chat, i) => (
+        ? (getFilteredChats("private") as PrivateChat[])?.map((chat, i) => (
             <PrivateChatItem
-              onClick={() => onClickChat(i)}
+              onClick={() => onClickChat(i, chat.receiverLogin)}
               key={i}
               {...chat}
-              active={i === currentChat}
+              active={currentChatIndex === i || currentChatId === chat.id}
             />
           ))
-        : list?.groupChats.map((chat, i) => (
+        : (getFilteredChats("group") as GroupChat[])?.map((chat, i) => (
             <div></div>
             //<GroupChatItem
             //  onClick={() => onClickChat(i)}
             //  key={i}
             //  {...chat}
-            //  active={i === currentChat}
+            //  active={currentChatIndex === i}
             ///>
           ))}
     </Box>

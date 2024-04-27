@@ -1,12 +1,12 @@
 import SockJS from "sockjs-client";
-import { Client, Stomp } from "@stomp/stompjs";
-import { userUrls, wsServerURL } from "config";
-import axios from "axios";
+import { Client } from "@stomp/stompjs";
+import { wsServerURL } from "config";
+import { store } from "redux/store";
+import { getCurrentChat } from "modules/CurrentChat";
 
 let client: Client;
 
-export function connect(id: string, chatId: string) {
-  //const loginOrId = getUserlogin(id);
+export function connect(userId: string, chatId: string) {
   const socket: WebSocket = new SockJS(wsServerURL);
 
   client = new Client();
@@ -14,17 +14,16 @@ export function connect(id: string, chatId: string) {
   client.configure({
     brokerURL: wsServerURL,
     onConnect: () => {
-      console.log("onConnect");
-
-      client.subscribe(`/private_chats/${id}`, (message) => {
-        console.log("private_chat: ", message);
+      client.subscribe(`/private_chat/${chatId}`, (message) => {
+        console.log("private_chat: ", JSON.parse(message.body));
+        store.dispatch(getCurrentChat(chatId));
       });
-      client.subscribe(`/private_chats/${id}/errors`, (message) => {
-        console.log("private_chat: ", message);
+      client.subscribe(`/private_chat/${chatId}/errors`, (message) => {
+        console.log("private_chat error: ", JSON.parse(message.body));
       });
 
-      client.subscribe(`/chats/${chatId}`, (message) => {
-        console.log("chat: ", message);
+      client.subscribe(`/chats/${userId}`, (message) => {
+        console.log("chats: ", JSON.parse(message.body));
       });
     },
     webSocketFactory: () => {
@@ -32,19 +31,20 @@ export function connect(id: string, chatId: string) {
     },
 
     debug: (str) => {
-      console.log("debug: ", str);
+      //console.log("debug: ", str);
     },
   });
 
   client.activate();
 }
 
-async function getUserlogin(str: string) {
-  if (str.length < 36) {
-    const res = await axios.get(userUrls.user(str));
-
-    return str;
-  }
-
-  return str;
+export function sendMessage(message: string, chatId: string, createdAt: number) {
+  client.publish({
+    destination: `/app/${chatId}`,
+    body: JSON.stringify({
+      chatId,
+      content: message,
+      createdAt: createdAt,
+    }),
+  });
 }

@@ -1,6 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
-import { chatGetUrls, chatPostUrls } from "config";
+import { chatDeleteUrls, chatGetUrls } from "config";
 import { ChatsListsObj } from "../types/ChatsListsObj";
 
 interface InitialState {
@@ -10,10 +10,7 @@ interface InitialState {
     errorCode: number | null;
     list: ChatsListsObj | null;
   };
-  newChat: {
-    status: "idle" | "loading" | "error" | "fulfilled";
-    errorMessage: string | null;
-  };
+
   sidebarOpen: boolean;
 }
 
@@ -24,10 +21,7 @@ const initialState: InitialState = {
     errorCode: null,
     list: null,
   },
-  newChat: {
-    status: "idle",
-    errorMessage: null,
-  },
+
   sidebarOpen: false,
 };
 
@@ -43,6 +37,20 @@ const sidebarSlice = createSlice({
       state.chatsList.errorMessage = null;
       state.chatsList.errorCode = null;
     },
+    updateLastMessage: (
+      state,
+      action: PayloadAction<{ lastMessage: string; chatId: string }>
+    ) => {
+      const list = state.chatsList.list;
+
+      if (list) {
+        const chat = list.privateChats.find((chat) => chat.id === action.payload.chatId);
+
+        if (chat) {
+          chat.lastMessage = action.payload.lastMessage;
+        }
+      }
+    },
   },
   extraReducers(builder) {
     builder
@@ -55,25 +63,11 @@ const sidebarSlice = createSlice({
         state.chatsList.errorMessage = null;
         state.chatsList.errorCode = null;
       })
-
       .addCase(getChatsList.rejected, (state, action: PayloadAction<any>) => {
         state.chatsList.status = "error";
         state.chatsList.errorMessage =
           action.payload.response?.data?.message || action.payload.message;
         state.chatsList.errorCode = action.payload.response?.data?.status || 500;
-      })
-
-      .addCase(createPrivateChat.fulfilled, (state, action: PayloadAction<any>) => {
-        state.newChat.status = "fulfilled";
-      })
-      .addCase(createPrivateChat.pending, (state) => {
-        state.newChat.status = "loading";
-        state.newChat.errorMessage = null;
-      })
-      .addCase(createPrivateChat.rejected, (state, action: PayloadAction<any>) => {
-        state.newChat.status = "error";
-        state.newChat.errorMessage =
-          action.payload?.response?.data?.message || action.payload.message;
       });
   },
 });
@@ -93,24 +87,19 @@ export const getChatsList = createAsyncThunk<any, void>(
   }
 );
 
-export const createPrivateChat = createAsyncThunk<void, string>(
-  "@@sidebar/createPrivateChat",
-  async (secondMemberId, { rejectWithValue }) => {
+export const logout = createAsyncThunk<void, void>(
+  "@@sidebar/logout",
+  async (_, { rejectWithValue }) => {
     try {
-      if (!secondMemberId) throw Error("This field is required!");
-
-      await axios.post(
-        chatPostUrls.privateChat,
-        {
-          secondMemberId,
-        },
-        { withCredentials: true }
-      );
+      await axios.delete(chatDeleteUrls.logOut, {
+        withCredentials: true,
+      });
     } catch (error) {
       return rejectWithValue(error);
     }
   }
 );
 
-export const { setSidebarOpen, resetChatListError } = sidebarSlice.actions;
+export const { setSidebarOpen, resetChatListError, updateLastMessage } =
+  sidebarSlice.actions;
 export default sidebarSlice.reducer;
