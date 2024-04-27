@@ -1,11 +1,18 @@
 import React from "react";
-import { Box, useTheme } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import { Message } from "../Message";
+import { useAppDispatch, useAppSelector } from "hooks/redux";
+import { updateLastMessage } from "modules/Sidebar/store/sidebarSlice";
 
 interface ChatBlockProps {}
 
 const ChatBlock: React.FC<ChatBlockProps> = () => {
   const [height, setHeight] = React.useState<number | null>(null);
+  const { data, errorMessage } = useAppSelector((state) => state.currentChat);
+  const { user } = useAppSelector((state) => state.root.currentUser);
+  const chatBlockRef = React.useRef<HTMLDivElement | null>(null);
+  const dispatch = useAppDispatch();
+  const { currentChatId } = useAppSelector((state) => state.root);
 
   React.useEffect(() => {
     const getListHeight = () => {
@@ -20,52 +27,25 @@ const ChatBlock: React.FC<ChatBlockProps> = () => {
     window.addEventListener("resize", getListHeight);
     getListHeight();
   }, [height]);
+  React.useEffect(() => {
+    const chatBlock = chatBlockRef.current;
 
-  const messages = [
-    {
-      content:
-        "Lorem ipsum sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd ",
-      time: "22:41",
-    },
-    {
-      content: "Lorem ipsum",
-      time: "Time",
-      isMine: true,
-    },
-    {
-      content:
-        "Lorem ipsum sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd ",
-      time: "22:41",
-    },
-    {
-      content: "Lorem ipsum",
-      time: "Time",
-      isMine: true,
-    },
-    {
-      content:
-        "Lorem ipsum sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd ",
-      time: "22:41",
-    },
-    {
-      content: "Lorem ipsum",
-      time: "Time",
-      isMine: true,
-    },
-    {
-      content:
-        "Lorem ipsum sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd sfdsfd ",
-      time: "22:41",
-    },
-    {
-      content: "Lorem ipsum",
-      time: "Time",
-      isMine: true,
-    },
-  ];
+    if (chatBlock) {
+      chatBlock.scrollTop = chatBlock.scrollHeight;
+    }
+  }, [chatBlockRef.current, data]);
+
+  React.useEffect(() => {
+    if (data && currentChatId) {
+      const lastMessage = data.messages[data.messages.length - 1].content;
+
+      dispatch(updateLastMessage({ lastMessage, chatId: currentChatId }));
+    }
+  }, [data]);
 
   return (
     <Box
+      ref={chatBlockRef}
       sx={{
         paddingY: 4,
         display: "flex",
@@ -74,9 +54,16 @@ const ChatBlock: React.FC<ChatBlockProps> = () => {
         height: height,
         overflowY: "auto",
       }}>
-      {messages.map((message, i) => (
-        <Message key={message.content + message.time + i} {...message} />
-      ))}
+      {errorMessage && <Typography>{errorMessage}</Typography>}
+
+      {user &&
+        data?.messages?.map((message, i) => (
+          <Message
+            key={message.content + message.createdAt + i}
+            {...message}
+            isMine={message.senderId === user.id}
+          />
+        ))}
     </Box>
   );
 };
