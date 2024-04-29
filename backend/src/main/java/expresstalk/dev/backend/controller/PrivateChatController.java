@@ -44,7 +44,7 @@ public class PrivateChatController {
         this.chatService = chatService;
     }
 
-    @MessageMapping("/sendMessage")
+    @MessageMapping("/private_chat/sendMessage")
     private void sendPrivateChatMessage(
             @Payload SendChatMessageDto sendChatMessageDto,
             Message<?> message
