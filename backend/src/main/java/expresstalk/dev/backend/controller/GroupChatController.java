@@ -44,7 +44,7 @@ public class GroupChatController {
         this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
-    @MessageMapping("/sendMessage")
+    @MessageMapping("/group_chat/sendMessage")
     private void sendGroupChatMessage(
             @Payload SendChatMessageDto sendChatMessageDto,
             Message<?> message
