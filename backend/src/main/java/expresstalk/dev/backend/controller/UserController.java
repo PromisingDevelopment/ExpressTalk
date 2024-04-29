@@ -1,6 +1,9 @@
 package expresstalk.dev.backend.controller;
 
+import expresstalk.dev.backend.dto.GetUserChatsDto;
 import expresstalk.dev.backend.entity.User;
+import expresstalk.dev.backend.enums.UserStatus;
+import expresstalk.dev.backend.service.ChatService;
 import expresstalk.dev.backend.service.SessionService;
 import expresstalk.dev.backend.service.UserService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -9,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -17,10 +21,12 @@ import java.util.UUID;
 public class UserController {
     private final UserService userService;
     private final SessionService sessionService;
+    private final ChatService chatService;
 
-    public UserController(UserService userService, SessionService sessionService) {
+    public UserController(UserService userService, SessionService sessionService, ChatService chatService) {
         this.userService = userService;
         this.sessionService = sessionService;
+        this.chatService = chatService;
     }
 
     @ApiResponses(value = {
@@ -44,5 +50,26 @@ public class UserController {
         UUID userId = sessionService.getUserIdFromSession(request);
 
         return userService.findById(userId);
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "403", description = "User is not authenticated"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/chats")
+    @ResponseBody
+    public GetUserChatsDto getChatsPage(HttpServletRequest request) {
+        request.getSession(false);
+        UUID userId = sessionService.getUserIdFromSession(request);
+
+        try {
+            userService.handleStatusTo(userId, UserStatus.ONLINE);
+        } catch (Exception ex) {
+            System.out.println("ERROR: " + ex.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+        }
+
+        return chatService.getChats(userId);
     }
 }

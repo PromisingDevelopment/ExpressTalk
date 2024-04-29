@@ -1,5 +1,9 @@
 package expresstalk.dev.backend.service;
 
+import expresstalk.dev.backend.dto.GetUserChatsDto;
+import expresstalk.dev.backend.dto.PrivateChatClientDto;
+import expresstalk.dev.backend.entity.PrivateChat;
+import expresstalk.dev.backend.entity.PrivateChatMessage;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.enums.UserStatus;
 import expresstalk.dev.backend.repository.UserRepository;
