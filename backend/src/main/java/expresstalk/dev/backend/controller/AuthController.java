@@ -94,9 +94,18 @@ public class AuthController {
         session.setAttribute("userId", verifiedUser.getId().toString());
     }
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "500", description = "Session doesn't exist")
+    })
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/log-out")
-    public void deleteSession(HttpSession session) {
-        session.invalidate();
+    public void deleteSession(HttpServletRequest request) {
+        try {
+            HttpSession session = request.getSession(false);
+
+            session.invalidate();
+        } catch (Exception exception) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Session doesn't exist");
+        }
     }
 }

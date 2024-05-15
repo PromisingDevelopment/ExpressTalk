@@ -44,7 +44,7 @@ public class PrivateChatController {
         this.chatService = chatService;
     }
 
-    @MessageMapping("/private_chat/sendMessage")
+    @MessageMapping("/private_chat/send_message")
     private void sendPrivateChatMessage(
             @Payload SendChatMessageDto sendChatMessageDto,
             Message<?> message
@@ -72,10 +72,10 @@ public class PrivateChatController {
             );
             LastMessageDto lastMessageDto = new LastMessageDto(chatId,privateChatMessage.getContent());
 
-            simpMessagingTemplate.convertAndSend("/chats/lastMessages" + receiver.getId(), lastMessageDto);
-            simpMessagingTemplate.convertAndSend("/private_chat/messages" + sendChatMessageDto.chatId(), clientChatMessageDto);
+            simpMessagingTemplate.convertAndSend("/chats/lastMessages/" + receiver.getId(), lastMessageDto);
+            simpMessagingTemplate.convertAndSend("/private_chat/messages/" + sendChatMessageDto.chatId(), clientChatMessageDto);
         } catch (Exception ex) {
-            simpMessagingTemplate.convertAndSend("/private_chat/messages" + sendChatMessageDto.chatId() + "/errors", ex.getMessage());
+            simpMessagingTemplate.convertAndSend("/private_chat/messages/" + sendChatMessageDto.chatId() + "/errors", ex.getMessage());
         }
     }
 
