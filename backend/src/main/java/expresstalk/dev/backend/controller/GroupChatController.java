@@ -44,7 +44,7 @@ public class GroupChatController {
         this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
-    @MessageMapping("/group_chat/sendMessage")
+    @MessageMapping("/group_chat/send_message")
     private void sendGroupChatMessage(
             @Payload SendChatMessageDto sendChatMessageDto,
             Message<?> message
@@ -67,7 +67,7 @@ public class GroupChatController {
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,groupChatMessage.getContent());
 
-                simpMessagingTemplate.convertAndSend("/chats/lastMessages/" + receiver.getId(), lastMessageDto);
+                simpMessagingTemplate.convertAndSend("/chats/last_messages/" + receiver.getId(), lastMessageDto);
             }
 
             ClientChatMessageDto clientChatMessageDto = new ClientChatMessageDto(
@@ -107,13 +107,13 @@ public class GroupChatController {
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,addMemberMessage);
 
-                simpMessagingTemplate.convertAndSend("/chats/lastMessages/" + receiver.getId(), lastMessageDto);
+                simpMessagingTemplate.convertAndSend("/chats/last_messages/" + receiver.getId(), lastMessageDto);
             }
 
             AnonymousClientChatMessageDto anonChatMessageDto = new AnonymousClientChatMessageDto(addMemberMessage,new Date());
             UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
 
-            simpMessagingTemplate.convertAndSend("/group_chat/updatedMembers/" + addUserToGroupChatDto.chatId(), updatedMembersDto);
+            simpMessagingTemplate.convertAndSend("/group_chat/updated_members/" + addUserToGroupChatDto.chatId(), updatedMembersDto);
             simpMessagingTemplate.convertAndSend("/group_chat/anon_messages/" + addUserToGroupChatDto.chatId(), anonChatMessageDto);
         } catch (Exception ex) {
             simpMessagingTemplate.convertAndSend("/group_chat/add/" + addUserToGroupChatDto.chatId() + "/errors", ex.getMessage());
@@ -146,13 +146,13 @@ public class GroupChatController {
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,addMemberMessage);
 
-                simpMessagingTemplate.convertAndSend("/chats/lastMessages/" + receiver.getId(), lastMessageDto);
+                simpMessagingTemplate.convertAndSend("/chats/last_messages/" + receiver.getId(), lastMessageDto);
             }
 
             AnonymousClientChatMessageDto anonChatMessageDto = new AnonymousClientChatMessageDto(addMemberMessage,new Date());
             UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
 
-            simpMessagingTemplate.convertAndSend("/group_chat/updatedMembers/" + removeUserFromGroupChatDto.chatId(), updatedMembersDto);
+            simpMessagingTemplate.convertAndSend("/group_chat/updated_members/" + removeUserFromGroupChatDto.chatId(), updatedMembersDto);
             simpMessagingTemplate.convertAndSend("/group_chat/anon_messages/" + removeUserFromGroupChatDto.chatId(), anonChatMessageDto);
         } catch (Exception ex) {
             simpMessagingTemplate.convertAndSend("/group_chat/remove/" + removeUserFromGroupChatDto.chatId() + "/errors", ex.getMessage());
