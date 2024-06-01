@@ -8,7 +8,7 @@ interface ChatBlockProps {}
 
 const ChatBlock: React.FC<ChatBlockProps> = () => {
   const [height, setHeight] = React.useState<number | null>(null);
-  const { data, errorMessage } = useAppSelector((state) => state.currentChat);
+  const { currentChat, errorMessage } = useAppSelector((state) => state.currentChat);
   const { user } = useAppSelector((state) => state.root.currentUser);
   const chatBlockRef = React.useRef<HTMLDivElement | null>(null);
   const dispatch = useAppDispatch();
@@ -33,15 +33,15 @@ const ChatBlock: React.FC<ChatBlockProps> = () => {
     if (chatBlock) {
       chatBlock.scrollTop = chatBlock.scrollHeight;
     }
-  }, [chatBlockRef.current, data]);
+  }, [chatBlockRef.current, currentChat]);
 
   React.useEffect(() => {
-    if (data && currentChatId) {
-      const lastMessage = data.messages[data.messages.length - 1].content;
+    if (currentChat && currentChat.messages.length > 0 && currentChatId) {
+      const lastMessage = currentChat.messages[currentChat.messages.length - 1].content;
 
       dispatch(updateLastMessage({ lastMessage, chatId: currentChatId }));
     }
-  }, [data]);
+  }, [currentChat, currentChatId]);
 
   return (
     <Box
@@ -57,7 +57,8 @@ const ChatBlock: React.FC<ChatBlockProps> = () => {
       {errorMessage && <Typography>{errorMessage}</Typography>}
 
       {user &&
-        data?.messages?.map((message, i) => (
+        currentChat &&
+        currentChat.messages.map((message, i) => (
           <Message
             key={message.content + message.createdAt + i}
             {...message}

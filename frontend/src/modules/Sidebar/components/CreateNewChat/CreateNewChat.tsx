@@ -12,31 +12,24 @@ import {
 import { CustomInput } from "components/CustomInput";
 import CreateIcon from "@mui/icons-material/CreateRounded";
 import { useAppDispatch, useAppSelector } from "hooks/redux";
-import {
-  createPrivateChat,
-  getSecondMember,
-  resetErrorMessages,
-  setCurrentChatId,
-} from "redux/rootSlice";
+import { setCurrentChatId, setIsCreatedNewChat } from "redux/rootSlice";
 import { connect } from "wsConfig";
-import { findPrivateChatId } from "helpers/findPrivateChatId";
-import { getChatsList, setSidebarOpen } from "modules/Sidebar/store/sidebarSlice";
+import { setSidebarOpen } from "../../store/sidebarSlice";
 import HeaderIconButton from "modules/Sidebar/UI/HeaderIconButton";
 import ModalContent from "modules/Sidebar/UI/ModalContent";
+import { getSecondMember } from "axios/getSecondMember";
+import { createPrivateChat } from "axios/createPrivateChat";
+import { setCurrentChat } from "modules/CurrentChat/store/currentChatSlice";
 
 interface CreateNewChatProps {}
 
 const CreateNewChat: React.FC<CreateNewChatProps> = () => {
   const [openModal, setOpenModal] = React.useState(false);
-  const [isCreateChat, setIsCreateChat] = React.useState(false);
-  const [isConnect, setIsConnect] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState<any>(null);
   const [isEmptyLogin, setIsEmptyLogin] = React.useState(false);
   const dispatch = useAppDispatch();
   const userIdInputRef = React.useRef<HTMLInputElement | null>(null);
-  const { newChat, secondMember, currentUser } = useAppSelector((state) => state.root);
-  const privateChats = useAppSelector(
-    (state) => state.sidebar.chatsList.list?.privateChats
-  );
+  const { currentUser } = useAppSelector((state) => state.root);
 
   const { breakpoints } = useTheme();
 
@@ -50,52 +43,35 @@ const CreateNewChat: React.FC<CreateNewChatProps> = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsEmptyLogin(false);
-    dispatch(resetErrorMessages());
+    setErrorMessage(null);
 
     const userIdInput = userIdInputRef.current;
     const login = userIdInput?.value;
 
     if (!login) return setIsEmptyLogin(true);
 
-    await dispatch(getSecondMember(login));
+    try {
+      const secondMember = await getSecondMember(login);
+      const currentUserId = currentUser.user?.id;
 
-    setIsCreateChat(true);
-  };
+      if (secondMember.id) {
+        const createdPrivateChat = await createPrivateChat(secondMember.id);
+        const chatId = createdPrivateChat.id;
 
-  React.useEffect(() => {
-    const createChat = async () => {
-      const secondMemberId = secondMember.user?.id;
-
-      if (secondMemberId && isCreateChat) {
-        await dispatch(createPrivateChat(secondMemberId));
-        dispatch(getChatsList());
-
-        setIsConnect(true);
+        if (chatId && currentUserId) {
+          connect(currentUserId, chatId);
+          console.log("setting is createdNewChat true");
+          dispatch(setIsCreatedNewChat(true));
+          dispatch(setCurrentChat(createdPrivateChat));
+          dispatch(setCurrentChatId(chatId));
+          dispatch(setSidebarOpen(false));
+          onCloseModal();
+        }
       }
-      setIsCreateChat(false);
-    };
-
-    createChat();
-  }, [secondMember, isCreateChat]);
-
-  React.useEffect(() => {
-    const secondMemberUser = secondMember.user;
-    const currentUserId = currentUser.user?.id;
-
-    if (newChat.status === "fulfilled" && privateChats && secondMemberUser && isConnect) {
-      const chatId = findPrivateChatId(privateChats, secondMemberUser.login);
-
-      if (!chatId) return;
-      if (!currentUserId) return;
-
-      dispatch(setCurrentChatId(chatId));
-      dispatch(setSidebarOpen(false));
-      connect(currentUserId, chatId);
-      onCloseModal();
-
-      setIsConnect(false);
+    } catch (error) {
+      setErrorMessage(error);
     }
-  }, [newChat.status, privateChats, secondMember.user, isConnect]);
+  };
 
   return (
     <>
@@ -118,21 +94,17 @@ const CreateNewChat: React.FC<CreateNewChatProps> = () => {
                 This field is required!
               </Typography>
             )}
-            {newChat.errorMessage && (
+            {errorMessage && (
               <Typography variant="body1" color="error.main" mt={0.5}>
-                {newChat.errorMessage}
+                {errorMessage}
               </Typography>
             )}
-            {secondMember.errorMessage && (
-              <Typography variant="body1" color="error.main" mt={0.5}>
-                {secondMember.errorMessage}
-              </Typography>
-            )}
+
             <Button
               variant="contained"
               type="submit"
               disableElevation
-              disabled={newChat.status === "loading"}
+              //disabled={newChat.status === "loading"}
               sx={{
                 bgcolor: "#fff",
                 color: "#2B3464",

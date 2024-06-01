@@ -1,14 +1,13 @@
 import { Box, Typography, useTheme } from "@mui/material";
 import React from "react";
 import { Logo } from "../../../../components/Logo";
-import { useAppSelector } from "hooks/redux";
 import { BurgerMenu } from "../BurgerMenu";
 
 interface HeaderProps {
-  secondMemberLogin: string | undefined;
+  login: string | undefined;
 }
 
-const Header: React.FC<HeaderProps> = ({ secondMemberLogin }) => {
+const Header: React.FC<HeaderProps> = ({ login }) => {
   const theme = useTheme();
 
   return (
@@ -29,8 +28,8 @@ const Header: React.FC<HeaderProps> = ({ secondMemberLogin }) => {
       <BurgerMenu />
       <Logo isMain size={52} />
       <Typography fontSize={20} textTransform="capitalize">
-        {!secondMemberLogin && "User"}
-        {secondMemberLogin && secondMemberLogin}
+        {!login && "User"}
+        {login && login}
       </Typography>
     </Box>
   );

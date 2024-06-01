@@ -1,6 +1,8 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import { currentChatReducer } from "modules/CurrentChat";
 import { authReducer } from "modules/RegistrationForm";
 import { sidebarReducer } from "modules/Sidebar";
+import rootReducer from "./rootSlice";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
@@ -9,15 +11,17 @@ const persistConfig = {
   storage,
 };
 
-const rootReducer = combineReducers({
+const combinedReducer = combineReducers({
   auth: authReducer,
   sidebar: sidebarReducer,
+  currentChat: currentChatReducer,
+  root: rootReducer,
 });
 
-const persistedReducer = persistReducer(persistConfig, rootReducer);
+//const persistedReducer = persistReducer(persistConfig, combinedReducer);
 
 const store = configureStore({
-  reducer: persistedReducer,
+  reducer: combinedReducer,
   middleware(getDefaultMiddleware) {
     return getDefaultMiddleware({
       serializableCheck: false,

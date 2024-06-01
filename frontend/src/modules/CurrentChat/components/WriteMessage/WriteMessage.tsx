@@ -3,7 +3,7 @@ import { Box, IconButton } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { CustomInput } from "components/CustomInput";
-import { sendMessage } from "wsConfig";
+import { privateChatSendMessage } from "wsConfig";
 import { useAppDispatch } from "hooks/redux";
 import { updateLastMessage } from "modules/Sidebar";
 
@@ -24,8 +24,8 @@ const WriteMessage: React.FC<WriteMessageProps> = ({ chatId }) => {
 
     if (lastMessage && chatId) {
       const createdAt = new Date().getTime();
-
-      sendMessage(lastMessage, chatId, createdAt);
+      console.log("send");
+      privateChatSendMessage(lastMessage, chatId, createdAt);
 
       dispatch(updateLastMessage({ lastMessage, chatId }));
       writeMessageInput.value = "";

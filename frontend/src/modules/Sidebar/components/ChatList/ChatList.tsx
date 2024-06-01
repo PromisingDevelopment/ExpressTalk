@@ -7,7 +7,7 @@ import { GroupChatItem } from "../GroupChatItem";
 import { PrivateChatItem } from "../PrivateChatItem";
 import { connect } from "wsConfig";
 import { findPrivateChatId } from "helpers/findPrivateChatId";
-import { getSecondMember, setCurrentChatId } from "redux/rootSlice";
+import { setCurrentChatId, setIsCreatedNewChat } from "redux/rootSlice";
 import { PrivateChat } from "modules/Sidebar/types/PrivateChat";
 import { GroupChat } from "modules/Sidebar/types/GroupChat";
 
@@ -28,18 +28,19 @@ const ChatList: React.FC<ChatListProps> = ({
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [isPrivateChatsList, setIsPrivateChatsList] = React.useState(true);
-  const { errorMessage, list, status, errorCode } = useAppSelector(
-    (state) => state.sidebar.chatsList
+  const { chatsList } = useAppSelector((state) => state.sidebar);
+  const { user: currentUserUser, errorCode: currentUserErrorCode } = useAppSelector(
+    (state) => state.root.currentUser
   );
-  const currentUser = useAppSelector((state) => state.root.currentUser);
-  const currentChatId = useAppSelector((state) => state.root.currentChatId);
+
+  const { currentChatId, isCreatedNewChat } = useAppSelector((state) => state.root);
   const getFilteredChats = (type: "private" | "group") => {
     if (type === "private") {
-      return list?.privateChats.filter((chat) => {
+      return chatsList.list?.privateChats.filter((chat) => {
         return chat.receiverLogin.includes(filterChatsValue);
       });
     } else {
-      return list?.groupChats.filter((chat) => {
+      return chatsList.list?.groupChats.filter((chat) => {
         return chat.name.includes(filterChatsValue);
       });
     }
@@ -60,27 +61,34 @@ const ChatList: React.FC<ChatListProps> = ({
   }, []);
 
   React.useEffect(() => {
-    if (errorCode === 403) {
+    if (isCreatedNewChat) {
+      dispatch(getChatsList());
+      dispatch(setIsCreatedNewChat(false));
+    }
+  }, [isCreatedNewChat]);
+
+  React.useEffect(() => {
+    if (chatsList.errorCode === 403 || currentUserErrorCode === 403) {
       navigate("/auth/home");
     }
-  }, [errorCode]);
+  }, [chatsList.errorCode, currentUserErrorCode]);
 
   React.useEffect(() => {
     setIsPrivateChatsList(currentChatMode === 0);
   }, [currentChatMode]);
 
   React.useEffect(() => {
-    const currentUserId = currentUser.user?.id;
+    const currentUserId = currentUserUser?.id;
 
     if (chatId && currentUserId) {
       dispatch(setCurrentChatId(chatId));
       connect(currentUserId, chatId);
     }
-  }, [currentUser, chatId]);
+  }, [currentUserUser, chatId]);
 
   const setEmptyContent = () => {
     if (isPrivateChatsList) {
-      if (list?.privateChats.length === 0) {
+      if (chatsList.list?.privateChats.length === 0) {
         return (
           <AlertMessage>
             Private chats list is empty. It's the best time to create a new chat
@@ -88,7 +96,7 @@ const ChatList: React.FC<ChatListProps> = ({
         );
       }
     } else {
-      if (list?.groupChats.length === 0) {
+      if (chatsList.list?.groupChats.length === 0) {
         return (
           <AlertMessage>
             Group chats list is empty. It's the best time to create a new chat
@@ -103,12 +111,10 @@ const ChatList: React.FC<ChatListProps> = ({
 
     setCurrentChatIndex(i);
 
-    if (!list?.privateChats) return;
+    if (!chatsList.list?.privateChats) return;
 
-    const id = findPrivateChatId(list.privateChats, login);
+    const id = findPrivateChatId(chatsList.list.privateChats, login);
     setChatId(id);
-
-    dispatch(getSecondMember(login));
 
     dispatch(setSidebarOpen(false));
   };
@@ -126,8 +132,8 @@ const ChatList: React.FC<ChatListProps> = ({
           },
         },
       }}>
-      {status === "loading" && <AlertMessage>Loading...</AlertMessage>}
-      {errorMessage && <AlertMessage>{errorMessage} :(</AlertMessage>}
+      {chatsList.status === "loading" && <AlertMessage>Loading...</AlertMessage>}
+      {chatsList.errorMessage && <AlertMessage>{chatsList.errorMessage} :(</AlertMessage>}
 
       {setEmptyContent()}
 
@@ -141,7 +147,7 @@ const ChatList: React.FC<ChatListProps> = ({
             />
           ))
         : (getFilteredChats("group") as GroupChat[])?.map((chat, i) => (
-            <div></div>
+            <div key={i}></div>
             //<GroupChatItem
             //  onClick={() => onClickChat(i)}
             //  key={i}

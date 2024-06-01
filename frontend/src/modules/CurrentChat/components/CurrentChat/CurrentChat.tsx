@@ -11,19 +11,23 @@ interface CurrentChatProps {}
 
 const CurrentChat: React.FC<CurrentChatProps> = () => {
   const dispatch = useAppDispatch();
-  const { data } = useAppSelector((state) => state.currentChat);
-  const { currentChatId, currentUser } = useAppSelector((state) => state.root);
-  const secondMember = data?.members.find(
+  const { currentChat } = useAppSelector((state) => state.currentChat);
+  const { currentChatId, currentUser, isCreatedNewChat } = useAppSelector(
+    (state) => state.root
+  );
+  const secondMember = currentChat?.members.find(
     (member) => member.login !== currentUser.user?.login
   );
 
   React.useEffect(() => {
+    if (isCreatedNewChat) return;
+
     if (currentChatId) {
       dispatch(getCurrentChat(currentChatId));
     }
   }, [currentChatId]);
 
-  if (!data) return <NoChat />;
+  if (!currentChat) return <NoChat />;
 
   return (
     <>
@@ -34,7 +38,7 @@ const CurrentChat: React.FC<CurrentChatProps> = () => {
           width: 1,
           bgcolor: "background.paper",
         }}>
-        <Header secondMemberLogin={secondMember?.login} />
+        <Header login={secondMember?.login} />
         <ChatBlock />
         <WriteMessage chatId={currentChatId} />
       </Box>

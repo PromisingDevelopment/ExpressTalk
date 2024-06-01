@@ -10,7 +10,6 @@ interface InitialState {
     errorCode: number | null;
     list: ChatsListsObj | null;
   };
-
   sidebarOpen: boolean;
 }
 
@@ -21,7 +20,6 @@ const initialState: InitialState = {
     errorCode: null,
     list: null,
   },
-
   sidebarOpen: false,
 };
 

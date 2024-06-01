@@ -5,6 +5,7 @@ import { styled } from "@mui/material";
 import { Search } from "../Search";
 import { ChatModes } from "../ChatModes";
 import { ChatList } from "../ChatList";
+import CreateGroup from "CreateGroup";
 
 interface SidebarProps {}
 
@@ -21,28 +22,27 @@ const Sidebar: React.FC<SidebarProps> = () => {
   };
 
   React.useEffect(() => {
-    setTimeout(() => {
-      const headerHeight = headerRef.current?.offsetHeight;
-      const chatModesHeight = chatModesRef.current?.offsetHeight;
-      const searchHeight = searchRef.current?.offsetHeight;
+    const setHeight = () => {
+      setTimeout(() => {
+        const headerHeight = headerRef.current?.offsetHeight;
+        const chatModesHeight = chatModesRef.current?.offsetHeight;
+        const searchHeight = searchRef.current?.offsetHeight;
 
-      if (headerHeight && chatModesHeight && searchHeight) {
-        console.log(
-          headerHeight,
-          chatModesHeight,
-          searchHeight,
-          " = ",
-          headerHeight + chatModesHeight + searchHeight
-        );
-        setSubtractedHeight(headerHeight + chatModesHeight + searchHeight);
-      }
-    }, 0);
+        if (headerHeight && chatModesHeight && searchHeight) {
+          setSubtractedHeight(headerHeight + chatModesHeight + searchHeight);
+        }
+      }, 0);
+    };
+
+    window.addEventListener("resize", setHeight);
+    setHeight();
   });
 
   return (
     <>
       <Wrapper>
         <Header ref={headerRef} />
+        <CreateGroup />
         <SidebarContent>
           <ChatModes
             ref={chatModesRef}

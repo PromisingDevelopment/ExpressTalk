@@ -4,13 +4,13 @@ import { chatGetUrls } from "config";
 import { CurrentChat } from "../types/CurrentChat";
 
 interface InitialState {
-  data: CurrentChat | null;
+  currentChat: CurrentChat | null;
   status: "idle" | "loading" | "error" | "fulfilled";
   errorMessage: string | null;
 }
 
 const initialState: InitialState = {
-  data: null,
+  currentChat: null,
   status: "idle",
   errorMessage: null,
 };
@@ -18,12 +18,16 @@ const initialState: InitialState = {
 const currentChatSlice = createSlice({
   name: "@@currentChat",
   initialState,
-  reducers: {},
+  reducers: {
+    setCurrentChat: (state, action: PayloadAction<any>) => {
+      state.currentChat = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getCurrentChat.fulfilled, (state, action: PayloadAction<CurrentChat>) => {
         state.status = "fulfilled";
-        state.data = action.payload;
+        state.currentChat = action.payload;
       })
       .addCase(getCurrentChat.pending, (state) => {
         state.status = "loading";
@@ -52,6 +56,6 @@ export const getCurrentChat = createAsyncThunk<any, string>(
   }
 );
 
-export const {} = currentChatSlice.actions;
+export const { setCurrentChat } = currentChatSlice.actions;
 
 export default currentChatSlice.reducer;
