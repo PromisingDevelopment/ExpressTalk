@@ -4,15 +4,17 @@ import React from "react";
 interface CustomInputProps {
   label: string;
   name: string;
+  onChange?: any;
   sx?: SxProps;
 }
 
-const CustomInput: React.FC<CustomInputProps> = React.forwardRef(
-  ({ label, name, sx }, ref) => {
+const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
+  ({ label, name, sx, onChange }, ref) => {
     const theme = useTheme();
 
     return (
       <Box
+        onChange={onChange}
         ref={ref}
         component="input"
         placeholder={label}

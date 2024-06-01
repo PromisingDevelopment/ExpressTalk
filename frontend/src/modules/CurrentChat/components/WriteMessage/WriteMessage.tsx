@@ -3,12 +3,46 @@ import { Box, IconButton } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { CustomInput } from "components/CustomInput";
+import { privateChatSendMessage } from "wsConfig";
+import { useAppDispatch } from "hooks/redux";
+import { updateLastMessage } from "modules/Sidebar";
 
-interface WriteMessageProps {}
+interface WriteMessageProps {
+  chatId: string | null;
+}
 
-const WriteMessage: React.FC<WriteMessageProps> = () => {
+const WriteMessage: React.FC<WriteMessageProps> = ({ chatId }) => {
+  const writeMessageInputRef = React.useRef<HTMLInputElement>(null);
+  const dispatch = useAppDispatch();
+  const [isHiddenAttachFile, setIsHiddenAttachFile] = React.useState(false);
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const writeMessageInput = writeMessageInputRef.current;
+    const lastMessage = writeMessageInput?.value;
+
+    if (lastMessage && chatId) {
+      const createdAt = new Date().getTime();
+      console.log("send");
+      privateChatSendMessage(lastMessage, chatId, createdAt);
+
+      dispatch(updateLastMessage({ lastMessage, chatId }));
+      writeMessageInput.value = "";
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value !== "") {
+      setIsHiddenAttachFile(true);
+    } else {
+      setIsHiddenAttachFile(false);
+    }
+  };
+
   return (
     <Box
+      onSubmit={onSubmit}
       component="form"
       sx={{
         bgcolor: "#1F274E",
@@ -23,18 +57,29 @@ const WriteMessage: React.FC<WriteMessageProps> = () => {
           flexGrow: 1,
           position: "relative",
         }}>
-        <CustomInput label="Write a message" name="write-message-input" />
+        <CustomInput
+          onChange={handleInputChange}
+          ref={writeMessageInputRef}
+          label="Write a message"
+          name="write-message-input"
+        />
 
-        {/* When input isn't empty hide attach button */}
         <IconButton
-          sx={{
-            color: "#6A73A6",
-            position: "absolute",
-            top: "50%",
-            right: 10,
-            transform: "translateY(-50%)",
-            bgcolor: "#1F274E",
-          }}>
+          sx={[
+            {
+              color: "#6A73A6",
+              position: "absolute",
+              top: "50%",
+              right: 10,
+              transform: "translateY(-50%)",
+              bgcolor: "#1F274E",
+              transition: "opacity 0.3s ease 0s",
+            },
+            isHiddenAttachFile && {
+              opacity: 0,
+              pointerEvents: "none",
+            },
+          ]}>
           <AttachFileIcon
             sx={{
               fontSize: 30,

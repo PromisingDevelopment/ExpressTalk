@@ -30,6 +30,6 @@ const theme = createTheme({
   },
 });
 
-console.log(theme);
+//console.log(theme);
 
 export default theme;

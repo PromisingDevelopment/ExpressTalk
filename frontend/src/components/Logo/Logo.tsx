@@ -1,5 +1,6 @@
 import { Box, SxProps } from "@mui/material";
 import React from "react";
+import avatarImage from "assets/images/avatar.png";
 
 interface LogoProps {
   size: number;
@@ -10,8 +11,8 @@ interface LogoProps {
 const Logo: React.FC<LogoProps> = ({ src = "", size, isMain }) => {
   const mainLogoSize = {
     lg: size,
-    sm: 52,
-    xs: 45,
+    md: 45,
+    xs: 40,
   };
   const defaultLogoSize = {
     lg: size,
@@ -23,13 +24,13 @@ const Logo: React.FC<LogoProps> = ({ src = "", size, isMain }) => {
     <Box
       sx={[
         {
-          bgcolor: "#fff", // remove bg
           borderRadius: "50%",
           overflow: "hidden",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           color: "#fff",
+          flex: "0 0 auto",
         },
         isMain
           ? {
@@ -41,7 +42,12 @@ const Logo: React.FC<LogoProps> = ({ src = "", size, isMain }) => {
               height: defaultLogoSize,
             },
       ]}>
-      <Box src={src} component="img" alt="logo" />
+      <Box
+        sx={{ width: 1, height: 1 }}
+        src={src ? src : avatarImage}
+        component="img"
+        alt="logo"
+      />
     </Box>
   );
 };

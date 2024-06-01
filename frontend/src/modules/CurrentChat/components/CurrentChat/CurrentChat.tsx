@@ -4,18 +4,30 @@ import { Box } from "@mui/material";
 import { Header } from "../Header";
 import { ChatBlock } from "../ChatBlock";
 import { WriteMessage } from "../WriteMessage";
-import { connect } from "wsConfig";
+import { useAppDispatch, useAppSelector } from "hooks/redux";
+import { getCurrentChat } from "../../store/currentChatSlice";
 
 interface CurrentChatProps {}
 
 const CurrentChat: React.FC<CurrentChatProps> = () => {
-  const chat = {};
+  const dispatch = useAppDispatch();
+  const { currentChat } = useAppSelector((state) => state.currentChat);
+  const { currentChatId, currentUser, isCreatedNewChat } = useAppSelector(
+    (state) => state.root
+  );
+  const secondMember = currentChat?.members.find(
+    (member) => member.login !== currentUser.user?.login
+  );
 
   React.useEffect(() => {
-    connect("", "");
-  }, []);
+    if (isCreatedNewChat) return;
 
-  if (!chat) return <NoChat />;
+    if (currentChatId) {
+      dispatch(getCurrentChat(currentChatId));
+    }
+  }, [currentChatId]);
+
+  if (!currentChat) return <NoChat />;
 
   return (
     <>
@@ -26,9 +38,9 @@ const CurrentChat: React.FC<CurrentChatProps> = () => {
           width: 1,
           bgcolor: "background.paper",
         }}>
-        <Header />
+        <Header login={secondMember?.login} />
         <ChatBlock />
-        <WriteMessage />
+        <WriteMessage chatId={currentChatId} />
       </Box>
     </>
   );
