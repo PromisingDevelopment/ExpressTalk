@@ -5,7 +5,16 @@ import axios from "axios";
 
 let client: Client;
 
-export function connect(id: string, chatId: string) {
+export async function connect() {
+  let chatId = "29bdb87b-cce4-4844-985c-e1ace00674fb"
+  // try {
+  //   console.log("LOG OUT")
+  //
+  //   await axios.delete("http://localhost:8080/auth/log-out", { withCredentials: true });
+  // } catch (error) {
+  //   console.log("LOG OUT ERROR: " + error)
+  // }
+
   //const loginOrId = getUserlogin(id);
   const socket: WebSocket = new SockJS(wsServerURL);
 
@@ -16,15 +25,17 @@ export function connect(id: string, chatId: string) {
     onConnect: () => {
       console.log("onConnect");
 
-      client.subscribe(`/private_chats/${id}`, (message) => {
-        console.log("private_chat: ", message);
+      client.publish({
+        destination: "/app/private_chat/send_message",
+        body: JSON.stringify({
+          chatId, content: "hello", createdAt: new Date().getTime()
+        })
+      })
+      client.subscribe(`/private_chat/messages/${chatId}`, (message) => {
+        console.log("private_chat response: ", message);
       });
-      client.subscribe(`/private_chats/${id}/errors`, (message) => {
-        console.log("private_chat: ", message);
-      });
-
-      client.subscribe(`/chats/${chatId}`, (message) => {
-        console.log("chat: ", message);
+      client.subscribe(`/private_chat/messages/${chatId}/errors`, (message) => {
+        console.log("private_chat error: ", message);
       });
     },
     webSocketFactory: () => {
