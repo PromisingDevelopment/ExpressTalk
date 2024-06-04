@@ -11,10 +11,10 @@ interface CurrentChatProps {}
 
 const CurrentChat: React.FC<CurrentChatProps> = () => {
   const dispatch = useAppDispatch();
-  const { currentChat } = useAppSelector((state) => state.currentChat);
-  const { currentChatId, currentUser, isCreatedNewChat } = useAppSelector(
-    (state) => state.root
-  );
+  const currentChat = useAppSelector((state) => state.currentChat.currentChat);
+  const currentGroupChat = useAppSelector((state) => state.currentChat.currentGroupChat);
+  const { currentChatId, currentUser, isCreatedNewChat, currentChatType } =
+    useAppSelector((state) => state.root);
   const secondMember = currentChat?.members.find(
     (member) => member.login !== currentUser.user?.login
   );
@@ -23,11 +23,11 @@ const CurrentChat: React.FC<CurrentChatProps> = () => {
     if (isCreatedNewChat) return;
 
     if (currentChatId) {
-      dispatch(getCurrentChat(currentChatId));
+      dispatch(getCurrentChat({ id: currentChatId, type: currentChatType }));
     }
   }, [currentChatId]);
 
-  if (!currentChat) return <NoChat />;
+  if (!currentChat && !currentGroupChat) return <NoChat />;
 
   return (
     <>

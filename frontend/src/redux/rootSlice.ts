@@ -1,6 +1,7 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
-import { chatPostUrls, userUrls } from "config";
+import { userUrls } from "config";
+import { CurrentChatType } from "types/CurrentChatType";
 import { IUser } from "types/IUser";
 
 interface InitialState {
@@ -11,6 +12,7 @@ interface InitialState {
   };
   currentChatId: string | null;
   isCreatedNewChat: boolean;
+  currentChatType: CurrentChatType;
 }
 
 const initialState: InitialState = {
@@ -21,6 +23,7 @@ const initialState: InitialState = {
   },
   currentChatId: null,
   isCreatedNewChat: false,
+  currentChatType: "privateChat",
 };
 
 const rootSlice = createSlice({
@@ -32,6 +35,9 @@ const rootSlice = createSlice({
     },
     setIsCreatedNewChat: (state, action: PayloadAction<boolean>) => {
       state.isCreatedNewChat = action.payload;
+    },
+    setCurrentChatType: (state, action: PayloadAction<CurrentChatType>) => {
+      state.currentChatType = action.payload;
     },
   },
   extraReducers(builder) {
@@ -63,6 +69,7 @@ export const getCurrentUser = createAsyncThunk<any, void>(
   }
 );
 
-export const { setCurrentChatId, setIsCreatedNewChat } = rootSlice.actions;
+export const { setCurrentChatId, setIsCreatedNewChat, setCurrentChatType } =
+  rootSlice.actions;
 
 export default rootSlice.reducer;

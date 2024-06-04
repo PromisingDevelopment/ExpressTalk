@@ -80,6 +80,14 @@ export function SignUpButtons() {
 
       <br />
 
+      {users.map((user, i) => (
+        <Button key={i} sx={{ color: "#fff" }} onClick={() => signInUser(user.email)}>
+          login {i + 1}
+        </Button>
+      ))}
+
+      <br />
+
       <TextField sx={{ border: 1 }} inputRef={inputRef} type="text" />
     </div>
   );

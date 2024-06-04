@@ -8,11 +8,41 @@ interface ChatBlockProps {}
 
 const ChatBlock: React.FC<ChatBlockProps> = () => {
   const [height, setHeight] = React.useState<number | null>(null);
-  const { currentChat, errorMessage } = useAppSelector((state) => state.currentChat);
+  const { currentChat, currentGroupChat, errorMessage } = useAppSelector(
+    (state) => state.currentChat
+  );
   const { user } = useAppSelector((state) => state.root.currentUser);
   const chatBlockRef = React.useRef<HTMLDivElement | null>(null);
   const dispatch = useAppDispatch();
   const { currentChatId } = useAppSelector((state) => state.root);
+
+  const privateChatLayout = (
+    <>
+      {user &&
+        currentChat &&
+        currentChat.messages.map((message, i) => (
+          <Message
+            key={message.content + message.createdAt + i}
+            {...message}
+            isMine={message.senderId === user.id}
+          />
+        ))}
+    </>
+  );
+
+  const groupChatLayout = (
+    <>
+      {user &&
+        currentGroupChat &&
+        currentGroupChat.messages.map((message, i) => (
+          <Message
+            key={message.content + message.createdAt + i}
+            {...message}
+            isMine={message.senderId === user.id}
+          />
+        ))}
+    </>
+  );
 
   React.useEffect(() => {
     const getListHeight = () => {
@@ -33,7 +63,7 @@ const ChatBlock: React.FC<ChatBlockProps> = () => {
     if (chatBlock) {
       chatBlock.scrollTop = chatBlock.scrollHeight;
     }
-  }, [chatBlockRef.current, currentChat]);
+  }, [chatBlockRef.current]);
 
   React.useEffect(() => {
     if (currentChat && currentChat.messages.length > 0 && currentChatId) {
@@ -55,16 +85,6 @@ const ChatBlock: React.FC<ChatBlockProps> = () => {
         overflowY: "auto",
       }}>
       {errorMessage && <Typography>{errorMessage}</Typography>}
-
-      {user &&
-        currentChat &&
-        currentChat.messages.map((message, i) => (
-          <Message
-            key={message.content + message.createdAt + i}
-            {...message}
-            isMine={message.senderId === user.id}
-          />
-        ))}
     </Box>
   );
 };
