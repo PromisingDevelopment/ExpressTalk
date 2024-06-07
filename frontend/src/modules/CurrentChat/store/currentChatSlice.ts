@@ -59,7 +59,6 @@ const currentChatSlice = createSlice({
             state.currentChat = action.payload.data as CurrentPrivateChat;
           }
           if (type === "groupChat") {
-            console.log(action.payload.data);
             state.currentGroupChat = action.payload.data as GroupChat;
           }
         }

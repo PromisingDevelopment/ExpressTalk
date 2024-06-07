@@ -31,6 +31,7 @@ const WriteMessage: React.FC<WriteMessageProps> = ({ chatId }) => {
       } else {
         sendGroupMessage(lastMessage, chatId, createdAt);
       }
+
       dispatch(updateLastMessage({ lastMessage, chatId }));
       writeMessageInput.value = "";
     }

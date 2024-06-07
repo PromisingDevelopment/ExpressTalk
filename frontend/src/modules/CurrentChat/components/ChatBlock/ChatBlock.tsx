@@ -8,15 +8,16 @@ interface ChatBlockProps {}
 
 const ChatBlock: React.FC<ChatBlockProps> = () => {
   const [height, setHeight] = React.useState<number | null>(null);
+  const currentChatType = useAppSelector((state) => state.root.currentChatType);
   const { currentChat, currentGroupChat, errorMessage } = useAppSelector(
     (state) => state.currentChat
   );
   const { user } = useAppSelector((state) => state.root.currentUser);
   const chatBlockRef = React.useRef<HTMLDivElement | null>(null);
-  const dispatch = useAppDispatch();
   const { currentChatId } = useAppSelector((state) => state.root);
+  const dispatch = useAppDispatch();
 
-  const privateChatLayout = (
+  const privateLayout = (
     <>
       {user &&
         currentChat &&
@@ -30,7 +31,7 @@ const ChatBlock: React.FC<ChatBlockProps> = () => {
     </>
   );
 
-  const groupChatLayout = (
+  const groupLayout = (
     <>
       {user &&
         currentGroupChat &&
@@ -85,6 +86,7 @@ const ChatBlock: React.FC<ChatBlockProps> = () => {
         overflowY: "auto",
       }}>
       {errorMessage && <Typography>{errorMessage}</Typography>}
+      {currentChatType === "privateChat" ? privateLayout : groupLayout}
     </Box>
   );
 };

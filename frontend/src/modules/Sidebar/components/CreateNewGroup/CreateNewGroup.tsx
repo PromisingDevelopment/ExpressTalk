@@ -2,7 +2,7 @@ import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import { createGroupChat } from "axios/createGroupChat";
 import { useAppDispatch, useAppSelector } from "hooks/redux";
 import { setCurrentChat } from "modules/CurrentChat/store/currentChatSlice";
-import { ModalWrapper } from "modules/Sidebar/hoc/ModalWrapper";
+import { ModalLayout } from "components/ModalLayout";
 import { setSidebarOpen } from "modules/Sidebar/store/sidebarSlice";
 import React from "react";
 import {
@@ -37,7 +37,7 @@ const CreateNewGroup: React.FC<CreateNewGroupProps> = ({ switchChatMode }) => {
   };
 
   return (
-    <ModalWrapper
+    <ModalLayout
       Icon={GroupAddIcon}
       inputLabel="Input name of the group"
       inputName="input-name-new-group"

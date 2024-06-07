@@ -1,7 +1,7 @@
 import { IconButton, SxProps } from "@mui/material";
 import React from "react";
 
-interface CustomIconButtonProps {
+interface ModeButtonProps {
   children: React.ReactNode;
   sx?: SxProps;
   onClick?: any;
@@ -9,7 +9,7 @@ interface CustomIconButtonProps {
   borderRight?: boolean;
 }
 
-const CustomIconButton: React.FC<CustomIconButtonProps> = ({
+const ModeButton: React.FC<ModeButtonProps> = ({
   children,
   sx,
   fontSize = 24,
@@ -34,4 +34,4 @@ const CustomIconButton: React.FC<CustomIconButtonProps> = ({
   );
 };
 
-export { CustomIconButton };
+export { ModeButton };

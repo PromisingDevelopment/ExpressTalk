@@ -1,10 +1,10 @@
-import { Button, Modal, Typography, styled, useTheme } from "@mui/material";
-import HeaderIconButton from "modules/Sidebar/UI/HeaderIconButton";
+import { Button, Modal, Typography, styled } from "@mui/material";
+import CustomIconButton from "UI/CustomIconButton";
 import React from "react";
 import ModalContent from "../UI/ModalContent";
 import { CustomInput } from "components/CustomInput";
 
-interface ModalWrapperProps {
+interface ModalLayoutProps {
   onSubmit: any;
   label: string;
   inputLabel: string;
@@ -12,7 +12,7 @@ interface ModalWrapperProps {
   Icon: any;
 }
 
-const ModalWrapper: React.FC<ModalWrapperProps> = ({
+const ModalLayout: React.FC<ModalLayoutProps> = ({
   onSubmit,
   label,
   inputLabel,
@@ -57,7 +57,7 @@ const ModalWrapper: React.FC<ModalWrapperProps> = ({
 
   return (
     <>
-      <HeaderIconButton label={label} onClick={onOpenModal} Icon={Icon} />
+      <CustomIconButton label={label} onClick={onOpenModal} Icon={Icon} />
 
       <Modal open={openModal} onClose={onCloseModal}>
         <ModalContent title={label} onCloseModal={onCloseModal}>
@@ -88,8 +88,6 @@ const ModalWrapper: React.FC<ModalWrapperProps> = ({
   );
 };
 
-export { ModalWrapper };
-
 const SubmitButton = styled(Button)(({ theme }) =>
   theme.unstable_sx({
     bgcolor: "#fff",
@@ -111,3 +109,5 @@ const SubmitButton = styled(Button)(({ theme }) =>
     },
   })
 );
+
+export { ModalLayout };

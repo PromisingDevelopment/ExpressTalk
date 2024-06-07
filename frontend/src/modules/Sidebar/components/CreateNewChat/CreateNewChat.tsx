@@ -8,10 +8,10 @@ import {
 } from "redux/rootSlice";
 import { connect } from "wsConfig";
 import { setSidebarOpen } from "../../store/sidebarSlice";
-import { getSecondMember } from "axios/getSecondMember";
+import { getMemberByLogin } from "axios/getMemberByLogin";
 import { createPrivateChat } from "axios/createPrivateChat";
 import { setCurrentChat } from "modules/CurrentChat/store/currentChatSlice";
-import { ModalWrapper } from "modules/Sidebar/hoc/ModalWrapper";
+import { ModalLayout } from "components/ModalLayout";
 
 interface CreateNewChatProps {
   switchChatMode: any;
@@ -22,7 +22,7 @@ const CreateNewChat: React.FC<CreateNewChatProps> = ({ switchChatMode }) => {
   const { currentUser } = useAppSelector((state) => state.root);
 
   const onSubmit = async (input: string) => {
-    const secondMember = await getSecondMember(input);
+    const secondMember = await getMemberByLogin(input);
     const currentUserId = currentUser.user?.id;
 
     if (secondMember.id) {
@@ -42,7 +42,7 @@ const CreateNewChat: React.FC<CreateNewChatProps> = ({ switchChatMode }) => {
   };
 
   return (
-    <ModalWrapper
+    <ModalLayout
       Icon={CreateIcon}
       label="Create a new chat"
       inputLabel="Input user id or login"

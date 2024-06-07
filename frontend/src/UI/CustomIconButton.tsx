@@ -1,13 +1,13 @@
 import { IconButton, Tooltip } from "@mui/material";
 import React from "react";
 
-interface HeaderIconButtonProps {
+interface CustomIconButtonProps {
   Icon: React.FC;
   label: string;
   onClick: any;
 }
 
-const HeaderIconButton: React.FC<HeaderIconButtonProps> = ({ Icon, label, onClick }) => {
+const CustomIconButton: React.FC<CustomIconButtonProps> = ({ Icon, label, onClick }) => {
   return (
     <Tooltip enterDelay={500} leaveDelay={200} title={label}>
       <IconButton
@@ -24,4 +24,4 @@ const HeaderIconButton: React.FC<HeaderIconButtonProps> = ({ Icon, label, onClic
   );
 };
 
-export default HeaderIconButton;
+export default CustomIconButton;
