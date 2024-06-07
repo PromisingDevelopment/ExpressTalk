@@ -3,8 +3,8 @@ import { Box, IconButton } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { CustomInput } from "components/CustomInput";
-import { privateChatSendMessage } from "wsConfig";
-import { useAppDispatch } from "hooks/redux";
+import { privateChatSendMessage, sendGroupMessage } from "wsConfig";
+import { useAppDispatch, useAppSelector } from "hooks/redux";
 import { updateLastMessage } from "modules/Sidebar";
 
 interface WriteMessageProps {
@@ -12,9 +12,10 @@ interface WriteMessageProps {
 }
 
 const WriteMessage: React.FC<WriteMessageProps> = ({ chatId }) => {
+  const [isHiddenAttachFile, setIsHiddenAttachFile] = React.useState(false);
   const writeMessageInputRef = React.useRef<HTMLInputElement>(null);
   const dispatch = useAppDispatch();
-  const [isHiddenAttachFile, setIsHiddenAttachFile] = React.useState(false);
+  const currentChatType = useAppSelector((state) => state.root.currentChatType);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -24,20 +25,19 @@ const WriteMessage: React.FC<WriteMessageProps> = ({ chatId }) => {
 
     if (lastMessage && chatId) {
       const createdAt = new Date().getTime();
-      console.log("send");
-      privateChatSendMessage(lastMessage, chatId, createdAt);
 
+      if (currentChatType === "privateChat") {
+        privateChatSendMessage(lastMessage, chatId, createdAt);
+      } else {
+        sendGroupMessage(lastMessage, chatId, createdAt);
+      }
       dispatch(updateLastMessage({ lastMessage, chatId }));
       writeMessageInput.value = "";
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value !== "") {
-      setIsHiddenAttachFile(true);
-    } else {
-      setIsHiddenAttachFile(false);
-    }
+    setIsHiddenAttachFile(e.target.value !== "");
   };
 
   return (

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Wrapper } from "../Wrapper";
 import { Header } from "../Header";
 import { styled } from "@mui/material";
@@ -16,10 +16,6 @@ const Sidebar: React.FC<SidebarProps> = () => {
   const chatModesRef = React.useRef<HTMLDivElement | null>(null);
   const searchRef = React.useRef<HTMLFormElement | null>(null);
   const [subtractedHeight, setSubtractedHeight] = React.useState(0);
-
-  const switchChatMode = (i: number) => {
-    setCurrentChatMode(i);
-  };
 
   React.useEffect(() => {
     const setHeight = () => {
@@ -41,12 +37,11 @@ const Sidebar: React.FC<SidebarProps> = () => {
   return (
     <>
       <Wrapper>
-        <Header ref={headerRef} />
-        <CreateGroup />
+        <Header switchChatMode={setCurrentChatMode} ref={headerRef} />
         <SidebarContent>
           <ChatModes
             ref={chatModesRef}
-            switchChatMode={switchChatMode}
+            switchChatMode={setCurrentChatMode}
             currentChatMode={currentChatMode}
           />
           <ChatList

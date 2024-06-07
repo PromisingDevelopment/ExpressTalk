@@ -1,15 +1,23 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "hooks/redux";
-import { getChatsList, setSidebarOpen } from "modules/Sidebar/store/sidebarSlice";
+import {
+  getChatsList,
+  resetChatListError,
+  setSidebarOpen,
+} from "../../store/sidebarSlice";
 import { useNavigate } from "react-router-dom";
 import { GroupChatItem } from "../GroupChatItem";
 import { PrivateChatItem } from "../PrivateChatItem";
 import { connect } from "wsConfig";
-import { findPrivateChatId } from "helpers/findPrivateChatId";
-import { setCurrentChatId, setIsCreatedNewChat } from "redux/rootSlice";
+import {
+  setCurrentChatId,
+  setCurrentChatType,
+  setIsCreatedNewChat,
+} from "redux/rootSlice";
 import { PrivateChat } from "modules/Sidebar/types/PrivateChat";
-import { GroupChat } from "modules/Sidebar/types/GroupChat";
+import { GroupChat } from "types/GroupChat";
+import { CurrentChatType } from "types/CurrentChatType";
 
 interface ChatListProps {
   currentChatMode: number;
@@ -22,29 +30,34 @@ const ChatList: React.FC<ChatListProps> = ({
   filterChatsValue,
   subtractedHeight,
 }) => {
-  const [listHeight, setListHeight] = React.useState<number | null>(null);
-  const [chatId, setChatId] = React.useState<string>();
-  const [currentChatIndex, setCurrentChatIndex] = React.useState<number | null>(null);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const [chatId, setChatId] = React.useState<string>();
+  const [listHeight, setListHeight] = React.useState<number | null>(null);
+  const [groupIndex, setGroupIndex] = React.useState<number | null>(null);
   const [isPrivateChatsList, setIsPrivateChatsList] = React.useState(true);
-  const { chatsList } = useAppSelector((state) => state.sidebar);
-  const { user: currentUserUser, errorCode: currentUserErrorCode } = useAppSelector(
-    (state) => state.root.currentUser
-  );
+  const [isPrivateConnect, setIsPrivateConnect] = React.useState<boolean>(true);
+  const [currentChatIndex, setCurrentChatIndex] = React.useState<number | null>(null);
 
+  const { chatsList } = useAppSelector((state) => state.sidebar);
   const { currentChatId, isCreatedNewChat } = useAppSelector((state) => state.root);
-  const getFilteredChats = (type: "private" | "group") => {
-    if (type === "private") {
+  const currentUser = useAppSelector((state) => state.root.currentUser);
+
+  const getFilteredChats = (type: CurrentChatType) => {
+    if (type === "privateChat") {
       return chatsList.list?.privateChats.filter((chat) => {
         return chat.receiverLogin.includes(filterChatsValue);
       });
-    } else {
+    }
+    if (type === "groupChat") {
       return chatsList.list?.groupChats.filter((chat) => {
         return chat.name.includes(filterChatsValue);
       });
     }
   };
+
+  const privateChatsList = getFilteredChats("privateChat") as PrivateChat[];
+  const groupChatsList = getFilteredChats("groupChat") as GroupChat[];
 
   React.useEffect(() => {
     const getListHeight = () => {
@@ -62,29 +75,35 @@ const ChatList: React.FC<ChatListProps> = ({
 
   React.useEffect(() => {
     if (isCreatedNewChat) {
+      setCurrentChatIndex(null);
+      setGroupIndex(null);
       dispatch(getChatsList());
       dispatch(setIsCreatedNewChat(false));
     }
   }, [isCreatedNewChat]);
 
   React.useEffect(() => {
-    if (chatsList.errorCode === 403 || currentUserErrorCode === 403) {
+    if (chatsList.errorCode === 403) {
       navigate("/auth/home");
+
+      return () => {
+        dispatch(resetChatListError());
+      };
     }
-  }, [chatsList.errorCode, currentUserErrorCode]);
+  }, [chatsList.errorCode]);
 
   React.useEffect(() => {
     setIsPrivateChatsList(currentChatMode === 0);
   }, [currentChatMode]);
 
   React.useEffect(() => {
-    const currentUserId = currentUserUser?.id;
+    const currentUserId = currentUser.user?.id;
 
     if (chatId && currentUserId) {
       dispatch(setCurrentChatId(chatId));
-      connect(currentUserId, chatId);
+      connect(currentUserId, chatId, isPrivateConnect);
     }
-  }, [currentUserUser, chatId]);
+  }, [currentUser.user, chatId]);
 
   const setEmptyContent = () => {
     if (isPrivateChatsList) {
@@ -106,17 +125,26 @@ const ChatList: React.FC<ChatListProps> = ({
     }
   };
 
-  const onClickChat = async (i: number, login: string) => {
+  const onClickChat = async (i: number, id: string) => {
     if (i === currentChatIndex) return;
 
     setCurrentChatIndex(i);
-
-    if (!chatsList.list?.privateChats) return;
-
-    const id = findPrivateChatId(chatsList.list.privateChats, login);
+    setGroupIndex(null);
+    setIsPrivateConnect(true);
     setChatId(id);
-
     dispatch(setSidebarOpen(false));
+    dispatch(setCurrentChatType("privateChat"));
+  };
+
+  const onClickGroup = async (i: number, id: string) => {
+    if (i === groupIndex) return;
+
+    setGroupIndex(i);
+    setCurrentChatIndex(null);
+    setIsPrivateConnect(false);
+    setChatId(id);
+    dispatch(setSidebarOpen(false));
+    dispatch(setCurrentChatType("groupChat"));
   };
 
   return (
@@ -138,22 +166,21 @@ const ChatList: React.FC<ChatListProps> = ({
       {setEmptyContent()}
 
       {isPrivateChatsList
-        ? (getFilteredChats("private") as PrivateChat[])?.map((chat, i) => (
+        ? privateChatsList?.map((chat, i) => (
             <PrivateChatItem
-              onClick={() => onClickChat(i, chat.receiverLogin)}
+              onClick={() => onClickChat(i, chat.id)}
               key={i}
               {...chat}
               active={currentChatIndex === i || currentChatId === chat.id}
             />
           ))
-        : (getFilteredChats("group") as GroupChat[])?.map((chat, i) => (
-            <div key={i}></div>
-            //<GroupChatItem
-            //  onClick={() => onClickChat(i)}
-            //  key={i}
-            //  {...chat}
-            //  active={currentChatIndex === i}
-            ///>
+        : groupChatsList?.map((chat, i) => (
+            <GroupChatItem
+              onClick={() => onClickGroup(i, chat.id)}
+              key={i}
+              {...chat}
+              active={groupIndex === i || currentChatId === chat.id}
+            />
           ))}
     </Box>
   );
