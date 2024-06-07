@@ -14,9 +14,11 @@ public class PrivateChat {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "privateChat", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<PrivateChatMessage> messages = new LinkedList<>();
 
+    @ToString.Exclude
     @ManyToMany(mappedBy = "privateChats", fetch = FetchType.EAGER)
     private List<User> members = new ArrayList<>();
 }

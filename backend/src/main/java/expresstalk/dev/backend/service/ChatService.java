@@ -1,10 +1,9 @@
 package expresstalk.dev.backend.service;
 
 import expresstalk.dev.backend.dto.GetUserChatsDto;
+import expresstalk.dev.backend.dto.GroupChatClientDto;
 import expresstalk.dev.backend.dto.PrivateChatClientDto;
-import expresstalk.dev.backend.entity.PrivateChat;
-import expresstalk.dev.backend.entity.PrivateChatMessage;
-import expresstalk.dev.backend.entity.User;
+import expresstalk.dev.backend.entity.*;
 import expresstalk.dev.backend.utils.Converter;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -53,7 +52,21 @@ public class ChatService {
             );
         }
 
-        GetUserChatsDto getUserChatsDto = new GetUserChatsDto(privateChatClientDtos, user.getGroupChats());
+        List<GroupChatClientDto> groupChatClientDtos = new ArrayList<>();
+        for(GroupChat groupChat : user.getGroupChats()) {
+            List<GroupChatMessage> messages = groupChat.getMessages();
+            String lastMessage = messages.size() == 0 ? "" : messages.getLast().getContent();
+
+            groupChatClientDtos.add(
+                    new GroupChatClientDto(
+                            groupChat.getId(),
+                            groupChat.getName(),
+                            lastMessage
+                    )
+            );
+        }
+
+        GetUserChatsDto getUserChatsDto = new GetUserChatsDto(privateChatClientDtos, groupChatClientDtos);
 
         return getUserChatsDto;
     }

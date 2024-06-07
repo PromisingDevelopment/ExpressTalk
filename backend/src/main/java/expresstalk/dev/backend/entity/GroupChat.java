@@ -1,10 +1,7 @@
 package expresstalk.dev.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -25,12 +22,15 @@ public class GroupChat {
     @Column
     private String name;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "groupChat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GroupChatMessage> messages = new LinkedList<>();
 
+    @ToString.Exclude
     @ManyToMany(mappedBy = "groupChats")
     private List<User> members = new ArrayList<>();
 
+    @ToString.Exclude
     @ManyToMany(mappedBy = "administratedGroupChats")
     private List<User> admins = new ArrayList<>();
 }

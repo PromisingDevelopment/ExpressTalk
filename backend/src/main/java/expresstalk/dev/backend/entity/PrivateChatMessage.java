@@ -3,10 +3,7 @@ package expresstalk.dev.backend.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 import java.util.UUID;
@@ -37,6 +34,7 @@ public class PrivateChatMessage {
     @Column(nullable = false)
     private Date createdAt;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "private_chats_id", referencedColumnName = "id")
     @JsonIgnore
