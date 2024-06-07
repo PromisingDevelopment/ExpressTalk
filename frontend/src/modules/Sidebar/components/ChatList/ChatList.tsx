@@ -15,8 +15,8 @@ import {
   setCurrentChatType,
   setIsCreatedNewChat,
 } from "redux/rootSlice";
-import { PrivateChat } from "modules/Sidebar/types/PrivateChat";
-import { GroupChat } from "types/GroupChat";
+import { PrivateChatListItem } from "modules/Sidebar/types/PrivateChatListItem";
+import { GroupChatListItem } from "../../types/GroupChatListItem";
 import { CurrentChatType } from "types/CurrentChatType";
 
 interface ChatListProps {
@@ -56,8 +56,8 @@ const ChatList: React.FC<ChatListProps> = ({
     }
   };
 
-  const privateChatsList = getFilteredChats("privateChat") as PrivateChat[];
-  const groupChatsList = getFilteredChats("groupChat") as GroupChat[];
+  const privateChatsList = getFilteredChats("privateChat") as PrivateChatListItem[];
+  const groupChatsList = getFilteredChats("groupChat") as GroupChatListItem[];
 
   React.useEffect(() => {
     const getListHeight = () => {
