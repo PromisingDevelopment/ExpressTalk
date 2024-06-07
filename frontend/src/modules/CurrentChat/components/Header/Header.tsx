@@ -4,6 +4,7 @@ import { Logo } from "../../../../components/Logo";
 import { BurgerMenu } from "../BurgerMenu";
 import { useAppSelector } from "hooks/redux";
 import { AddMember } from "../AddMember";
+import { GroupMembersInfo } from "../GroupMembersInfo";
 
 interface HeaderProps {
   login?: string;
@@ -30,10 +31,7 @@ const Header: React.FC<HeaderProps> = ({ login }) => {
       <Logo isMain size={52} />
       <div style={{ flexGrow: 1 }}>
         <Title>{currentGroupChat.name}</Title>
-        <p>
-          {currentGroupChat.members.length}{" "}
-          {currentGroupChat.members.length === 1 ? "member" : "members"}
-        </p>
+        <GroupMembersInfo members={currentGroupChat.members} />
       </div>
       <AddMember />
     </>
@@ -58,6 +56,7 @@ const Title = styled("h3")`
 
 const HeaderWrapper = styled("div")(({ theme }) =>
   theme.unstable_sx({
+    position: "relative",
     display: "flex",
     gap: 1.5,
     alignItems: "center",
