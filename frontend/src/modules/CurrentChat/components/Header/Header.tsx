@@ -1,9 +1,9 @@
-import { Box, Typography, styled } from "@mui/material";
+import { styled } from "@mui/material";
 import React from "react";
 import { Logo } from "../../../../components/Logo";
 import { BurgerMenu } from "../BurgerMenu";
 import { useAppSelector } from "hooks/redux";
-import { isCurrentGroupChat } from "helpers/isCurrentGroupChat";
+import { AddMember } from "../AddMember";
 
 interface HeaderProps {
   login?: string;
@@ -25,19 +25,18 @@ const Header: React.FC<HeaderProps> = ({ login }) => {
     </>
   );
 
-  const groupLayout = currentGroupChat ? (
+  const groupLayout = currentGroupChat && (
     <>
       <Logo isMain size={52} />
-      <div>
+      <div style={{ flexGrow: 1 }}>
         <Title>{currentGroupChat.name}</Title>
         <p>
           {currentGroupChat.members.length}{" "}
           {currentGroupChat.members.length === 1 ? "member" : "members"}
         </p>
       </div>
+      <AddMember />
     </>
-  ) : (
-    <Title>Group</Title>
   );
 
   return (
