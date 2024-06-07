@@ -1,8 +1,8 @@
 import { Box, Button, Modal, Typography, styled } from "@mui/material";
 import React from "react";
 import LogoutIcon from "@mui/icons-material/Logout";
-import HeaderIconButton from "modules/Sidebar/UI/HeaderIconButton";
-import ModalContent from "modules/Sidebar/UI/ModalContent";
+import CustomIconButton from "UI/CustomIconButton";
+import ModalContent from "UI/ModalContent";
 import { useAppDispatch } from "hooks/redux";
 import { logout } from "modules/Sidebar/store/sidebarSlice";
 
@@ -29,7 +29,7 @@ const Logout: React.FC<LogoutProps> = () => {
 
   return (
     <>
-      <HeaderIconButton
+      <CustomIconButton
         Icon={LogoutIcon}
         label="Logout"
         onClick={onClickButtonIconLogout}

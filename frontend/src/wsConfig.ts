@@ -17,7 +17,7 @@ export function connect(userId: string, chatId: string, isPrivate: boolean) {
     client.subscribe(`/group_chat/anon_messages/${chatId}`, (message) => {
       console.log("group_chat/anon_messages: ", JSON.parse(message.body));
     });
-    client.subscribe(`/group_chats/updatedMembers/${chatId}`, (message) => {
+    client.subscribe(`/group_chats/updated_members/${chatId}`, (message) => {
       console.log("group_chats/updatedMembers: ", JSON.parse(message.body));
     });
     client.subscribe(`/group_chat/add/${chatId}/errors`, (message) => {
@@ -33,8 +33,8 @@ export function connect(userId: string, chatId: string, isPrivate: boolean) {
 
   const onConnectPrivate = () => {
     client.subscribe(`/private_chat/messages/${chatId}`, (message) => {
-      store.dispatch(getCurrentChat({ id: chatId, type: "privateChat" }));
       console.log(message);
+      store.dispatch(getCurrentChat({ id: chatId, type: "privateChat" }));
     });
     client.subscribe(`/private_chat/messages/${chatId}/errors`, (message) => {
       console.log("private_chat error: ", JSON.parse(message.body));
@@ -78,13 +78,14 @@ export function privateChatSendMessage(
 
 export function addGroupMember(chatId: string, memberId: string) {
   client.publish({
-    destination: `app/group_chat/add`,
+    destination: `/app/group_chat/add`,
     body: JSON.stringify({
       chatId,
       memberId,
     }),
   });
 }
+
 export function sendGroupMessage(content: string, chatId: string, createdAt: number) {
   client.publish({
     destination: `/app/group_chat/send_message`,

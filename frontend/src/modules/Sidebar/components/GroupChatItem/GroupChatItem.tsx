@@ -14,11 +14,9 @@ interface GroupChatItemProps {
 }
 
 const GroupChatItem: React.FC<GroupChatItemProps> = (props) => {
-  console.log(props);
   const { members, messages, name, active, onClick } = props;
 
   const getLastMessage = () => {
-    console.log(messages.length);
     if (!messages.length) {
       return "Write first message! :3";
     }

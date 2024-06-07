@@ -1,8 +1,8 @@
 import React from "react";
 import { Box } from "@mui/material";
-import { CustomIconButton } from "../CustomIconButton";
 import ChatIcon from "@mui/icons-material/ChatOutlined";
 import PeopleIcon from "@mui/icons-material/PeopleAltOutlined";
+import { ModeButton } from "../ModeButton";
 
 interface ChatModesProps {
   currentChatMode: number;
@@ -28,7 +28,7 @@ const ChatModes = React.forwardRef<HTMLDivElement, ChatModesProps>(
           bgcolor: "#1F274E",
         }}>
         {chatModesIcons.map((Icon, i) => (
-          <CustomIconButton
+          <ModeButton
             key={i}
             onClick={() => switchChatMode(i)}
             borderRight={i == 0}
@@ -42,7 +42,7 @@ const ChatModes = React.forwardRef<HTMLDivElement, ChatModesProps>(
               height: 56,
             }}>
             <Icon />
-          </CustomIconButton>
+          </ModeButton>
         ))}
       </Box>
     );

@@ -69,29 +69,27 @@ const StyledWrapper = styled("div")(
   })
 );
 
-const CenteredWrapper = styled("div")(
-  ({ theme: { palette, spacing, shape, breakpoints } }) => ({
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    maxWidth: 600,
-    width: "100%",
-    transform: "translate(-50%, -50%)",
-    padding: spacing(0, 2),
-    "@media (max-height: 400px)": {
-      position: "static",
-      maxWidth: "100%",
-      paddingTop: 30,
-      paddingBottom: 30,
-      transform: "translate(0, 0)",
-      overflowY: "auto",
-      height: "100%",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "start",
-    },
-  })
-);
+const CenteredWrapper = styled("div")(({ theme: { spacing } }) => ({
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  maxWidth: 600,
+  width: "100%",
+  transform: "translate(-50%, -50%)",
+  padding: spacing(0, 2),
+  "@media (max-height: 400px)": {
+    position: "static",
+    maxWidth: "100%",
+    paddingTop: 30,
+    paddingBottom: 30,
+    transform: "translate(0, 0)",
+    overflowY: "auto",
+    height: "100%",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "start",
+  },
+}));
 
 const CloseButton = styled(IconButton)`
   position: absolute;
