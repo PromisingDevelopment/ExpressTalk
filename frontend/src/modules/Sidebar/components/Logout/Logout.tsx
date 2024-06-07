@@ -5,12 +5,14 @@ import CustomIconButton from "UI/CustomIconButton";
 import ModalContent from "UI/ModalContent";
 import { useAppDispatch } from "hooks/redux";
 import { logout } from "modules/Sidebar/store/sidebarSlice";
+import { useNavigate } from "react-router-dom";
 
 interface LogoutProps {}
 
 const Logout: React.FC<LogoutProps> = () => {
   const [openModal, setOpenModal] = React.useState(false);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const onOpenModal = () => {
     setOpenModal(true);
@@ -19,21 +21,19 @@ const Logout: React.FC<LogoutProps> = () => {
     setOpenModal(false);
   };
 
-  const onClickButtonIconLogout = () => {
+  const onClickLogout = () => {
     onOpenModal();
   };
 
   const onLogout = () => {
     dispatch(logout());
+    console.log("navigate");
+    navigate("/auth/home");
   };
 
   return (
     <>
-      <CustomIconButton
-        Icon={LogoutIcon}
-        label="Logout"
-        onClick={onClickButtonIconLogout}
-      />
+      <CustomIconButton Icon={LogoutIcon} label="Logout" onClick={onClickLogout} />
       <Modal open={openModal} onClose={onCloseModal}>
         <ModalContent onCloseModal={onCloseModal} title="Are you sure you want to logout">
           <Box sx={{ display: "flex", gap: 2 }}>
