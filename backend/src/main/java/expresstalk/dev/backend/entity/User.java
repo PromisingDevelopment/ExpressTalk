@@ -1,6 +1,8 @@
 package expresstalk.dev.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import expresstalk.dev.backend.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Table(name = "users")
 @RequiredArgsConstructor
 @NoArgsConstructor
@@ -45,6 +48,7 @@ public class User {
     @Column(nullable = false, columnDefinition = "varchar(7) default 'ONLINE'")
     private UserStatus status;
 
+    @ToString.Exclude
     @ManyToMany
     @JoinTable(
             name = "user_private_chats",
@@ -54,6 +58,7 @@ public class User {
     @JsonIgnore
     private List<PrivateChat> privateChats = new LinkedList<>();
 
+    @ToString.Exclude
     @ManyToMany
     @JoinTable(
             name = "user_group_chats",
@@ -63,6 +68,7 @@ public class User {
     @JsonIgnore
     private List<GroupChat> groupChats = new LinkedList<>();
 
+    @ToString.Exclude
     @ManyToMany
     @JoinTable(
             name = "user_administrated_group_chats",

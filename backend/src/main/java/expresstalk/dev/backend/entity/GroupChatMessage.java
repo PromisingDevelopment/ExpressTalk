@@ -1,15 +1,15 @@
 package expresstalk.dev.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 import java.util.UUID;
 
 @Entity
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Table(name = "group_chat_messages")
 @RequiredArgsConstructor
 @NoArgsConstructor
@@ -31,6 +31,7 @@ public class GroupChatMessage {
     @Column(nullable = false)
     private Date createdAt;
 
+    @ToString.Exclude
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "group_chats_id", referencedColumnName = "id")
     private GroupChat groupChat;

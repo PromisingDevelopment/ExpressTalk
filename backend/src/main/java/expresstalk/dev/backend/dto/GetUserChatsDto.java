@@ -6,6 +6,6 @@ import java.util.List;
 
 public record GetUserChatsDto(
         List<PrivateChatClientDto> privateChats,
-        List<GroupChat> groupChats
+        List<GroupChatClientDto> groupChats
 ) {
 }

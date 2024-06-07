@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -183,13 +184,12 @@ public class GroupChatController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping ("/{chatStrId}")
     @ResponseBody
-    public GroupChat getGroupChatRoom(@PathVariable String chatStrId, HttpServletRequest request) {
+    public GroupChat getGroupChat(@PathVariable String chatStrId, HttpServletRequest request) {
         UUID chatId = chatService.checkAndGetChatUUID(chatStrId);
         UUID userId = sessionService.getUserIdFromSession(request);
         User user = userService.findById(userId);
-        GroupChat chat = groupChatSerivce.getChat(user, chatId);
 
-        return chat;
+        return groupChatSerivce.getChat(user, chatId);
     }
 
     @ApiResponses(value = {
