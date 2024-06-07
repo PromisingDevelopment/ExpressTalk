@@ -45,6 +45,7 @@ public class User {
     @Column(nullable = false, columnDefinition = "varchar(7) default 'ONLINE'")
     private UserStatus status;
 
+    @ToString.Exclude
     @ManyToMany
     @JoinTable(
             name = "user_private_chats",
@@ -54,6 +55,7 @@ public class User {
     @JsonIgnore
     private List<PrivateChat> privateChats = new LinkedList<>();
 
+    @ToString.Exclude
     @ManyToMany
     @JoinTable(
             name = "user_group_chats",
@@ -63,6 +65,7 @@ public class User {
     @JsonIgnore
     private List<GroupChat> groupChats = new LinkedList<>();
 
+    @ToString.Exclude
     @ManyToMany
     @JoinTable(
             name = "user_administrated_group_chats",

@@ -1,10 +1,7 @@
 package expresstalk.dev.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 import java.util.UUID;
@@ -31,6 +28,7 @@ public class GroupChatMessage {
     @Column(nullable = false)
     private Date createdAt;
 
+    @ToString.Exclude
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "group_chats_id", referencedColumnName = "id")
     private GroupChat groupChat;
