@@ -26,14 +26,14 @@ public class GroupChat {
     private String name;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "groupChat", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "groupChat", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<GroupChatMessage> messages = new LinkedList<>();
 
     @ToString.Exclude
-    @ManyToMany(mappedBy = "groupChats")
+    @ManyToMany(mappedBy = "groupChats", fetch = FetchType.EAGER)
     private List<User> members = new ArrayList<>();
 
     @ToString.Exclude
-    @ManyToMany(mappedBy = "administratedGroupChats")
+    @ManyToMany(mappedBy = "administratedGroupChats", fetch = FetchType.EAGER)
     private List<User> admins = new ArrayList<>();
 }
