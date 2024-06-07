@@ -1,61 +1,97 @@
 import SockJS from "sockjs-client";
-import { Client, Stomp } from "@stomp/stompjs";
-import { userUrls, wsServerURL } from "config";
-import axios from "axios";
+import { Client } from "@stomp/stompjs";
+import { wsServerURL } from "config";
+import { store } from "redux/store";
+import { getCurrentChat } from "modules/CurrentChat";
 
 let client: Client;
 
-export async function connect() {
-  let chatId = "29bdb87b-cce4-4844-985c-e1ace00674fb"
-  // try {
-  //   console.log("LOG OUT")
-  //
-  //   await axios.delete("http://localhost:8080/auth/log-out", { withCredentials: true });
-  // } catch (error) {
-  //   console.log("LOG OUT ERROR: " + error)
-  // }
-
-  //const loginOrId = getUserlogin(id);
+export function connect(userId: string, chatId: string, isPrivate: boolean) {
   const socket: WebSocket = new SockJS(wsServerURL);
-
   client = new Client();
+
+  const onConnectGroup = () => {
+    client.subscribe(`/chats/last_message/${userId}`, (message) => {
+      console.log("chats/lastMessage: ", JSON.parse(message.body));
+    });
+    client.subscribe(`/group_chat/anon_messages/${chatId}`, (message) => {
+      console.log("group_chat/anon_messages: ", JSON.parse(message.body));
+    });
+    client.subscribe(`/group_chats/updatedMembers/${chatId}`, (message) => {
+      console.log("group_chats/updatedMembers: ", JSON.parse(message.body));
+    });
+    client.subscribe(`/group_chat/add/${chatId}/errors`, (message) => {
+      console.log("group_chat/add errors: ", JSON.parse(message.body));
+    });
+    client.subscribe(`/group_chat/messages/${chatId}`, (message) => {
+      console.log("/group_chat/messages: ", JSON.parse(message.body));
+    });
+    client.subscribe(`/group_chat/messages/${chatId}/errors`, (message) => {
+      console.log("/group_chat/messages errors: ", JSON.parse(message.body));
+    });
+  };
+
+  const onConnectPrivate = () => {
+    client.subscribe(`/private_chat/messages/${chatId}`, (message) => {
+      store.dispatch(getCurrentChat({ id: chatId, type: "privateChat" }));
+      console.log(message);
+    });
+    client.subscribe(`/private_chat/messages/${chatId}/errors`, (message) => {
+      console.log("private_chat error: ", JSON.parse(message.body));
+    });
+    client.subscribe(`/chats/last_message/${userId}`, (message) => {
+      console.log("chats: ", JSON.parse(message.body));
+    });
+  };
 
   client.configure({
     brokerURL: wsServerURL,
-    onConnect: () => {
-      console.log("onConnect");
-
-      client.publish({
-        destination: "/app/private_chat/send_message",
-        body: JSON.stringify({
-          chatId, content: "hello", createdAt: new Date().getTime()
-        })
-      })
-      client.subscribe(`/private_chat/messages/${chatId}`, (message) => {
-        console.log("private_chat response: ", message);
-      });
-      client.subscribe(`/private_chat/messages/${chatId}/errors`, (message) => {
-        console.log("private_chat error: ", message);
-      });
-    },
+    onConnect: isPrivate ? onConnectPrivate : onConnectGroup,
     webSocketFactory: () => {
       return socket;
     },
 
     debug: (str) => {
-      console.log("debug: ", str);
+      //console.log("debug: ", str);
     },
   });
 
   client.activate();
 }
 
-async function getUserlogin(str: string) {
-  if (str.length < 36) {
-    const res = await axios.get(userUrls.user(str));
+// SEND REQUESTS
 
-    return str;
-  }
+export function privateChatSendMessage(
+  message: string,
+  chatId: string,
+  createdAt: number
+) {
+  client.publish({
+    destination: `/app/private_chat/send_message`,
+    body: JSON.stringify({
+      chatId,
+      content: message,
+      createdAt: createdAt,
+    }),
+  });
+}
 
-  return str;
+export function addGroupMember(chatId: string, memberId: string) {
+  client.publish({
+    destination: `app/group_chat/add`,
+    body: JSON.stringify({
+      chatId,
+      memberId,
+    }),
+  });
+}
+export function sendGroupMessage(content: string, chatId: string, createdAt: number) {
+  client.publish({
+    destination: `/app/group_chat/send_message`,
+    body: JSON.stringify({
+      chatId,
+      content: content,
+      createdAt: createdAt,
+    }),
+  });
 }

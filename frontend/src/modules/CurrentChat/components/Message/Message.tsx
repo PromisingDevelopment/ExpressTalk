@@ -2,14 +2,15 @@ import React from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 import LeftMessageTailImage from "assets/images/left-message-tail.svg";
 import RightMessageTailImage from "assets/images/right-message-tail.svg";
+import { getCurrentTimeString } from "helpers/getCurrentTimeString";
 
 interface MessageProps {
-  time: string;
+  createdAt: string;
   content: string;
   isMine?: boolean;
 }
 
-const Message: React.FC<MessageProps> = ({ isMine, time, content }) => {
+const Message: React.FC<MessageProps> = ({ isMine, createdAt, content }) => {
   const theme = useTheme();
 
   return (
@@ -76,14 +77,14 @@ const Message: React.FC<MessageProps> = ({ isMine, time, content }) => {
         <Box
           sx={{
             fontSize: 12,
-            color: "#6A73A6",
+            color: isMine ? "#7a85c2" : "#6A73A6",
             position: "absolute",
             right: 10,
             bottom: 5,
             pointerEvents: "none",
           }}
           component="span">
-          {time}
+          {getCurrentTimeString(createdAt)}
         </Box>
       </Box>
     </Box>

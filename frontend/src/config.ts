@@ -7,25 +7,25 @@ export const authUrls = {
 };
 
 export const chatPostUrls = {
-  privateChat: BASE_URL + "/chats/private",
-  groupChat: BASE_URL + "/chats/group",
-  groupRoles: BASE_URL + "/chats/group/roles",
-  groupAdd: BASE_URL + "/chats/group/add",
+  privateChat: BASE_URL + "/private_chats",
+  groupRoles: BASE_URL + "/group_chats/roles",
+  groupAdd: BASE_URL + "/group_chats/group",
 };
 
 export const chatGetUrls = {
-  chatsList: BASE_URL + "/chats",
-  privateChat: (id: string) => BASE_URL + "/chats/private/" + id,
-  groupChat: (id: string) => BASE_URL + "/chats/group/" + id,
+  chatsList: BASE_URL + "/users/chats",
+  privateChat: (id: string) => BASE_URL + "/private_chats/" + id,
+  groupChat: (id: string) => BASE_URL + "/group_chats/" + id,
 };
 
 export const chatDeleteUrls = {
-  logOut: BASE_URL + "/chats/log-out",
+  logOut: BASE_URL + "/auth/log-out",
   removeGroup: BASE_URL + "/chats/group/remove",
 };
 
 export const userUrls = {
-  user: (id: string) => BASE_URL + "/users/" + id,
+  user: (login: string) => BASE_URL + "/users/" + login,
+  self: BASE_URL + "/users/self",
 };
 
 export const navigateUrls = {

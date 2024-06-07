@@ -1,51 +1,76 @@
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import { Box, Typography, styled } from "@mui/material";
 import React from "react";
 import { Logo } from "../../../../components/Logo";
-import MenuIcon from "@mui/icons-material/MenuRounded";
-import { useAppDispatch } from "hooks/redux";
-import { setSidebarOpen } from "modules/Sidebar/store/sidebarSlice";
-import { useIsMobile } from "hooks/useIsMobile";
+import { BurgerMenu } from "../BurgerMenu";
+import { useAppSelector } from "hooks/redux";
+import { isCurrentGroupChat } from "helpers/isCurrentGroupChat";
 
-interface HeaderProps {}
+interface HeaderProps {
+  login?: string;
+}
 
-const Header: React.FC<HeaderProps> = () => {
-  const theme = useTheme();
-  const dispatch = useAppDispatch();
-  const isMobile = useIsMobile();
+const Header: React.FC<HeaderProps> = ({ login }) => {
+  const currentChat = useAppSelector((state) => state.currentChat.currentChat);
+  const currentChatType = useAppSelector((state) => state.root.currentChatType);
+  const currentGroupChat = useAppSelector((state) => state.currentChat.currentGroupChat);
 
-  const onClickMenu = () => {
-    dispatch(setSidebarOpen(true));
-  };
+  const privateLayout = (
+    <>
+      <Logo isMain size={52} />
+
+      <Title>
+        {!login && "User"}
+        {login && login}
+      </Title>
+    </>
+  );
+
+  const groupLayout = currentGroupChat ? (
+    <>
+      <Logo isMain size={52} />
+      <div>
+        <Title>{currentGroupChat.name}</Title>
+        <p>
+          {currentGroupChat.members.length}{" "}
+          {currentGroupChat.members.length === 1 ? "member" : "members"}
+        </p>
+      </div>
+    </>
+  ) : (
+    <Title>Group</Title>
+  );
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        gap: 1.5,
-        alignItems: "center",
-        height: 96,
-        px: 4.875,
-        bgcolor: "#1F274E",
-        borderLeft: "1px solid #353F75",
-        [theme.breakpoints.down(767)]: {
-          height: 70,
-          px: 1.5,
-        },
-      }}>
-      {isMobile && (
-        <IconButton onClick={onClickMenu} sx={{ mr: 1 }}>
-          <MenuIcon
-            sx={{
-              color: "#6972A5",
-              fontSize: 40,
-            }}
-          />
-        </IconButton>
-      )}
-      <Logo isMain size={52} />
-      <Typography fontSize={20}>Login</Typography>
-    </Box>
+    <HeaderWrapper>
+      <BurgerMenu />
+
+      {currentChatType === "privateChat" ? privateLayout : groupLayout}
+    </HeaderWrapper>
   );
 };
+
+const Title = styled("h3")`
+  font-size: 20px;
+  text-transform: capitalize;
+  @media (max-width: 767px) {
+    font-size: 16px;
+  }
+`;
+
+const HeaderWrapper = styled("div")(({ theme }) =>
+  theme.unstable_sx({
+    display: "flex",
+    gap: 1.5,
+    alignItems: "center",
+    height: 96,
+    px: 4.875,
+    bgcolor: "#1F274E",
+    borderLeft: "1px solid #353F75",
+    [theme.breakpoints.down(767)]: {
+      height: 70,
+      px: 1.5,
+    },
+  })
+);
 
 export { Header };

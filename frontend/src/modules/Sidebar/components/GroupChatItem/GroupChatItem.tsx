@@ -1,22 +1,41 @@
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import React from "react";
 import { Logo } from "components/Logo";
+import { GroupChatMember, GroupChatMessage } from "types/GroupChat";
 
 interface GroupChatItemProps {
   logoSrc?: string; // change to required
   name: string;
-  lastMessage: string;
   active?: boolean;
-  onClick: any;
+  lastMessage?: string; // change to required
+  onClick?: any; // change to required
+  members: GroupChatMember[];
+  messages: GroupChatMessage[];
 }
 
-const GroupChatItem: React.FC<GroupChatItemProps> = ({
-  lastMessage,
-  logoSrc = "",
-  active = false,
-  name,
-  onClick,
-}) => {
+const GroupChatItem: React.FC<GroupChatItemProps> = (props) => {
+  console.log(props);
+  const { members, messages, name, active, onClick } = props;
+
+  const getLastMessage = () => {
+    console.log(messages.length);
+    if (!messages.length) {
+      return "Write first message! :3";
+    }
+
+    const lastMessageObj = messages[messages.length - 1];
+    const user = members.find((member, i) => member.id === lastMessageObj.senderId);
+
+    if (user) {
+      return (
+        <>
+          <Typography fontWeight={500}>{user.login}: </Typography>
+          {lastMessageObj.content}
+        </>
+      );
+    }
+  };
+
   const theme = useTheme();
 
   return (
@@ -41,7 +60,7 @@ const GroupChatItem: React.FC<GroupChatItemProps> = ({
           height: 60,
         },
       }}>
-      <Logo size={48} src={logoSrc} />
+      <Logo size={48} src={""} />
       <Box>
         <Typography
           sx={{
@@ -56,7 +75,9 @@ const GroupChatItem: React.FC<GroupChatItemProps> = ({
           }}>
           {name}
         </Typography>
-        <Typography sx={{ fontSize: 12, color: "#6A73A6" }}>{lastMessage}</Typography>
+        <Typography sx={{ fontSize: 12, color: "#6A73A6" }}>
+          {getLastMessage()}
+        </Typography>
       </Box>
     </Button>
   );
