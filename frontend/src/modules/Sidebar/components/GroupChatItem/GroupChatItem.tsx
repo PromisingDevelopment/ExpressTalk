@@ -7,33 +7,12 @@ interface GroupChatItemProps {
   logoSrc?: string; // change to required
   name: string;
   active?: boolean;
-  lastMessage?: string; // change to required
-  onClick?: any; // change to required
-  members: GroupChatMember[];
-  messages: GroupChatMessage[];
+  lastMessage: string;
+  onClick: any;
 }
 
 const GroupChatItem: React.FC<GroupChatItemProps> = (props) => {
-  const { members, messages, name, active, onClick } = props;
-
-  const getLastMessage = () => {
-    if (!messages.length) {
-      return "Write first message! :3";
-    }
-
-    const lastMessageObj = messages[messages.length - 1];
-    const user = members.find((member, i) => member.id === lastMessageObj.senderId);
-
-    if (user) {
-      return (
-        <>
-          <Typography fontWeight={500}>{user.login}: </Typography>
-          {lastMessageObj.content}
-        </>
-      );
-    }
-  };
-
+  const { name, lastMessage, active, onClick } = props;
   const theme = useTheme();
 
   return (
@@ -74,7 +53,7 @@ const GroupChatItem: React.FC<GroupChatItemProps> = (props) => {
           {name}
         </Typography>
         <Typography sx={{ fontSize: 12, color: "#6A73A6" }}>
-          {getLastMessage()}
+          {lastMessage || "Chat is empty so far"}
         </Typography>
       </Box>
     </Button>

@@ -1,11 +1,10 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Wrapper } from "../Wrapper";
 import { Header } from "../Header";
 import { styled } from "@mui/material";
 import { Search } from "../Search";
 import { ChatModes } from "../ChatModes";
 import { ChatList } from "../ChatList";
-import CreateGroup from "CreateGroup";
 
 interface SidebarProps {}
 

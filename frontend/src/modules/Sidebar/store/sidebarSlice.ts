@@ -1,14 +1,14 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { chatDeleteUrls, chatGetUrls } from "config";
-import { ChatsListsObj } from "../types/ChatsListsObj";
+import { ChatsListObj } from "../types/ChatsListObj";
 
 interface InitialState {
   chatsList: {
     status: "idle" | "loading" | "error" | "fulfilled";
     errorMessage: string | null;
     errorCode: number | null;
-    list: ChatsListsObj | null;
+    list: ChatsListObj | null;
   };
   sidebarOpen: boolean;
 }
