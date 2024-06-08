@@ -78,6 +78,7 @@ public class GroupChatController {
             );
             simpMessagingTemplate.convertAndSend("/group_chat/messages/" + sendChatMessageDto.chatId(), clientChatMessageDto);
         } catch (Exception ex) {
+            System.out.println(ex.getMessage());
             simpMessagingTemplate.convertAndSend("/group_chat/messages/" + sendChatMessageDto.chatId() + "/errors", ex.getMessage());
         }
     }

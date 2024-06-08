@@ -7,6 +7,7 @@ import expresstalk.dev.backend.repository.GroupChatMessageRepository;
 import expresstalk.dev.backend.repository.GroupChatRepository;
 import expresstalk.dev.backend.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
