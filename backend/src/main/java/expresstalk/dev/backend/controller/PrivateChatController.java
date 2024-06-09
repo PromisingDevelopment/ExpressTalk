@@ -66,6 +66,7 @@ public class PrivateChatController {
 
             PrivateChatMessage privateChatMessage = privateChatService.saveMessage(sendChatMessageDto, sender.getId(), receiver.getId());
             ClientChatMessageDto clientChatMessageDto = new ClientChatMessageDto(
+                    sender.getId(),
                     sender.getLogin(),
                     privateChatMessage.getContent(),
                     privateChatMessage.getCreatedAt()
