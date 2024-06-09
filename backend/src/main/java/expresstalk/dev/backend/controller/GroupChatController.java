@@ -72,6 +72,7 @@ public class GroupChatController {
             }
 
             ClientChatMessageDto clientChatMessageDto = new ClientChatMessageDto(
+                    sender.getId(),
                     sender.getLogin(),
                     groupChatMessage.getContent(),
                     groupChatMessage.getCreatedAt()

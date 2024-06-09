@@ -48,6 +48,10 @@ public class PrivateChatService {
     }
 
     public PrivateChat createPrivateChat(UUID member1Id, UUID member2Id) {
+        if(member1Id.equals(member2Id)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can not create private chat with 1 person");
+        }
+
         User user1 = userService.findById(member1Id);
         User user2 = userService.findById(member2Id);
 

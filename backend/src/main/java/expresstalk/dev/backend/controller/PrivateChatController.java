@@ -66,6 +66,7 @@ public class PrivateChatController {
 
             PrivateChatMessage privateChatMessage = privateChatService.saveMessage(sendChatMessageDto, sender.getId(), receiver.getId());
             ClientChatMessageDto clientChatMessageDto = new ClientChatMessageDto(
+                    sender.getId(),
                     sender.getLogin(),
                     privateChatMessage.getContent(),
                     privateChatMessage.getCreatedAt()
@@ -100,6 +101,7 @@ public class PrivateChatController {
 
     @ApiResponses(value = {
             @ApiResponse(responseCode = "400", description = "Second user's id must be a type of UUID"),
+            @ApiResponse(responseCode = "400", description = "Can not create private chat with 1 person"),
             @ApiResponse(responseCode = "404", description = "User with provided id doesn't exist"),
             @ApiResponse(responseCode = "403", description = "User is not authenticated"),
             @ApiResponse(responseCode = "409", description = "Private chat with provided two members had already been created"),
