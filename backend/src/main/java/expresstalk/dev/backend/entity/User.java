@@ -49,7 +49,7 @@ public class User {
     private UserStatus status;
 
     @ToString.Exclude
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_private_chats",
             joinColumns = @JoinColumn(name = "users_id"),
@@ -59,7 +59,7 @@ public class User {
     private List<PrivateChat> privateChats = new LinkedList<>();
 
     @ToString.Exclude
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_group_chats",
             joinColumns = @JoinColumn(name = "users_id"),
@@ -69,7 +69,7 @@ public class User {
     private List<GroupChat> groupChats = new LinkedList<>();
 
     @ToString.Exclude
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_administrated_group_chats",
             joinColumns = @JoinColumn(name = "users_id"),
