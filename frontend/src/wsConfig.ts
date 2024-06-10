@@ -86,6 +86,16 @@ export function addGroupMember(chatId: string, memberId: string) {
   });
 }
 
+export function removeGroupMember(chatId: string, memberId: string) {
+  client.publish({
+    destination: `/app/group_chat/remove`,
+    body: JSON.stringify({
+      chatId,
+      memberId,
+    }),
+  });
+}
+
 export function sendGroupMessage(content: string, chatId: string, createdAt: number) {
   client.publish({
     destination: `/app/group_chat/send_message`,
