@@ -1,8 +1,9 @@
-import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import { wsServerURL } from "config";
-import { store } from "redux/store";
 import { getCurrentChat } from "modules/CurrentChat";
+import { updateCurrentChat } from "modules/CurrentChat/store/currentChatSlice";
+import { store } from "redux/store";
+import SockJS from "sockjs-client";
 
 let client: Client;
 
@@ -25,6 +26,9 @@ export function connect(userId: string, chatId: string, isPrivate: boolean) {
     });
     client.subscribe(`/group_chat/messages/${chatId}`, (message) => {
       console.log("/group_chat/messages: ", JSON.parse(message.body));
+      const data = JSON.parse(message.body);
+
+      store.dispatch(updateCurrentChat({ data, type: "groupChat" }));
     });
     client.subscribe(`/group_chat/messages/${chatId}/errors`, (message) => {
       console.log("/group_chat/messages errors: ", JSON.parse(message.body));
@@ -33,8 +37,9 @@ export function connect(userId: string, chatId: string, isPrivate: boolean) {
 
   const onConnectPrivate = () => {
     client.subscribe(`/private_chat/messages/${chatId}`, (message) => {
-      console.log(message);
-      store.dispatch(getCurrentChat({ id: chatId, type: "privateChat" }));
+      const data = JSON.parse(message.body);
+
+      store.dispatch(updateCurrentChat({ data, type: "privateChat" }));
     });
     client.subscribe(`/private_chat/messages/${chatId}/errors`, (message) => {
       console.log("private_chat error: ", JSON.parse(message.body));
