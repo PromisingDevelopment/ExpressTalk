@@ -1,8 +1,10 @@
 import LogoutIcon from "@mui/icons-material/Logout";
 import { Box, Button, Modal, styled } from "@mui/material";
 import { useAppDispatch } from "hooks/redux";
+import { resetChats } from "modules/CurrentChat";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { resetChatId } from "redux/rootSlice";
 import CustomIconButton from "UI/CustomIconButton";
 import ModalContent from "UI/ModalContent";
 import { logout } from "../store/sidebarSlice";
@@ -27,6 +29,8 @@ const Logout: React.FC<LogoutProps> = () => {
 
   const onLogout = () => {
     dispatch(logout());
+    dispatch(resetChats());
+    dispatch(resetChatId());
     navigate("/auth/home");
   };
 

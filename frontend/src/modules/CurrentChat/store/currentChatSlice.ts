@@ -62,6 +62,10 @@ const currentChatSlice = createSlice({
         () => state.currentGroupChat?.messages.push(action.payload.data)
       );
     },
+    resetChats: (state) => {
+      state.currentChat = null;
+      state.currentGroupChat = null;
+    },
   },
 
   extraReducers: (builder) => {
@@ -114,6 +118,6 @@ export const getCurrentChat = createAsyncThunk<
   }
 });
 
-export const { setCurrentChat, updateCurrentChat } = currentChatSlice.actions;
+export const { setCurrentChat, updateCurrentChat, resetChats } = currentChatSlice.actions;
 
 export default currentChatSlice.reducer;

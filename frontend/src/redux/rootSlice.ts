@@ -1,4 +1,4 @@
-import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import { userUrls } from "config";
 import { CurrentChatType } from "types/CurrentChatType";
@@ -39,6 +39,9 @@ const rootSlice = createSlice({
     setCurrentChatType: (state, action: PayloadAction<CurrentChatType>) => {
       state.currentChatType = action.payload;
     },
+    resetChatId: (state) => {
+      state.currentChatId = null;
+    },
   },
   extraReducers(builder) {
     builder
@@ -69,7 +72,7 @@ export const getCurrentUser = createAsyncThunk<any, void>(
   }
 );
 
-export const { setCurrentChatId, setIsCreatedNewChat, setCurrentChatType } =
+export const { setCurrentChatId, setIsCreatedNewChat, setCurrentChatType, resetChatId } =
   rootSlice.actions;
 
 export default rootSlice.reducer;

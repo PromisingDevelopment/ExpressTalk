@@ -4,4 +4,5 @@ export {
   getCurrentChat,
   updateCurrentChat,
   setCurrentChat,
+  resetChats,
 } from "./store/currentChatSlice";
