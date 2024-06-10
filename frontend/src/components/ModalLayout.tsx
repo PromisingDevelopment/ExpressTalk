@@ -1,15 +1,16 @@
-import { Button, Modal, Typography, styled } from "@mui/material";
-import CustomIconButton from "UI/CustomIconButton";
-import React from "react";
-import ModalContent from "../UI/ModalContent";
+import { Button, Modal, styled, Typography } from "@mui/material";
 import { CustomInput } from "components/CustomInput";
+import React from "react";
+import CustomIconButton from "UI/CustomIconButton";
+import ModalContent from "../UI/ModalContent";
 
 interface ModalLayoutProps {
   onSubmit: any;
   label: string;
   inputLabel: string;
   inputName: string;
-  Icon: any;
+  Icon?: any;
+  withoutIcon?: boolean;
 }
 
 const ModalLayout: React.FC<ModalLayoutProps> = ({
@@ -18,6 +19,7 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
   inputLabel,
   inputName,
   Icon,
+  withoutIcon,
 }) => {
   const [openModal, setOpenModal] = React.useState(false);
   const [isEmpty, setIsEmpty] = React.useState(false);
@@ -57,7 +59,13 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
 
   return (
     <>
-      <CustomIconButton label={label} onClick={onOpenModal} Icon={Icon} />
+      {withoutIcon ? (
+        <Typography fontSize={16} onClick={onOpenModal}>
+          {label}
+        </Typography>
+      ) : (
+        <CustomIconButton label={label} onClick={onOpenModal} Icon={Icon} />
+      )}
 
       <Modal open={openModal} onClose={onCloseModal}>
         <ModalContent title={label} onCloseModal={onCloseModal}>

@@ -1,12 +1,12 @@
-import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import { chatGetUrls } from "config";
-import { CurrentPrivateChat } from "../../../types/CurrentPrivateChat";
 import { CurrentChatType } from "types/CurrentChatType";
 import { GroupChat } from "types/GroupChat";
+import { PrivateChat } from "../../../types/PrivateChat";
 
 interface InitialState {
-  currentChat: CurrentPrivateChat | null;
+  currentChat: PrivateChat | null;
   currentGroupChat: GroupChat | null;
   status: "idle" | "loading" | "error" | "fulfilled";
   errorMessage: string | null;
@@ -19,6 +19,21 @@ const initialState: InitialState = {
   errorMessage: null,
 };
 
+const narrowChatType = (
+  type: CurrentChatType,
+  privateCallback: any,
+  groupCallback: any
+) => {
+  switch (type) {
+    case "privateChat":
+      privateCallback();
+      break;
+    case "groupChat":
+      groupCallback();
+      break;
+  }
+};
+
 const currentChatSlice = createSlice({
   name: "@@currentChat",
   initialState,
@@ -29,14 +44,27 @@ const currentChatSlice = createSlice({
     ) => {
       const type = action.payload.type;
 
-      switch (type) {
-        case "privateChat":
-          state.currentChat = action.payload.data;
-          break;
-        case "groupChat":
-          state.currentGroupChat = action.payload.data;
-          break;
-      }
+      narrowChatType(
+        type,
+        () => (state.currentChat = action.payload.data),
+        () => (state.currentGroupChat = action.payload.data)
+      );
+    },
+    updateCurrentChat: (
+      state,
+      action: PayloadAction<{ data: any; type: CurrentChatType }>
+    ) => {
+      const type = action.payload.type;
+
+      narrowChatType(
+        type,
+        () => state.currentChat?.messages.push(action.payload.data),
+        () => state.currentGroupChat?.messages.push(action.payload.data)
+      );
+    },
+    resetChats: (state) => {
+      state.currentChat = null;
+      state.currentGroupChat = null;
     },
   },
 
@@ -47,7 +75,7 @@ const currentChatSlice = createSlice({
         (
           state,
           action: PayloadAction<{
-            data: CurrentPrivateChat | GroupChat;
+            data: PrivateChat | GroupChat;
             type: CurrentChatType;
           }>
         ) => {
@@ -56,7 +84,7 @@ const currentChatSlice = createSlice({
           const type = action.payload.type;
 
           if (type === "privateChat") {
-            state.currentChat = action.payload.data as CurrentPrivateChat;
+            state.currentChat = action.payload.data as PrivateChat;
           }
           if (type === "groupChat") {
             state.currentGroupChat = action.payload.data as GroupChat;
@@ -90,6 +118,6 @@ export const getCurrentChat = createAsyncThunk<
   }
 });
 
-export const { setCurrentChat } = currentChatSlice.actions;
+export const { setCurrentChat, updateCurrentChat, resetChats } = currentChatSlice.actions;
 
 export default currentChatSlice.reducer;
