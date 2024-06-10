@@ -42,6 +42,7 @@ const StyledWrapper = styled("div")`
 const PopoverWrapper = styled("div")`
   width: 200px;
   position: absolute;
+  z-index: 1000;
   transform: translateX(-46%);
   opacity: 0;
   transition: opacity 0.3s ease 0s;
