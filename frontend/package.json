@@ -36,9 +36,9 @@
     "start": "rsbuild dev",
     "build": "rsbuild build",
     "preview": "rsbuild preview",
-    "c-chat": "generate-react component --type=chat",
-    "c-auth": "generate-react component --type=auth",
-    "c-sidebar": "generate-react component --type=sidebar"
+    "c-chat": "generate-react component --type=chat --flat",
+    "c-auth": "generate-react component --type=auth --flat",
+    "c-sidebar": "generate-react component --type=sidebar --flat"
   },
   "eslintConfig": {
     "extends": [
