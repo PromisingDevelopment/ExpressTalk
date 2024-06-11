@@ -1,6 +1,6 @@
 package expresstalk.dev.backend.controller;
 
-import expresstalk.dev.backend.dto.GetUserChatsDto;
+import expresstalk.dev.backend.dto.request.GetUserChatsDto;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.enums.UserStatus;
 import expresstalk.dev.backend.service.ChatService;
@@ -9,7 +9,6 @@ import expresstalk.dev.backend.service.UserService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;

@@ -12,7 +12,6 @@ import java.util.UUID;
 @Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Table(name = "private_chat_messages")
-@RequiredArgsConstructor
 @NoArgsConstructor
 @Data
 public class PrivateChatMessage {
@@ -22,11 +21,19 @@ public class PrivateChatMessage {
 
     @NonNull
     @Column(nullable = false)
+    private boolean isSystemMessage;
+
+    @Column
     private UUID senderId;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column
+    private String senderLogin;
+
+    @Column
     private UUID receiverId;
+
+    @Column
+    private String receiverLogin;
 
     @NonNull
     @Column(nullable = false)
@@ -41,4 +48,20 @@ public class PrivateChatMessage {
     @JoinColumn(name = "private_chats_id", referencedColumnName = "id")
     @JsonIgnore
     private PrivateChat privateChat;
+
+    public PrivateChatMessage(String content, Date createdAt) {
+        this.isSystemMessage = true;
+        this.content = content;
+        this.createdAt = createdAt;
+    }
+
+    public PrivateChatMessage(User sender, User receiver, String content, Date createdAt) {
+        this.isSystemMessage = false;
+        this.senderId  = sender.getId();
+        this.senderLogin  = sender.getLogin();
+        this.receiverId = receiver.getId();
+        this.receiverLogin = receiver.getLogin();
+        this.content = content;
+        this.createdAt = createdAt;
+    }
 }

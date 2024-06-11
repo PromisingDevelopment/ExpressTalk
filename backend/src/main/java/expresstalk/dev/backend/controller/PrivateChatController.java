@@ -1,9 +1,9 @@
 package expresstalk.dev.backend.controller;
 
-import expresstalk.dev.backend.dto.ClientChatMessageDto;
-import expresstalk.dev.backend.dto.CreatePrivateChatRoomDto;
-import expresstalk.dev.backend.dto.LastMessageDto;
-import expresstalk.dev.backend.dto.SendChatMessageDto;
+import expresstalk.dev.backend.dto.response.ChatMessageDto;
+import expresstalk.dev.backend.dto.request.CreatePrivateChatRoomDto;
+import expresstalk.dev.backend.dto.response.LastMessageDto;
+import expresstalk.dev.backend.dto.request.SendChatMessageDto;
 import expresstalk.dev.backend.entity.PrivateChat;
 import expresstalk.dev.backend.entity.PrivateChatMessage;
 import expresstalk.dev.backend.entity.User;
@@ -59,13 +59,11 @@ public class PrivateChatController {
             UUID chatId = chatService.checkAndGetChatUUID(sendChatMessageDto.chatId());
             UUID userId = sessionService.getUserIdFromSession(session);
             User sender = userService.findById(userId);
-
             privateChatService.ensureUserPermissionToSendMessageInChat(sender, chatId);
 
             User receiver = privateChatService.getSecondUserOfChat(sender.getId(), chatId);
-
-            PrivateChatMessage privateChatMessage = privateChatService.saveMessage(sendChatMessageDto, sender.getId(), receiver.getId());
-            ClientChatMessageDto clientChatMessageDto = new ClientChatMessageDto(
+            PrivateChatMessage privateChatMessage = privateChatService.saveMessage(sendChatMessageDto, sender, receiver);
+            ChatMessageDto clientChatMessageDto = new ChatMessageDto(
                     sender.getId(),
                     sender.getLogin(),
                     privateChatMessage.getContent(),

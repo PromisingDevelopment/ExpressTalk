@@ -11,7 +11,6 @@ import java.util.UUID;
 @Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Table(name = "group_chat_messages")
-@RequiredArgsConstructor
 @NoArgsConstructor
 @Data
 public class GroupChatMessage {
@@ -21,7 +20,13 @@ public class GroupChatMessage {
 
     @NonNull
     @Column(nullable = false)
+    private boolean isSystemMessage;
+
+    @Column
     private UUID senderId;
+
+    @Column
+    private String senderLogin;
 
     @NonNull
     @Column(nullable = false)
@@ -35,4 +40,18 @@ public class GroupChatMessage {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "group_chats_id", referencedColumnName = "id")
     private GroupChat groupChat;
+
+    public GroupChatMessage(String content, Date createdAt) {
+        this.isSystemMessage = true;
+        this.content = content;
+        this.createdAt = createdAt;
+    }
+
+    public GroupChatMessage(User sender, String content, Date createdAt) {
+        this.isSystemMessage = false;
+        this.senderId  = sender.getId();
+        this.senderLogin  = sender.getLogin();
+        this.content = content;
+        this.createdAt = createdAt;
+    }
 }

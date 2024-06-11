@@ -1,17 +1,16 @@
 package expresstalk.dev.backend.service;
 
-import expresstalk.dev.backend.dto.SendChatMessageDto;
+import expresstalk.dev.backend.dto.request.SendChatMessageDto;
 import expresstalk.dev.backend.entity.*;
 import expresstalk.dev.backend.enums.GroupChatRole;
 import expresstalk.dev.backend.repository.GroupChatMessageRepository;
 import expresstalk.dev.backend.repository.GroupChatRepository;
 import expresstalk.dev.backend.repository.UserRepository;
-import jakarta.servlet.http.HttpSession;
-import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -190,11 +189,11 @@ public class GroupChatSerivce {
         }
     }
 
-    public GroupChatMessage saveMessage(SendChatMessageDto sendChatMessageDto, UUID senderId) {
+    public GroupChatMessage saveMessage(SendChatMessageDto sendChatMessageDto, User sender) {
         GroupChat groupChat = getChat(UUID.fromString(sendChatMessageDto.chatId()));
 
         GroupChatMessage groupChatMessage = new GroupChatMessage(
-                senderId,
+                sender,
                 sendChatMessageDto.content(),
                 new Date(Long.parseLong(sendChatMessageDto.createdAt()))
         );
@@ -203,6 +202,19 @@ public class GroupChatSerivce {
         groupChatMessage.setGroupChat(groupChat);
         groupChatRepository.save(groupChat);
         groupChatMessageRepository.save(groupChatMessage);
+
+        return groupChatMessage;
+    }
+
+    public GroupChatMessage saveSystemMessage(String content, GroupChat groupChat) {
+        GroupChatMessage groupChatMessage = new GroupChatMessage(
+                content,
+                new Date()
+        );
+
+        groupChat.getMessages().add(groupChatMessage);
+        groupChatMessage.setGroupChat(groupChat);
+        groupChatRepository.save(groupChat);
 
         return groupChatMessage;
     }

@@ -1,6 +1,6 @@
 package expresstalk.dev.backend.service;
 
-import expresstalk.dev.backend.dto.SendChatMessageDto;
+import expresstalk.dev.backend.dto.request.SendChatMessageDto;
 import expresstalk.dev.backend.entity.PrivateChat;
 import expresstalk.dev.backend.entity.PrivateChatMessage;
 import expresstalk.dev.backend.entity.User;
@@ -76,12 +76,12 @@ public class PrivateChatService {
 
     }
 
-    public PrivateChatMessage saveMessage(SendChatMessageDto sendPrivateChatMessageDto, UUID senderId, UUID receiverId) {
+    public PrivateChatMessage saveMessage(SendChatMessageDto sendPrivateChatMessageDto, User sender, User receiver) {
         PrivateChat privateChat = getChat(UUID.fromString(sendPrivateChatMessageDto.chatId()));
 
         PrivateChatMessage privateChatMessage = new PrivateChatMessage(
-                senderId,
-                receiverId,
+                sender,
+                receiver,
                 sendPrivateChatMessageDto.content(),
                 new Date(Long.parseLong(sendPrivateChatMessageDto.createdAt()))
         );

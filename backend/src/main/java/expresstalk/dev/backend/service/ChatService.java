@@ -1,8 +1,8 @@
 package expresstalk.dev.backend.service;
 
-import expresstalk.dev.backend.dto.GetUserChatsDto;
-import expresstalk.dev.backend.dto.GroupChatClientDto;
-import expresstalk.dev.backend.dto.PrivateChatClientDto;
+import expresstalk.dev.backend.dto.request.GetUserChatsDto;
+import expresstalk.dev.backend.dto.response.BriefGroupChatDto;
+import expresstalk.dev.backend.dto.response.BriefPrivateChatDto;
 import expresstalk.dev.backend.entity.*;
 import expresstalk.dev.backend.utils.Converter;
 import org.springframework.http.HttpStatus;
@@ -31,7 +31,7 @@ public class ChatService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "User id stored in session doesn't storage real user's id");
         }
 
-        List<PrivateChatClientDto> privateChatClientDtos = new ArrayList<>();
+        List<BriefPrivateChatDto> briefPrivateChatDtos = new ArrayList<>();
         for(PrivateChat privateChat : user.getPrivateChats()) {
             User secondUser = new User();
             try {
@@ -43,22 +43,23 @@ public class ChatService {
             List<PrivateChatMessage> messages = privateChat.getMessages();
             String lastMessage = messages.size() == 0 ? "" : messages.getLast().getContent();
 
-            privateChatClientDtos.add(
-                    new PrivateChatClientDto(
+            briefPrivateChatDtos.add(
+                    new BriefPrivateChatDto(
                             privateChat.getId(),
+                            secondUser.getId(),
                             secondUser.getLogin(),
                             lastMessage
                     )
             );
         }
 
-        List<GroupChatClientDto> groupChatClientDtos = new ArrayList<>();
+        List<BriefGroupChatDto> briefGroupChatDtos = new ArrayList<>();
         for(GroupChat groupChat : user.getGroupChats()) {
             List<GroupChatMessage> messages = groupChat.getMessages();
             String lastMessage = messages.size() == 0 ? "" : messages.getLast().getContent();
 
-            groupChatClientDtos.add(
-                    new GroupChatClientDto(
+            briefGroupChatDtos.add(
+                    new BriefGroupChatDto(
                             groupChat.getId(),
                             groupChat.getName(),
                             lastMessage
@@ -66,7 +67,7 @@ public class ChatService {
             );
         }
 
-        GetUserChatsDto getUserChatsDto = new GetUserChatsDto(privateChatClientDtos, groupChatClientDtos);
+        GetUserChatsDto getUserChatsDto = new GetUserChatsDto(briefPrivateChatDtos, briefGroupChatDtos);
 
         return getUserChatsDto;
     }

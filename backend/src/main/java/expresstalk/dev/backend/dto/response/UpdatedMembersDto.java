@@ -1,4 +1,4 @@
-package expresstalk.dev.backend.dto;
+package expresstalk.dev.backend.dto.response;
 
 import expresstalk.dev.backend.entity.User;
 
