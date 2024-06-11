@@ -7,5 +7,6 @@ import java.util.UUID;
 
 public record UpdatedMembersDto (
         UUID chatId,
-        List<User> users
+        List<User> members,
+        List<User> admins
 ) {}
