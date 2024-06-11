@@ -1,9 +1,9 @@
 package expresstalk.dev.backend.controller;
 
 import expresstalk.dev.backend.service.AuthService;
-import expresstalk.dev.backend.dto.EmailVerificationDto;
-import expresstalk.dev.backend.dto.SignInUserDto;
-import expresstalk.dev.backend.dto.SignUpUserDto;
+import expresstalk.dev.backend.dto.request.EmailVerificationDto;
+import expresstalk.dev.backend.dto.request.SignInUserDto;
+import expresstalk.dev.backend.dto.request.SignUpUserDto;
 import expresstalk.dev.backend.service.EmailService;
 import expresstalk.dev.backend.exception.EmailNotVerifiedException;
 import expresstalk.dev.backend.entity.User;
