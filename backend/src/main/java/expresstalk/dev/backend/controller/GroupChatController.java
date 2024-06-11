@@ -112,7 +112,7 @@ public class GroupChatController {
                 simpMessagingTemplate.convertAndSend("/chats/last_messages/" + receiver.getId(), lastMessageDto);
             }
 
-            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
+            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers(), groupChat.getAdmins());
             simpMessagingTemplate.convertAndSend("/group_chat/updated_members/" + addUserToGroupChatDto.chatId(), updatedMembersDto);
         } catch (Exception ex) {
             simpMessagingTemplate.convertAndSend("/group_chat/add/" + addUserToGroupChatDto.chatId() + "/errors", ex.getMessage());
@@ -147,10 +147,45 @@ public class GroupChatController {
                 simpMessagingTemplate.convertAndSend("/chats/last_messages/" + receiver.getId(), lastMessageDto);
             }
 
-            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
+            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers(), groupChat.getAdmins());
             simpMessagingTemplate.convertAndSend("/group_chat/updated_members/" + removeUserFromGroupChatDto.chatId(), updatedMembersDto);
         } catch (Exception ex) {
             simpMessagingTemplate.convertAndSend("/group_chat/remove/" + removeUserFromGroupChatDto.chatId() + "/errors", ex.getMessage());
+        }
+    }
+
+    @MessageMapping("/group_chat/set_role")
+    private void addMemberToGroupChat(
+            @Payload SetUserRoleInGroupChatDto setUserRoleInGroupChatDto,
+            Message<?> message
+    ) {
+        try {
+            MessageHeaders headers = message.getHeaders();
+            HttpSession session = (HttpSession) SimpMessageHeaderAccessor.getSessionAttributes(headers).get("session");
+            sessionService.ensureSessionExistense(session);
+
+            ValidationErrorChecker.<SetUserRoleInGroupChatDto>checkDtoForErrors(setUserRoleInGroupChatDto);
+
+            UUID chatId = chatService.checkAndGetChatUUID(setUserRoleInGroupChatDto.chatId());
+            UUID userId = sessionService.getUserIdFromSession(session);
+            User admin = userService.findById(userId);
+            User changingUser = userService.findById(Converter.convertStringToUUID(setUserRoleInGroupChatDto.userToGiveRoleId()));
+            GroupChat groupChat = groupChatSerivce.getChat(chatId);
+            groupChatSerivce.setRole(groupChat, admin, changingUser, setUserRoleInGroupChatDto.groupChatRole());
+
+            String changedRoleMessage = changingUser.getLogin() + " is now " + setUserRoleInGroupChatDto.groupChatRole();
+            groupChatSerivce.saveSystemMessage(changedRoleMessage, groupChat);
+
+            List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin.getId(), chatId);
+            for(User receiver : receivers) {
+                LastMessageDto lastMessageDto = new LastMessageDto(chatId,changedRoleMessage);
+                simpMessagingTemplate.convertAndSend("/chats/last_messages/" + receiver.getId(), lastMessageDto);
+            }
+
+            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers(), groupChat.getAdmins());
+            simpMessagingTemplate.convertAndSend("/group_chat/updated_members/" + setUserRoleInGroupChatDto.chatId(), updatedMembersDto);
+        } catch (Exception ex) {
+            simpMessagingTemplate.convertAndSend("/group_chat/set_role/" + setUserRoleInGroupChatDto.chatId() + "/errors", ex.getMessage());
         }
     }
 
@@ -184,32 +219,5 @@ public class GroupChatController {
         User user = userService.findById(userId);
 
         return groupChatSerivce.getChat(user, chatId);
-    }
-
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "400", description = "Chat id must be a type of UUID"),
-            @ApiResponse(responseCode = "400", description = "Member's id must be a type of UUID"),
-            @ApiResponse(responseCode = "400", description = "The member is not present in the chat"),
-            @ApiResponse(responseCode = "400", description = "Can not give admin role to the member. The member is already admin in the chat"),
-            @ApiResponse(responseCode = "401", description = "User can not set role for members from the chat because user is not admin"),
-            @ApiResponse(responseCode = "403", description = "User is not authenticated"),
-            @ApiResponse(responseCode = "403", description = "Admin can not take off admin rights from another admin"),
-            @ApiResponse(responseCode = "404", description = "Chat with provided id wasn't found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    @ResponseStatus(HttpStatus.OK)
-    @PostMapping("/roles")
-    public void setUserRoleInGroupChat(
-            @RequestBody @Valid SetUserRoleInGroupChatDto setUserRoleInGroupChatDto,
-            HttpServletRequest request
-    ) {
-        UUID userId = sessionService.getUserIdFromSession(request);
-        UUID memberId = UUID.fromString(setUserRoleInGroupChatDto.userToGiveRoleId());
-        UUID chatId = UUID.fromString(setUserRoleInGroupChatDto.chatId());
-        GroupChat groupChat = groupChatSerivce.getChat(chatId);
-        User admin = userService.findById(userId);
-        User member = userService.findById(memberId);
-
-        groupChatSerivce.setRole(groupChat, admin, member, setUserRoleInGroupChatDto.groupChatRole());
     }
 }
