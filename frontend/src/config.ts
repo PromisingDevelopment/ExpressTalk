@@ -8,8 +8,8 @@ export const authUrls = {
 
 export const chatPostUrls = {
   privateChat: BASE_URL + "/private_chats",
+  groupAdd: BASE_URL + "/group_chats",
   groupRoles: BASE_URL + "/group_chats/roles",
-  groupAdd: BASE_URL + "/group_chats/group",
 };
 
 export const chatGetUrls = {

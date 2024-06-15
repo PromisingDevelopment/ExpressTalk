@@ -29,7 +29,7 @@ const CurrentChat: React.FC<CurrentChatProps> = () => {
 
   React.useEffect(() => {
     console.log("currentGroupChat: ", currentGroupChat);
-    console.log("currentChat: ", currentChat);
+    //  console.log("currentChat: ", currentChat);
   }, [currentChat, currentGroupChat]);
 
   if (!currentChat && !currentGroupChat) return <NoChat />;
