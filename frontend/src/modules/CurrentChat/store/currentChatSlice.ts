@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import { chatGetUrls } from "config";
 import { CurrentChatType } from "types/CurrentChatType";
-import { GroupChat } from "types/GroupChat";
+import { GroupChat, GroupChatMember } from "types/GroupChat";
 import { PrivateChat } from "../../../types/PrivateChat";
 
 interface InitialState {
@@ -62,6 +62,11 @@ const currentChatSlice = createSlice({
         () => state.currentGroupChat?.messages.push(action.payload.data)
       );
     },
+    updateGroupMembers: (state, action: PayloadAction<GroupChatMember[]>) => {
+      if (state.currentGroupChat) {
+        state.currentGroupChat.members = action.payload;
+      }
+    },
     resetChats: (state) => {
       state.currentChat = null;
       state.currentGroupChat = null;
@@ -118,6 +123,7 @@ export const getCurrentChat = createAsyncThunk<
   }
 });
 
-export const { setCurrentChat, updateCurrentChat, resetChats } = currentChatSlice.actions;
+export const { setCurrentChat, updateCurrentChat, resetChats, updateGroupMembers } =
+  currentChatSlice.actions;
 
 export default currentChatSlice.reducer;

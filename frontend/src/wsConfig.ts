@@ -21,6 +21,11 @@ export function connect(userId: string, chatId: string, isPrivate: boolean) {
       store.dispatch(updateCurrentChat({ data: json, type: "groupChat" }));
     });
     client.subscribe(`/group_chat/updated_members/${chatId}`, (data) => {
+      const json = JSON.parse(data.body);
+      console.log(json);
+      const members = json.members;
+
+      store.dispatch(updateGroupMembers(members));
     });
     client.subscribe(`/chats/last_message/${userId}`, (message) => {
       console.log("chats/lastMessage: ", JSON.parse(message.body));
