@@ -29,6 +29,9 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
 
   const onOpenModal = () => {
     setOpenModal(true);
+    setTimeout(() => {
+      userIdInputRef.current?.focus();
+    }, 0);
   };
   const onCloseModal = () => {
     setOpenModal(false);

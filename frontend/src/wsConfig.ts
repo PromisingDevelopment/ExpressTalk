@@ -1,9 +1,12 @@
 import { Client } from "@stomp/stompjs";
 import { wsServerURL } from "config";
 import { getCurrentChat } from "modules/CurrentChat";
-import { updateCurrentChat } from "modules/CurrentChat/store/currentChatSlice";
 import { store } from "redux/store";
 import SockJS from "sockjs-client";
+import {
+  updateCurrentChat,
+  updateGroupMembers,
+} from "modules/CurrentChat/store/currentChatSlice";
 
 let client: Client;
 
@@ -12,23 +15,18 @@ export function connect(userId: string, chatId: string, isPrivate: boolean) {
   client = new Client();
 
   const onConnectGroup = () => {
+    client.subscribe(`/group_chat/messages/${chatId}`, (data) => {
+      const json = JSON.parse(data.body);
+
+      store.dispatch(updateCurrentChat({ data: json, type: "groupChat" }));
+    });
+    client.subscribe(`/group_chat/updated_members/${chatId}`, (data) => {
+    });
     client.subscribe(`/chats/last_message/${userId}`, (message) => {
       console.log("chats/lastMessage: ", JSON.parse(message.body));
     });
-    client.subscribe(`/group_chat/anon_messages/${chatId}`, (message) => {
-      console.log("group_chat/anon_messages: ", JSON.parse(message.body));
-    });
-    client.subscribe(`/group_chats/updated_members/${chatId}`, (message) => {
-      console.log("group_chats/updatedMembers: ", JSON.parse(message.body));
-    });
     client.subscribe(`/group_chat/add/${chatId}/errors`, (message) => {
       console.log("group_chat/add errors: ", JSON.parse(message.body));
-    });
-    client.subscribe(`/group_chat/messages/${chatId}`, (message) => {
-      console.log("/group_chat/messages: ", JSON.parse(message.body));
-      const data = JSON.parse(message.body);
-
-      store.dispatch(updateCurrentChat({ data, type: "groupChat" }));
     });
     client.subscribe(`/group_chat/messages/${chatId}/errors`, (message) => {
       console.log("/group_chat/messages errors: ", JSON.parse(message.body));

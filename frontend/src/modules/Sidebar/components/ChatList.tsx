@@ -41,7 +41,6 @@ const ChatList: React.FC<ChatListProps> = ({
 
   const getFilteredChats = (type: CurrentChatType) => {
     if (type === "privateChat") {
-      console.log(chatsList);
       return chatsList.list?.privateChats.filter((chat) => {
         return chat.receiverLogin.includes(filterChatsValue);
       });
