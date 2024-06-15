@@ -71,7 +71,8 @@ public class PrivateChatController {
             );
             LastMessageDto lastMessageDto = new LastMessageDto(chatId,privateChatMessage.getContent());
 
-            simpMessagingTemplate.convertAndSend("/chats/last_messages/" + receiver.getId(), lastMessageDto);
+            simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
+            simpMessagingTemplate.convertAndSend("/chat/last_message/" + sender.getId(), lastMessageDto);
             simpMessagingTemplate.convertAndSend("/private_chat/messages/" + sendChatMessageDto.chatId(), clientChatMessageDto);
         } catch (Exception ex) {
             System.out.println("\n" + ex.getMessage() + "\n");

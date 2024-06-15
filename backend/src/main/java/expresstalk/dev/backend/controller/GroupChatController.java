@@ -68,7 +68,7 @@ public class GroupChatController {
 
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,groupChatMessage.getContent());
-                simpMessagingTemplate.convertAndSend("/chats/last_messages/" + receiver.getId(), lastMessageDto);
+                simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             }
 
             ChatMessageDto clientChatMessageDto = new ChatMessageDto(
@@ -109,7 +109,7 @@ public class GroupChatController {
             List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin.getId(), chatId);
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,addMemberMessage);
-                simpMessagingTemplate.convertAndSend("/chats/last_messages/" + receiver.getId(), lastMessageDto);
+                simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             }
 
             UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers(), groupChat.getAdmins());
@@ -144,7 +144,8 @@ public class GroupChatController {
             List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin.getId(), chatId);
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,removeMemberMessage);
-                simpMessagingTemplate.convertAndSend("/chats/last_messages/" + receiver.getId(), lastMessageDto);
+
+                simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             }
 
             UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers(), groupChat.getAdmins());
@@ -179,7 +180,7 @@ public class GroupChatController {
             List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin.getId(), chatId);
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,changedRoleMessage);
-                simpMessagingTemplate.convertAndSend("/chats/last_messages/" + receiver.getId(), lastMessageDto);
+                simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             }
 
             UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers(), groupChat.getAdmins());

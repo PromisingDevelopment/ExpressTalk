@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 @Service
 public class GroupChatSerivce {
@@ -92,8 +93,16 @@ public class GroupChatSerivce {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User can not remove members from the chat because user is not admin");
         }
 
-        groupChat.getMembers().remove(member);
-        member.getGroupChats().remove(groupChat);
+        int memberIndex = IntStream.range(0, groupChat.getMembers().size())
+                .filter(i -> groupChat.getMembers().get(i).getId().equals(member.getId()))
+                .findFirst().orElse(-1);
+
+        int groupIndex = IntStream.range(0, member.getGroupChats().size())
+                .filter(i -> member.getGroupChats().get(i).getId().equals(groupChat.getId()))
+                .findFirst().orElse(-1);
+
+        groupChat.getMembers().remove(memberIndex);
+        member.getGroupChats().remove(groupIndex);
 
         groupChatRepository.save(groupChat);
         userRepository.save(member);
