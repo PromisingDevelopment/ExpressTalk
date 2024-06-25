@@ -106,6 +106,7 @@ public class GroupChatController {
             String addMemberMessage = admin.getLogin() + " has added " + member.getLogin();
             groupChatSerivce.saveSystemMessage(addMemberMessage, groupChat);
 
+            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + addUserToGroupChatDto.chatId(), addMemberMessage);
             List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin.getId(), chatId);
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,addMemberMessage);
@@ -141,6 +142,7 @@ public class GroupChatController {
             String removeMemberMessage = admin.getLogin() + " has removed " + member.getLogin();
             groupChatSerivce.saveSystemMessage(removeMemberMessage, groupChat);
 
+            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + removeUserFromGroupChatDto.chatId(), removeMemberMessage);
             List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin.getId(), chatId);
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,removeMemberMessage);
@@ -177,6 +179,7 @@ public class GroupChatController {
             String changedRoleMessage = changingUser.getLogin() + " is now " + setUserRoleInGroupChatDto.groupChatRole();
             groupChatSerivce.saveSystemMessage(changedRoleMessage, groupChat);
 
+            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + setUserRoleInGroupChatDto.chatId(), changedRoleMessage);
             List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin.getId(), chatId);
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,changedRoleMessage);
