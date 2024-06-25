@@ -13,17 +13,12 @@ interface MessageProps {
   isGroupMessage?: boolean;
 }
 
-const Message: React.FC<MessageProps> = ({
-  isMine,
-  createdAt,
-  content,
-  senderLogin,
-  isGroupMessage,
-  senderId,
-}) => {
+const Message: React.FC<MessageProps> = (props) => {
+  const { isMine, createdAt, content, senderLogin, isGroupMessage, senderId } = props;
+
   const isLowContent = content.length < 20;
   const isShownLogin = Boolean(isGroupMessage && !isMine && senderLogin);
-  const isAnon = Boolean(content && senderId === null);
+  const isAnon = Boolean(content && !senderId);
 
   return (
     <StyledMessageContainer isAnon={isAnon} isMine={isMine}>
@@ -101,7 +96,7 @@ const StyledMessageWrapper = styled("div")<{
       : isAnon
       ? {
           borderRadius: "10px",
-          background: "rgba(53, 63, 117, .6 )",
+          background: "rgba(53, 63, 117, .7 )",
           px: {
             md: 2,
             xs: 2,

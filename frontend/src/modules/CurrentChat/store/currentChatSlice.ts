@@ -50,7 +50,7 @@ const currentChatSlice = createSlice({
         () => (state.currentGroupChat = action.payload.data)
       );
     },
-    updateCurrentChat: (
+    updateCurrentChatMessages: (
       state,
       action: PayloadAction<{ data: any; type: CurrentChatType }>
     ) => {
@@ -123,7 +123,11 @@ export const getCurrentChat = createAsyncThunk<
   }
 });
 
-export const { setCurrentChat, updateCurrentChat, resetChats, updateGroupMembers } =
-  currentChatSlice.actions;
+export const {
+  setCurrentChat,
+  updateCurrentChatMessages,
+  resetChats,
+  updateGroupMembers,
+} = currentChatSlice.actions;
 
 export default currentChatSlice.reducer;

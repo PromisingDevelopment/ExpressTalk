@@ -54,7 +54,7 @@ const rootSlice = createSlice({
       })
       .addCase(getCurrentUser.rejected, (state, action: PayloadAction<any>) => {
         state.currentUser.status = "error";
-        state.currentUser.errorCode = action.payload.response.status || null;
+        state.currentUser.errorCode = action.payload.response?.status || null;
       });
   },
 });
