@@ -33,7 +33,7 @@ const CreateNewChat: React.FC<CreateNewChatProps> = ({ switchChatMode }) => {
 
       if (chatId && currentUserId) {
         switchChatMode(0);
-        connect(currentUserId, chatId, true);
+        connect(chatId, true);
         dispatch(setIsCreatedNewChat(true));
         dispatch(setCurrentChat({ data: createdPrivateChat, type: "privateChat" }));
         dispatch(setCurrentChatId(chatId));

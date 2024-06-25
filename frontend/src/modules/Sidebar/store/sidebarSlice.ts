@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import { chatDeleteUrls, chatGetUrls } from "config";
+import { CurrentChatType } from "types/CurrentChatType";
 import { ChatsListObj } from "../types/ChatsListObj";
 
 interface InitialState {
@@ -37,16 +38,30 @@ const sidebarSlice = createSlice({
     },
     updateLastMessage: (
       state,
-      action: PayloadAction<{ lastMessage: string; chatId: string }>
+      action: PayloadAction<{
+        lastMessage: string;
+        chatId: string;
+        chatType: CurrentChatType;
+      }>
     ) => {
-      const list = state.chatsList.list;
+      const chatsList = state.chatsList.list;
+      const lastMessage = action.payload.lastMessage;
+      const chatId = action.payload.chatId;
+      const chatType = action.payload.chatType;
 
-      if (list) {
-        const chat = list.privateChats.find((chat) => chat.id === action.payload.chatId);
+      if (!chatsList) return;
 
-        if (chat) {
-          chat.lastMessage = action.payload.lastMessage;
-        }
+      const findChat = (chat: any) => chat.id === chatId;
+
+      const privateChat = chatsList.privateChats.find(findChat);
+      const groupChat = chatsList.groupChats.find(findChat);
+
+      if (privateChat) {
+        privateChat.lastMessage = lastMessage;
+      }
+
+      if (groupChat) {
+        groupChat.lastMessage = lastMessage;
       }
     },
   },
