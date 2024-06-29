@@ -5,8 +5,8 @@ import { getCurrentTimeString } from "helpers/getCurrentTimeString";
 import React from "react";
 
 interface MessageProps {
-  createdAt: string;
   content: string;
+  createdAt?: string;
   isMine?: boolean;
   senderId?: string;
   senderLogin?: string;
@@ -29,7 +29,9 @@ const Message: React.FC<MessageProps> = (props) => {
         isShownLogin={isShownLogin}>
         {isShownLogin && <StyledName>{senderLogin}</StyledName>}
         <StyledContent isAnon={isAnon}>{content}</StyledContent>
-        {!isAnon && <StyledDate>{getCurrentTimeString(createdAt)}</StyledDate>}
+        {!isAnon && createdAt && (
+          <StyledDate>{getCurrentTimeString(createdAt)}</StyledDate>
+        )}
       </StyledMessageWrapper>
     </StyledMessageContainer>
   );

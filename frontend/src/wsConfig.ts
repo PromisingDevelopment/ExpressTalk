@@ -4,6 +4,8 @@ import { updateCurrentChatMessages, updateGroupMembers } from "modules/CurrentCh
 import { updateLastMessage } from "modules/Sidebar";
 import { store } from "redux/store";
 import SockJS from "sockjs-client";
+import { CurrentChatType } from "types/CurrentChatType";
+import { MemberRoles } from "types/MemberRoles";
 
 const chatClient = new Client();
 const sidebarClient = new Client();
@@ -12,24 +14,42 @@ const sidebarClient = new Client();
 export function connect(chatId: string, isPrivate: boolean) {
   const socket: WebSocket = new SockJS(wsServerURL);
 
+  //console.log("%c" + "connect", "color: red;");
+
   const onConnectGroup = () => {
     chatClient.subscribe(`/group_chat/messages/${chatId}`, (data) => {
       const json = JSON.parse(data.body);
+      const type: CurrentChatType = "groupChat";
 
-      console.log("group_chat/messages: ", json);
+      const messageData = {
+        data: json,
+        type: type,
+      };
 
-      store.dispatch(updateCurrentChatMessages({ data: json, type: "groupChat" }));
+      if (typeof json === "string") {
+        const anonMessage = {
+          content: json,
+        };
+
+        messageData.data = anonMessage;
+
+        store.dispatch(updateCurrentChatMessages(messageData));
+        return;
+      }
+
+      store.dispatch(updateCurrentChatMessages(messageData));
     });
     chatClient.subscribe(`/group_chat/updated_members/${chatId}`, (data) => {
       const json = JSON.parse(data.body);
       const members = json.members;
 
-      console.log("updated_members: ", json);
+      //console.log("updated_members: ", json);
 
       store.dispatch(updateGroupMembers(members));
     });
     chatClient.subscribe(`/group_chat/add/${chatId}/errors`, (message) => {
-      console.log("group_chat/add errors: ", JSON.parse(message.body));
+      const error = JSON.parse(message.body);
+      console.log("group_chat/add errors: ", error);
     });
     chatClient.subscribe(`/group_chat/messages/${chatId}/errors`, (message) => {
       console.log("/group_chat/messages errors: ", JSON.parse(message.body));
@@ -52,8 +72,6 @@ export function connect(chatId: string, isPrivate: boolean) {
     });
   };
 
-  console.log("%c" + "connect", "color: red;");
-
   chatClient.configure({
     brokerURL: wsServerURL,
     onConnect: isPrivate ? onConnectPrivate : onConnectGroup,
@@ -75,9 +93,9 @@ export function subscribeLastMessages(userId: string) {
   const handleLastMessage = (data: any) => {
     const json = JSON.parse(data.body);
     const chatType = store.getState().root.currentChatType;
-    console.log("last_messages: ", json);
+    //console.log("last_messages: ", json);
 
-    console.log(chatType);
+    //console.log(chatType);
 
     const lastMessage = {
       ...json,
