@@ -1,6 +1,6 @@
-import { IconButton, Typography, styled, useTheme } from "@mui/material";
-import React from "react";
 import CloseIcon from "@mui/icons-material/CloseRounded";
+import { IconButton, styled, Typography, useTheme } from "@mui/material";
+import React from "react";
 
 interface ModalContentProps {
   children: React.ReactNode;
@@ -79,15 +79,20 @@ const CenteredWrapper = styled("div")(({ theme: { spacing } }) => ({
   padding: spacing(0, 2),
   "@media (max-height: 400px)": {
     position: "static",
-    maxWidth: "100%",
+    margin: "0 auto",
+    overflowY: "auto",
     paddingTop: 30,
     paddingBottom: 30,
     transform: "translate(0, 0)",
-    overflowY: "auto",
     height: "100%",
     display: "flex",
     justifyContent: "center",
     alignItems: "start",
+
+    "&::-webkit-scrollbar": {
+      width: "0px",
+      backgroundColor: "transparent",
+    },
   },
 }));
 

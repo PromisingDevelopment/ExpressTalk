@@ -1,6 +1,7 @@
 import { Button, Modal, styled, Typography } from "@mui/material";
 import { CustomInput } from "components/CustomInput";
-import React from "react";
+import { error } from "console";
+import React, { useEffect } from "react";
 import CustomIconButton from "UI/CustomIconButton";
 import ModalContent from "../UI/ModalContent";
 
@@ -11,6 +12,7 @@ interface ModalLayoutProps {
   inputName: string;
   Icon?: any;
   withoutIcon?: boolean;
+  closeMenu?: any;
 }
 
 const ModalLayout: React.FC<ModalLayoutProps> = ({
@@ -20,12 +22,17 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
   inputName,
   Icon,
   withoutIcon,
+  closeMenu,
 }) => {
   const [openModal, setOpenModal] = React.useState(false);
   const [isEmpty, setIsEmpty] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<any>(null);
   const userIdInputRef = React.useRef<HTMLInputElement | null>(null);
   const [isDisabled, setIsDisabled] = React.useState(false);
+
+  const hideFocus = () => {
+    (document.activeElement as HTMLElement).blur();
+  };
 
   const onOpenModal = () => {
     setOpenModal(true);
@@ -35,6 +42,8 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
   };
   const onCloseModal = () => {
     setOpenModal(false);
+    closeMenu();
+    setTimeout(hideFocus, 300);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

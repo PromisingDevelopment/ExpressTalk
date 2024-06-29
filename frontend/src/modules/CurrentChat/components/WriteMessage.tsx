@@ -34,7 +34,6 @@ const WriteMessage: React.FC<WriteMessageProps> = ({ chatId }) => {
       setIsHiddenAttachFile(false);
     }
   };
-  console.log(isHiddenAttachFile);
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsHiddenAttachFile(e.target.value !== "");
   };

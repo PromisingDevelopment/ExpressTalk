@@ -1,7 +1,5 @@
 import MoreIcon from "@mui/icons-material/MoreVert";
-import PersonAddIcon from "@mui/icons-material/PersonAddAlt1";
-import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
-import { Menu, MenuItem, styled } from "@mui/material";
+import { Menu, MenuItem } from "@mui/material";
 import { getMemberByLogin } from "axios/getMemberByLogin";
 import { ModalLayout } from "components/ModalLayout";
 import { useAppSelector } from "hooks/redux";
@@ -43,7 +41,7 @@ const MemberActions: React.FC<MemberActionsProps> = () => {
         <MenuItem>
           <ModalLayout
             withoutIcon
-            Icon={PersonAddIcon}
+            closeMenu={closeMenu}
             inputLabel="Input a member login"
             inputName="input-member-login"
             label="Add a new member"
@@ -53,7 +51,7 @@ const MemberActions: React.FC<MemberActionsProps> = () => {
         <MenuItem>
           <ModalLayout
             withoutIcon
-            Icon={PersonRemoveIcon}
+            closeMenu={closeMenu}
             inputLabel="Input a member login"
             inputName="input-member-login"
             label="Remove a member"
@@ -64,10 +62,5 @@ const MemberActions: React.FC<MemberActionsProps> = () => {
     </>
   );
 };
-
-const StyledWrapper = styled("div")`
-  display: flex;
-  gap: 12px;
-`;
 
 export { MemberActions };
