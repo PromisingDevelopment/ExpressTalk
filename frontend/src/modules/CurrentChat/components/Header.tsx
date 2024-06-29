@@ -31,7 +31,10 @@ const Header: React.FC<HeaderProps> = ({ login }) => {
 
       <div style={{ flexGrow: 1 }}>
         <Title>{currentGroupChat.name}</Title>
-        <GroupMembersInfo members={currentGroupChat.members} />
+        <GroupMembersInfo
+          chatId={currentGroupChat.id}
+          members={currentGroupChat.members}
+        />
       </div>
       <MemberActions />
     </>

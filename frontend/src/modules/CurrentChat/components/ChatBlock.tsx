@@ -32,7 +32,6 @@ const ChatBlock: React.FC<ChatBlockProps> = () => {
         ))}
     </>
   );
-
   const groupLayout = (
     <>
       {user &&

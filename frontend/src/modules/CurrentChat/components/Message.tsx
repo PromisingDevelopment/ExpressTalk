@@ -112,7 +112,7 @@ const StyledMessageWrapper = styled("div")<{
             background: `url(${LeftMessageTailImage}) 0 0 / auto no-repeat`,
           },
         },
-    isLowContent
+    isLowContent && !isAnon
       ? {
           p: ({ spacing }) => ({
             md: spacing(1, 6.25, 1, 2.5),

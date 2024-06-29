@@ -3,6 +3,7 @@ import { CustomInput } from "components/CustomInput";
 import { error } from "console";
 import React, { useEffect } from "react";
 import CustomIconButton from "UI/CustomIconButton";
+import { SubmitButton } from "UI/SubmitButton";
 import ModalContent from "../UI/ModalContent";
 
 interface ModalLayoutProps {
@@ -94,40 +95,12 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
               </Typography>
             )}
 
-            <SubmitButton
-              variant="contained"
-              type="submit"
-              disableElevation
-              disabled={isDisabled}>
-              {label}
-            </SubmitButton>
+            <SubmitButton disabled={isDisabled} label={label} />
           </form>
         </ModalContent>
       </Modal>
     </>
   );
 };
-
-const SubmitButton = styled(Button)(({ theme }) =>
-  theme.unstable_sx({
-    bgcolor: "#fff",
-    color: "#2B3464",
-    transition: "opacity 0.3s ease 0s",
-    mt: 4,
-    py: 2,
-    width: 1,
-    fontSize: 18,
-    ":hover": { opacity: 0.8, bgcolor: "#fff" },
-    ":disabled": {
-      opacity: 0.6,
-      bgcolor: "#fff",
-    },
-    [theme.breakpoints.down("sm")]: {
-      fontSize: 16,
-      mt: 3,
-      py: 1.5,
-    },
-  })
-);
 
 export { ModalLayout };

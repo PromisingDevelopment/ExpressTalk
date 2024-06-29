@@ -14,13 +14,11 @@ const sidebarClient = new Client();
 export function connect(chatId: string, isPrivate: boolean) {
   const socket: WebSocket = new SockJS(wsServerURL);
 
-  //console.log("%c" + "connect", "color: red;");
-
   const onConnectGroup = () => {
     chatClient.subscribe(`/group_chat/messages/${chatId}`, (data) => {
       const json = JSON.parse(data.body);
       const type: CurrentChatType = "groupChat";
-
+      console.log(json);
       const messageData = {
         data: json,
         type: type,
@@ -43,21 +41,20 @@ export function connect(chatId: string, isPrivate: boolean) {
       const json = JSON.parse(data.body);
       const members = json.members;
 
-      //console.log("updated_members: ", json);
-
       store.dispatch(updateGroupMembers(members));
     });
-    chatClient.subscribe(`/group_chat/add/${chatId}/errors`, (message) => {
-      const error = JSON.parse(message.body);
+    chatClient.subscribe(`/group_chat/add/${chatId}/errors`, (data) => {
+      const error = JSON.parse(data.body);
       console.log("group_chat/add errors: ", error);
     });
-    chatClient.subscribe(`/group_chat/messages/${chatId}/errors`, (message) => {
-      console.log("/group_chat/messages errors: ", JSON.parse(message.body));
+    chatClient.subscribe(`/group_chat/messages/${chatId}/errors`, (data) => {
+      const error = JSON.parse(data.body);
+      console.log("/group_chat/messages/errors: ", error);
     });
     chatClient.subscribe(`/group_chat/set_role/${chatId}/errors`, (data) => {
-      const json = JSON.parse(data.body);
+      const error = JSON.parse(data.body);
 
-      console.log(json);
+      console.log("/group_chat/set_role/errors: ", error);
     });
   };
 
@@ -93,9 +90,6 @@ export function subscribeLastMessages(userId: string) {
   const handleLastMessage = (data: any) => {
     const json = JSON.parse(data.body);
     const chatType = store.getState().root.currentChatType;
-    //console.log("last_messages: ", json);
-
-    //console.log(chatType);
 
     const lastMessage = {
       ...json,
@@ -128,8 +122,7 @@ export function disconnect() {
   chatClient.deactivate();
 }
 
-// SEND REQUESTS
-
+// SEND MESSAGES -----------------------------------------------------
 export function privateChatSendMessage(
   message: string,
   chatId: string,
@@ -154,7 +147,7 @@ export function sendGroupMessage(content: string, chatId: string, createdAt: num
     }),
   });
 }
-
+// ADD/REMOVE GROUP MEMBERS ------------------------------------------
 export function addGroupMember(chatId: string, memberId: string) {
   chatClient.publish({
     destination: `/app/group_chat/add`,
@@ -174,10 +167,18 @@ export function removeGroupMember(chatId: string, memberId: string) {
   });
 }
 
-// roles
-
-export function addMemberRole(
+// ROLES ------------------------------------------------------------
+export function setMemberRole(
   chatId: string,
   userToGiveRoleId: string,
-  role: MemberRoles
-) {}
+  groupChatRole: MemberRoles
+) {
+  chatClient.publish({
+    destination: `/app/group_chat/set_role`,
+    body: JSON.stringify({
+      chatId,
+      userToGiveRoleId,
+      groupChatRole,
+    }),
+  });
+}
