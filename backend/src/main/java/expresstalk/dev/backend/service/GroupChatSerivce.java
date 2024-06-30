@@ -52,6 +52,10 @@ public class GroupChatSerivce {
         return false;
     }
 
+    public GroupChatRole getRole(GroupChat groupChat, User user) {
+        return isAdmin(groupChat, user) ? GroupChatRole.ADMIN : GroupChatRole.MEMBER;
+    }
+
     public GroupChat getChat(UUID chatId) {
         GroupChat groupChat = groupChatRepository.findById(chatId).orElse(null);
 
@@ -108,13 +112,7 @@ public class GroupChatSerivce {
         userRepository.save(member);
     }
 
-    public GroupChat createChat(UUID userId, String groupName) {
-        User user = new User();
-        try {
-            user = userService.findById(userId);
-        } catch (Exception ex) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "User id stored in session doesn't storage real user's id");
-        }
+    public GroupChat createChat(User user, String groupName) {
         GroupChat groupChat = new GroupChat(groupName);
 
         groupChat.getMembers().add(user);
@@ -184,10 +182,9 @@ public class GroupChatSerivce {
         return groupChat;
     }
 
-    public List<User> getOtherUsersOfChat(UUID currentUserId, UUID chatId) {
-        GroupChat groupChat = getChat(chatId);
+    public List<User> getOtherUsersOfChat(User currentUser, GroupChat groupChat) {
         List<User> users = groupChat.getMembers();
-        users.stream().filter((User user)-> !user.getId().equals(currentUserId));
+        users.stream().filter((User user)-> !user.getId().equals(currentUser.getId()));
 
         return users;
     }

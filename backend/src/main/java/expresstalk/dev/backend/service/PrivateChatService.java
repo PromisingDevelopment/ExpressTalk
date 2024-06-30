@@ -47,13 +47,10 @@ public class PrivateChatService {
         return chat;
     }
 
-    public PrivateChat createPrivateChat(UUID member1Id, UUID member2Id) {
-        if(member1Id.equals(member2Id)) {
+    public PrivateChat createPrivateChat(User user1, User user2) {
+        if(user1.getId().equals(user2.getId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can not create private chat with 1 person");
         }
-
-        User user1 = userService.findById(member1Id);
-        User user2 = userService.findById(member2Id);
 
         try {
             getChat(user1, user2); // throws exception if chat between two users wasn't found
@@ -78,7 +75,6 @@ public class PrivateChatService {
 
     public PrivateChatMessage saveMessage(SendChatMessageDto sendPrivateChatMessageDto, User sender, User receiver) {
         PrivateChat privateChat = getChat(UUID.fromString(sendPrivateChatMessageDto.chatId()));
-
         PrivateChatMessage privateChatMessage = new PrivateChatMessage(
                 sender,
                 receiver,
@@ -94,7 +90,7 @@ public class PrivateChatService {
         return privateChatMessage;
     }
 
-    private boolean isUserExistsInChat(User user, PrivateChat privateChat) {
+    public boolean isUserExistsInChat(User user, PrivateChat privateChat) {
         for (User member : privateChat.getMembers()) {
             if(member.getId().equals(user.getId())) {
                 return true;
@@ -104,50 +100,20 @@ public class PrivateChatService {
         return false;
     }
 
-    public boolean isUserExistsInChat(UUID userId, UUID chatId) {
-        PrivateChat privateChat = getChat(chatId);
-        User user = userService.findById(userId);
-
-        return isUserExistsInChat(user, privateChat);
-    }
-
-    public boolean isUserExistsInChat(User user, UUID chatId) {
-        PrivateChat privateChat = getChat(chatId);
-
-        return isUserExistsInChat(user, privateChat);
-    }
-
-    public void ensureUserPermissionToSendMessageInChat(User user, UUID chatId) {
-        if(!isUserExistsInChat(user, chatId)) {
+    public void ensureUserPermissionToSendMessageInChat(User user, PrivateChat privateChat) {
+        if(!isUserExistsInChat(user, privateChat)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User with id " + user.getId() + " can't send messages to other people's chat");
         }
     }
 
-    public User getSecondUserOfChat(UUID firstUserId, PrivateChat privateChat) throws Exception {
-        if(!isUserExistsInChat(firstUserId, privateChat.getId())) {
+    public User getSecondUserOfChat(User firstUser, PrivateChat privateChat) throws Exception {
+        if(!isUserExistsInChat(firstUser, privateChat)) {
             throw new Exception("Searching of the second user of chat was failed because the first user doesn't exist in chat");
         }
 
         User secondUser = new User();
-
         for (User user : privateChat.getMembers()) {
-            if(!user.getId().equals(firstUserId)) secondUser = user;
-        }
-
-        return secondUser;
-    }
-
-    public User getSecondUserOfChat(UUID firstUserId, UUID privateChatId) throws Exception {
-        PrivateChat privateChat = getChat(privateChatId);
-
-        if(!isUserExistsInChat(firstUserId, privateChat.getId())) {
-            throw new Exception("Searching of the second user of chat was failed because the first user doesn't exist in chat");
-        }
-
-        User secondUser = new User();
-
-        for (User user : privateChat.getMembers()) {
-            if(!user.getId().equals(firstUserId)) secondUser = user;
+            if(!user.getId().equals(firstUser.getId())) secondUser = user;
         }
 
         return secondUser;

@@ -61,6 +61,7 @@ public class UserController {
     public GetUserChatsDto getChatsPage(HttpServletRequest request) {
         request.getSession(false);
         UUID userId = sessionService.getUserIdFromSession(request);
+        User user = userService.findById(userId);
 
         try {
             userService.handleStatusTo(userId, UserStatus.ONLINE);
@@ -69,6 +70,6 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
         }
 
-        return chatService.getChats(userId);
+        return chatService.getChats(user);
     }
 }
