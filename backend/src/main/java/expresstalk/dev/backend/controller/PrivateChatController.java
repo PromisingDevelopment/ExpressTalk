@@ -1,6 +1,6 @@
 package expresstalk.dev.backend.controller;
 
-import expresstalk.dev.backend.dto.response.ChatMessageDto;
+import expresstalk.dev.backend.dto.response.PrivateChatMessageDto;
 import expresstalk.dev.backend.dto.request.CreatePrivateChatRoomDto;
 import expresstalk.dev.backend.dto.response.LastMessageDto;
 import expresstalk.dev.backend.dto.request.SendChatMessageDto;
@@ -53,29 +53,28 @@ public class PrivateChatController {
             MessageHeaders headers = message.getHeaders();
             HttpSession session = (HttpSession) SimpMessageHeaderAccessor.getSessionAttributes(headers).get("session");
             sessionService.ensureSessionExistense(session);
-
             ValidationErrorChecker.<SendChatMessageDto>checkDtoForErrors(sendChatMessageDto);
 
             UUID chatId = chatService.checkAndGetChatUUID(sendChatMessageDto.chatId());
             UUID userId = sessionService.getUserIdFromSession(session);
             User sender = userService.findById(userId);
-            privateChatService.ensureUserPermissionToSendMessageInChat(sender, chatId);
-
-            User receiver = privateChatService.getSecondUserOfChat(sender.getId(), chatId);
+            PrivateChat privateChat = privateChatService.getChat(chatId);
+            privateChatService.ensureUserPermissionToSendMessageInChat(sender, privateChat);
+            User receiver = privateChatService.getSecondUserOfChat(sender, privateChat);
             PrivateChatMessage privateChatMessage = privateChatService.saveMessage(sendChatMessageDto, sender, receiver);
-            ChatMessageDto clientChatMessageDto = new ChatMessageDto(
-                    sender.getId(),
-                    sender.getLogin(),
+            PrivateChatMessageDto privateChatMessageDto = new PrivateChatMessageDto(
+                    privateChatMessage.isSystemMessage(),
+                    privateChatMessage.getCreatedAt(),
                     privateChatMessage.getContent(),
-                    privateChatMessage.getCreatedAt()
+                    sender.getLogin(),
+                    sender.getId()
             );
             LastMessageDto lastMessageDto = new LastMessageDto(chatId,privateChatMessage.getContent());
 
             simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             simpMessagingTemplate.convertAndSend("/chat/last_message/" + sender.getId(), lastMessageDto);
-            simpMessagingTemplate.convertAndSend("/private_chat/messages/" + sendChatMessageDto.chatId(), clientChatMessageDto);
+            simpMessagingTemplate.convertAndSend("/private_chat/messages/" + sendChatMessageDto.chatId(), privateChatMessageDto);
         } catch (Exception ex) {
-            System.out.println("\n" + ex.getMessage() + "\n");
             simpMessagingTemplate.convertAndSend("/private_chat/messages/" + sendChatMessageDto.chatId() + "/errors", ex.getMessage());
         }
     }
@@ -110,9 +109,11 @@ public class PrivateChatController {
     @PostMapping
     @ResponseBody
     public PrivateChat createPrivateChatRoom(@RequestBody @Valid CreatePrivateChatRoomDto createPrivateChatRoomDto, HttpServletRequest request) {
-        UUID userId = sessionService.getUserIdFromSession(request);
-        UUID secondMemberId = UUID.fromString(createPrivateChatRoomDto.secondMemberId());
-        PrivateChat chat = privateChatService.createPrivateChat(userId, secondMemberId);
+        UUID user1Id = sessionService.getUserIdFromSession(request);
+        UUID user2Id = UUID.fromString(createPrivateChatRoomDto.secondMemberId());
+        User user1 = userService.findById(user1Id);
+        User user2 = userService.findById(user2Id);
+        PrivateChat chat = privateChatService.createPrivateChat(user1, user2);
 
         return chat;
     }

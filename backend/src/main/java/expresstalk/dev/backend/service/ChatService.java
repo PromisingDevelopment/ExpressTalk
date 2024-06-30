@@ -23,19 +23,12 @@ public class ChatService {
         this.privateChatService = privateChatService;
     }
 
-    public GetUserChatsDto getChats(UUID userId) {
-        User user = new User();
-        try {
-            user = userService.findById(userId);
-        } catch (Exception ex) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "User id stored in session doesn't storage real user's id");
-        }
-
+    public GetUserChatsDto getChats(User user) {
         List<BriefPrivateChatDto> briefPrivateChatDtos = new ArrayList<>();
         for(PrivateChat privateChat : user.getPrivateChats()) {
             User secondUser = new User();
             try {
-                secondUser = privateChatService.getSecondUserOfChat(user.getId(), privateChat);
+                secondUser = privateChatService.getSecondUserOfChat(user, privateChat);
             } catch (Exception ex) {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
             }

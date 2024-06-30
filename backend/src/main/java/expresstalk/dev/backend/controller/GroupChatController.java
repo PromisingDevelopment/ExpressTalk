@@ -1,7 +1,8 @@
 package expresstalk.dev.backend.controller;
 
 import expresstalk.dev.backend.dto.request.*;
-import expresstalk.dev.backend.dto.response.ChatMessageDto;
+import expresstalk.dev.backend.dto.response.GroupChatMessageDto;
+import expresstalk.dev.backend.dto.response.PrivateChatMessageDto;
 import expresstalk.dev.backend.dto.response.LastMessageDto;
 import expresstalk.dev.backend.dto.response.UpdatedMembersDto;
 import expresstalk.dev.backend.entity.GroupChat;
@@ -14,7 +15,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -55,29 +55,30 @@ public class GroupChatController {
             MessageHeaders headers = message.getHeaders();
             HttpSession session = (HttpSession) SimpMessageHeaderAccessor.getSessionAttributes(headers).get("session");
             sessionService.ensureSessionExistense(session);
-
             ValidationErrorChecker.<SendChatMessageDto>checkDtoForErrors(sendChatMessageDto);
 
             UUID chatId = chatService.checkAndGetChatUUID(sendChatMessageDto.chatId());
             UUID userId = sessionService.getUserIdFromSession(session);
             User sender = userService.findById(userId);
+            GroupChat groupChat = groupChatSerivce.getChat(chatId);
             groupChatSerivce.ensureUserPermissionToSendMessageInChat(sender, chatId);
-
-            List<User> receivers = groupChatSerivce.getOtherUsersOfChat(sender.getId(), chatId);
+            List<User> receivers = groupChatSerivce.getOtherUsersOfChat(sender, groupChat);
             GroupChatMessage groupChatMessage = groupChatSerivce.saveMessage(sendChatMessageDto, sender);
+            GroupChatMessageDto groupChatMessageDto = new GroupChatMessageDto(
+                    groupChatMessage.isSystemMessage(),
+                    groupChatMessage.getCreatedAt(),
+                    groupChatMessage.getContent(),
+                    groupChatMessage.getSenderLogin(),
+                    groupChatSerivce.getRole(groupChat, sender),
+                    sender.getId()
+                    );
 
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,groupChatMessage.getContent());
                 simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             }
 
-            ChatMessageDto clientChatMessageDto = new ChatMessageDto(
-                    sender.getId(),
-                    sender.getLogin(),
-                    groupChatMessage.getContent(),
-                    groupChatMessage.getCreatedAt()
-            );
-            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + sendChatMessageDto.chatId(), clientChatMessageDto);
+            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + sendChatMessageDto.chatId(), groupChatMessageDto);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             simpMessagingTemplate.convertAndSend("/group_chat/messages/" + sendChatMessageDto.chatId() + "/errors", ex.getMessage());
@@ -93,7 +94,6 @@ public class GroupChatController {
             MessageHeaders headers = message.getHeaders();
             HttpSession session = (HttpSession) SimpMessageHeaderAccessor.getSessionAttributes(headers).get("session");
             sessionService.ensureSessionExistense(session);
-
             ValidationErrorChecker.<AddUserToGroupChatDto>checkDtoForErrors(addUserToGroupChatDto);
 
             UUID chatId = chatService.checkAndGetChatUUID(addUserToGroupChatDto.chatId());
@@ -102,18 +102,21 @@ public class GroupChatController {
             User member = userService.findById(Converter.convertStringToUUID(addUserToGroupChatDto.memberId()));
             GroupChat groupChat = groupChatSerivce.getChat(chatId);
             groupChatSerivce.addMemberToChat(groupChat, admin, member);
-
             String addMemberMessage = admin.getLogin() + " has added " + member.getLogin();
-            groupChatSerivce.saveSystemMessage(addMemberMessage, groupChat);
+            GroupChatMessage groupChatMessage = groupChatSerivce.saveSystemMessage(addMemberMessage, groupChat);
+            GroupChatMessageDto groupChatMessageDto = new GroupChatMessageDto(
+                    groupChatMessage.isSystemMessage(),
+                    groupChatMessage.getCreatedAt(),
+                    groupChatMessage.getContent()
+            );
+            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers(), groupChat.getAdmins());
+            List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin, groupChat);
 
-            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + addUserToGroupChatDto.chatId(), addMemberMessage);
-            List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin.getId(), chatId);
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,addMemberMessage);
                 simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             }
-
-            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers(), groupChat.getAdmins());
+            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + addUserToGroupChatDto.chatId(), groupChatMessageDto);
             simpMessagingTemplate.convertAndSend("/group_chat/updated_members/" + addUserToGroupChatDto.chatId(), updatedMembersDto);
         } catch (Exception ex) {
             simpMessagingTemplate.convertAndSend("/group_chat/add/" + addUserToGroupChatDto.chatId() + "/errors", ex.getMessage());
@@ -129,7 +132,6 @@ public class GroupChatController {
             MessageHeaders headers = message.getHeaders();
             HttpSession session = (HttpSession) SimpMessageHeaderAccessor.getSessionAttributes(headers).get("session");
             sessionService.ensureSessionExistense(session);
-
             ValidationErrorChecker.<RemoveUserFromGroupChatDto>checkDtoForErrors(removeUserFromGroupChatDto);
 
             UUID chatId = chatService.checkAndGetChatUUID(removeUserFromGroupChatDto.chatId());
@@ -138,19 +140,21 @@ public class GroupChatController {
             User member = userService.findById(Converter.convertStringToUUID(removeUserFromGroupChatDto.memberId()));
             GroupChat groupChat = groupChatSerivce.getChat(chatId);
             groupChatSerivce.removeMemberFromChat(groupChat, admin, member);
-
             String removeMemberMessage = admin.getLogin() + " has removed " + member.getLogin();
-            groupChatSerivce.saveSystemMessage(removeMemberMessage, groupChat);
+            GroupChatMessage groupChatMessage = groupChatSerivce.saveSystemMessage(removeMemberMessage, groupChat);
+            GroupChatMessageDto groupChatMessageDto = new GroupChatMessageDto(
+                    groupChatMessage.isSystemMessage(),
+                    groupChatMessage.getCreatedAt(),
+                    groupChatMessage.getContent()
+            );
+            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers(), groupChat.getAdmins());
+            List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin, groupChat);
 
-            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + removeUserFromGroupChatDto.chatId(), removeMemberMessage);
-            List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin.getId(), chatId);
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,removeMemberMessage);
-
                 simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             }
-
-            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers(), groupChat.getAdmins());
+            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + removeUserFromGroupChatDto.chatId(), groupChatMessageDto);
             simpMessagingTemplate.convertAndSend("/group_chat/updated_members/" + removeUserFromGroupChatDto.chatId(), updatedMembersDto);
         } catch (Exception ex) {
             simpMessagingTemplate.convertAndSend("/group_chat/remove/" + removeUserFromGroupChatDto.chatId() + "/errors", ex.getMessage());
@@ -166,7 +170,6 @@ public class GroupChatController {
             MessageHeaders headers = message.getHeaders();
             HttpSession session = (HttpSession) SimpMessageHeaderAccessor.getSessionAttributes(headers).get("session");
             sessionService.ensureSessionExistense(session);
-
             ValidationErrorChecker.<SetUserRoleInGroupChatDto>checkDtoForErrors(setUserRoleInGroupChatDto);
 
             UUID chatId = chatService.checkAndGetChatUUID(setUserRoleInGroupChatDto.chatId());
@@ -175,18 +178,21 @@ public class GroupChatController {
             User changingUser = userService.findById(Converter.convertStringToUUID(setUserRoleInGroupChatDto.userToGiveRoleId()));
             GroupChat groupChat = groupChatSerivce.getChat(chatId);
             groupChatSerivce.setRole(groupChat, admin, changingUser, setUserRoleInGroupChatDto.groupChatRole());
-
             String changedRoleMessage = changingUser.getLogin() + " is now " + setUserRoleInGroupChatDto.groupChatRole();
-            groupChatSerivce.saveSystemMessage(changedRoleMessage, groupChat);
+            GroupChatMessage groupChatMessage = groupChatSerivce.saveSystemMessage(changedRoleMessage, groupChat);
+            GroupChatMessageDto groupChatMessageDto = new GroupChatMessageDto(
+                    groupChatMessage.isSystemMessage(),
+                    groupChatMessage.getCreatedAt(),
+                    groupChatMessage.getContent()
+            );
+            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers(), groupChat.getAdmins());
+            List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin, groupChat);
 
-            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + setUserRoleInGroupChatDto.chatId(), changedRoleMessage);
-            List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin.getId(), chatId);
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,changedRoleMessage);
                 simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             }
-
-            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers(), groupChat.getAdmins());
+            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + setUserRoleInGroupChatDto.chatId(), groupChatMessageDto);
             simpMessagingTemplate.convertAndSend("/group_chat/updated_members/" + setUserRoleInGroupChatDto.chatId(), updatedMembersDto);
         } catch (Exception ex) {
             simpMessagingTemplate.convertAndSend("/group_chat/set_role/" + setUserRoleInGroupChatDto.chatId() + "/errors", ex.getMessage());
@@ -202,7 +208,8 @@ public class GroupChatController {
     @ResponseBody
     public GroupChat createGroupChatRoom(@RequestBody CreateGroupChatRoomDto createGroupChatRoomDto, HttpServletRequest request) {
         UUID userId = sessionService.getUserIdFromSession(request);
-        GroupChat chat = groupChatSerivce.createChat(userId, createGroupChatRoomDto.groupName());
+        User user = userService.findById(userId);
+        GroupChat chat = groupChatSerivce.createChat(user, createGroupChatRoomDto.groupName());
 
         return chat;
     }
