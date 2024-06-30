@@ -3,7 +3,6 @@ import SendIcon from "@mui/icons-material/Send";
 import { Box, IconButton } from "@mui/material";
 import { CustomInput } from "components/CustomInput";
 import { useAppDispatch, useAppSelector } from "hooks/redux";
-import { updateLastMessage } from "modules/Sidebar";
 import React from "react";
 import { privateChatSendMessage, sendGroupMessage } from "wsConfig";
 
@@ -14,7 +13,6 @@ interface WriteMessageProps {
 const WriteMessage: React.FC<WriteMessageProps> = ({ chatId }) => {
   const [isHiddenAttachFile, setIsHiddenAttachFile] = React.useState(false);
   const writeMessageInputRef = React.useRef<HTMLInputElement>(null);
-  const dispatch = useAppDispatch();
   const currentChatType = useAppSelector((state) => state.root.currentChatType);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -32,11 +30,10 @@ const WriteMessage: React.FC<WriteMessageProps> = ({ chatId }) => {
         sendGroupMessage(lastMessage, chatId, createdAt);
       }
 
-      dispatch(updateLastMessage({ lastMessage, chatId }));
       writeMessageInput.value = "";
+      setIsHiddenAttachFile(false);
     }
   };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsHiddenAttachFile(e.target.value !== "");
   };

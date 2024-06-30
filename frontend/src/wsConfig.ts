@@ -1,80 +1,134 @@
 import { Client } from "@stomp/stompjs";
 import { wsServerURL } from "config";
-import { getCurrentChat } from "modules/CurrentChat";
+import { updateCurrentChatMessages, updateGroupMembers } from "modules/CurrentChat";
+import { updateLastMessage } from "modules/Sidebar";
 import { store } from "redux/store";
 import SockJS from "sockjs-client";
-import {
-  updateCurrentChat,
-  updateGroupMembers,
-} from "modules/CurrentChat/store/currentChatSlice";
+import { CurrentChatType } from "types/CurrentChatType";
+import { MemberRoles } from "types/MemberRoles";
 
-let client: Client;
+const chatClient = new Client();
+const sidebarClient = new Client();
 
-export function connect(userId: string, chatId: string, isPrivate: boolean) {
+// connect -----------------------------------------------------------
+export function connect(chatId: string, isPrivate: boolean) {
   const socket: WebSocket = new SockJS(wsServerURL);
-  client = new Client();
 
   const onConnectGroup = () => {
-    client.subscribe(`/group_chat/messages/${chatId}`, (data) => {
+    chatClient.subscribe(`/group_chat/messages/${chatId}`, (data) => {
       const json = JSON.parse(data.body);
-
-      store.dispatch(updateCurrentChat({ data: json, type: "groupChat" }));
-    });
-    client.subscribe(`/group_chat/updated_members/${chatId}`, (data) => {
-      const json = JSON.parse(data.body);
+      const type: CurrentChatType = "groupChat";
       console.log(json);
+      const messageData = {
+        data: json,
+        type: type,
+      };
+
+      if (typeof json === "string") {
+        const anonMessage = {
+          content: json,
+        };
+
+        messageData.data = anonMessage;
+
+        store.dispatch(updateCurrentChatMessages(messageData));
+        return;
+      }
+
+      store.dispatch(updateCurrentChatMessages(messageData));
+    });
+    chatClient.subscribe(`/group_chat/updated_members/${chatId}`, (data) => {
+      const json = JSON.parse(data.body);
       const members = json.members;
 
       store.dispatch(updateGroupMembers(members));
     });
-    client.subscribe(`/chats/last_message/${userId}`, (message) => {
-      console.log("chats/lastMessage: ", JSON.parse(message.body));
+    chatClient.subscribe(`/group_chat/add/${chatId}/errors`, (data) => {
+      const error = JSON.parse(data.body);
+      console.log("group_chat/add errors: ", error);
     });
-    client.subscribe(`/group_chat/add/${chatId}/errors`, (message) => {
-      console.log("group_chat/add errors: ", JSON.parse(message.body));
+    chatClient.subscribe(`/group_chat/messages/${chatId}/errors`, (data) => {
+      const error = JSON.parse(data.body);
+      console.log("/group_chat/messages/errors: ", error);
     });
-    client.subscribe(`/group_chat/messages/${chatId}/errors`, (message) => {
-      console.log("/group_chat/messages errors: ", JSON.parse(message.body));
+    chatClient.subscribe(`/group_chat/set_role/${chatId}/errors`, (data) => {
+      const error = JSON.parse(data.body);
+
+      console.log("/group_chat/set_role/errors: ", error);
     });
   };
 
   const onConnectPrivate = () => {
-    client.subscribe(`/private_chat/messages/${chatId}`, (message) => {
+    chatClient.subscribe(`/private_chat/messages/${chatId}`, (message) => {
       const data = JSON.parse(message.body);
-
-      store.dispatch(updateCurrentChat({ data, type: "privateChat" }));
+      console.log("/private_chat/messages/", data);
+      store.dispatch(updateCurrentChatMessages({ data, type: "privateChat" }));
     });
-    client.subscribe(`/private_chat/messages/${chatId}/errors`, (message) => {
+    chatClient.subscribe(`/private_chat/messages/${chatId}/errors`, (message) => {
       console.log("private_chat error: ", JSON.parse(message.body));
-    });
-    client.subscribe(`/chats/last_message/${userId}`, (message) => {
-      console.log("chats: ", JSON.parse(message.body));
     });
   };
 
-  client.configure({
+  chatClient.configure({
     brokerURL: wsServerURL,
     onConnect: isPrivate ? onConnectPrivate : onConnectGroup,
     webSocketFactory: () => {
       return socket;
     },
-
     debug: (str) => {
       //console.log("debug: ", str);
     },
   });
 
-  client.activate();
+  chatClient.activate();
 }
 
-// SEND REQUESTS
+// last_message ------------------------------------------------------
+export function subscribeLastMessages(userId: string) {
+  const socket: WebSocket = new SockJS(wsServerURL);
 
+  const handleLastMessage = (data: any) => {
+    const json = JSON.parse(data.body);
+    const chatType = store.getState().root.currentChatType;
+
+    const lastMessage = {
+      ...json,
+      chatType,
+    };
+    store.dispatch(updateLastMessage(lastMessage));
+  };
+
+  const onConnect = () =>
+    sidebarClient.subscribe(`/chat/last_message/${userId}`, handleLastMessage);
+
+  sidebarClient.configure({
+    brokerURL: wsServerURL,
+    onConnect: onConnect,
+    webSocketFactory: () => {
+      return socket;
+    },
+    debug: (str) => {
+      //console.log("debug: ", str);
+    },
+  });
+
+  console.log("%c" + "last_message", "color: red;");
+
+  sidebarClient.activate();
+}
+
+// disconnect
+export function disconnect() {
+  chatClient.deactivate();
+}
+
+// SEND MESSAGES -----------------------------------------------------
 export function privateChatSendMessage(
   message: string,
   chatId: string,
   createdAt: number
 ) {
-  client.publish({
+  chatClient.publish({
     destination: `/app/private_chat/send_message`,
     body: JSON.stringify({
       chatId,
@@ -83,9 +137,19 @@ export function privateChatSendMessage(
     }),
   });
 }
-
+export function sendGroupMessage(content: string, chatId: string, createdAt: number) {
+  chatClient.publish({
+    destination: `/app/group_chat/send_message`,
+    body: JSON.stringify({
+      chatId,
+      content: content,
+      createdAt: createdAt,
+    }),
+  });
+}
+// ADD/REMOVE GROUP MEMBERS ------------------------------------------
 export function addGroupMember(chatId: string, memberId: string) {
-  client.publish({
+  chatClient.publish({
     destination: `/app/group_chat/add`,
     body: JSON.stringify({
       chatId,
@@ -93,9 +157,8 @@ export function addGroupMember(chatId: string, memberId: string) {
     }),
   });
 }
-
 export function removeGroupMember(chatId: string, memberId: string) {
-  client.publish({
+  chatClient.publish({
     destination: `/app/group_chat/remove`,
     body: JSON.stringify({
       chatId,
@@ -104,13 +167,18 @@ export function removeGroupMember(chatId: string, memberId: string) {
   });
 }
 
-export function sendGroupMessage(content: string, chatId: string, createdAt: number) {
-  client.publish({
-    destination: `/app/group_chat/send_message`,
+// ROLES ------------------------------------------------------------
+export function setMemberRole(
+  chatId: string,
+  userToGiveRoleId: string,
+  groupChatRole: MemberRoles
+) {
+  chatClient.publish({
+    destination: `/app/group_chat/set_role`,
     body: JSON.stringify({
       chatId,
-      content: content,
-      createdAt: createdAt,
+      userToGiveRoleId,
+      groupChatRole,
     }),
   });
 }

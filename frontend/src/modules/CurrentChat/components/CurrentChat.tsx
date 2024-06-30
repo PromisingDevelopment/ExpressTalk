@@ -6,6 +6,7 @@ import { Header } from "./Header";
 import { NoChat } from "./NoChat";
 import { WriteMessage } from "./WriteMessage";
 import { getCurrentChat } from "../store/currentChatSlice";
+import { setCurrentChat } from "../store/currentChatSlice";
 
 interface CurrentChatProps {}
 
@@ -28,8 +29,8 @@ const CurrentChat: React.FC<CurrentChatProps> = () => {
   }, [currentChatId]);
 
   React.useEffect(() => {
-    console.log("currentGroupChat: ", currentGroupChat);
-    //  console.log("currentChat: ", currentChat);
+    //console.log("group: ", currentGroupChat);
+    //console.log("private: ", currentChat);
   }, [currentChat, currentGroupChat]);
 
   if (!currentChat && !currentGroupChat) return <NoChat />;

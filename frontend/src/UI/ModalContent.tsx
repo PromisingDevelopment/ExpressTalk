@@ -1,15 +1,16 @@
-import { IconButton, Typography, styled, useTheme } from "@mui/material";
-import React from "react";
 import CloseIcon from "@mui/icons-material/CloseRounded";
+import { IconButton, styled, Typography, useTheme } from "@mui/material";
+import React from "react";
 
 interface ModalContentProps {
   children: React.ReactNode;
   onCloseModal: any;
   title: string;
+  isSmallMargin?: boolean;
 }
 
 const ModalContent = React.forwardRef<HTMLDivElement, ModalContentProps>(
-  ({ children, onCloseModal, title }, ref) => {
+  ({ children, onCloseModal, title, isSmallMargin }, ref) => {
     const { breakpoints } = useTheme();
 
     return (
@@ -19,10 +20,10 @@ const ModalContent = React.forwardRef<HTMLDivElement, ModalContentProps>(
             <Typography
               variant="h4"
               sx={{
-                mb: 6,
+                mb: isSmallMargin ? 2.5 : 6,
                 [breakpoints.down("sm")]: {
                   fontSize: 30,
-                  mb: 4,
+                  mb: isSmallMargin ? "16px !important" : 4,
                 },
                 [breakpoints.down(450)]: {
                   fontSize: 24,
@@ -55,6 +56,7 @@ const StyledWrapper = styled("div")(
   ({ theme: { spacing, shape, breakpoints, palette } }) => ({
     paddingLeft: spacing(2),
     paddingRight: spacing(2),
+    width: "100%",
     background: palette.primary.dark,
     position: "relative",
     padding: spacing(4, 8, 8),
@@ -79,15 +81,20 @@ const CenteredWrapper = styled("div")(({ theme: { spacing } }) => ({
   padding: spacing(0, 2),
   "@media (max-height: 400px)": {
     position: "static",
-    maxWidth: "100%",
+    margin: "0 auto",
+    overflowY: "auto",
     paddingTop: 30,
     paddingBottom: 30,
     transform: "translate(0, 0)",
-    overflowY: "auto",
     height: "100%",
     display: "flex",
     justifyContent: "center",
     alignItems: "start",
+
+    "&::-webkit-scrollbar": {
+      width: "0px",
+      backgroundColor: "transparent",
+    },
   },
 }));
 

@@ -8,13 +8,15 @@ interface ChatBlockProps {}
 
 const ChatBlock: React.FC<ChatBlockProps> = () => {
   const [height, setHeight] = React.useState<number | null>(null);
+  const chatBlockRef = React.useRef<HTMLDivElement | null>(null);
+
   const currentChatType = useAppSelector((state) => state.root.currentChatType);
   const { currentChat, currentGroupChat, errorMessage } = useAppSelector(
     (state) => state.currentChat
   );
   const { user } = useAppSelector((state) => state.root.currentUser);
-  const chatBlockRef = React.useRef<HTMLDivElement | null>(null);
   const { currentChatId } = useAppSelector((state) => state.root);
+
   const dispatch = useAppDispatch();
 
   const privateLayout = (
@@ -30,7 +32,6 @@ const ChatBlock: React.FC<ChatBlockProps> = () => {
         ))}
     </>
   );
-
   const groupLayout = (
     <>
       {user &&
@@ -69,14 +70,6 @@ const ChatBlock: React.FC<ChatBlockProps> = () => {
     }
   }, [chatBlockRef.current, currentChat, currentGroupChat]);
 
-  React.useEffect(() => {
-    if (currentChat && currentChat.messages.length > 0 && currentChatId) {
-      const lastMessage = currentChat.messages[currentChat.messages.length - 1].content;
-
-      dispatch(updateLastMessage({ lastMessage, chatId: currentChatId }));
-    }
-  }, [currentChat, currentChatId]);
-
   return (
     <Box
       ref={chatBlockRef}
@@ -87,6 +80,7 @@ const ChatBlock: React.FC<ChatBlockProps> = () => {
         gap: 2,
         height: height,
         overflowY: "auto",
+        background: `url(${"https://i.pinimg.com/originals/46/98/e7/4698e705c754cc4192d443442fa137ce.jpg"}) center / cover no-repeat`,
       }}>
       {errorMessage && <Typography>{errorMessage}</Typography>}
       {currentChatType === "privateChat" ? privateLayout : groupLayout}

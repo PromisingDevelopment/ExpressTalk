@@ -4,7 +4,7 @@ import { PrivateChatListItem } from "modules/Sidebar/types/PrivateChatListItem";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { CurrentChatType } from "types/CurrentChatType";
-import { connect } from "wsConfig";
+import { connect, disconnect, subscribeLastMessages } from "wsConfig";
 import { GroupChatItem } from "./GroupChatItem";
 import { PrivateChatItem } from "./PrivateChatItem";
 import { getChatsList, resetChatListError, setSidebarOpen } from "../store/sidebarSlice";
@@ -89,6 +89,14 @@ const ChatList: React.FC<ChatListProps> = ({
   }, [chatsList.errorCode]);
 
   React.useEffect(() => {
+    const currentUserId = currentUser.user?.id;
+
+    if (currentUserId) {
+      subscribeLastMessages(currentUserId);
+    }
+  }, [currentUser.user]);
+
+  React.useEffect(() => {
     setIsPrivateChatsList(currentChatMode === 0);
   }, [currentChatMode]);
 
@@ -97,7 +105,7 @@ const ChatList: React.FC<ChatListProps> = ({
 
     if (chatId && currentUserId) {
       dispatch(setCurrentChatId(chatId));
-      connect(currentUserId, chatId, isPrivateConnect);
+      connect(chatId, isPrivateConnect);
     }
   }, [currentUser.user, chatId]);
 
@@ -130,6 +138,10 @@ const ChatList: React.FC<ChatListProps> = ({
     setChatId(id);
     dispatch(setSidebarOpen(false));
     dispatch(setCurrentChatType("privateChat"));
+
+    if (chatId) {
+      disconnect();
+    }
   };
 
   const onClickGroup = async (i: number, id: string) => {
@@ -141,6 +153,10 @@ const ChatList: React.FC<ChatListProps> = ({
     setChatId(id);
     dispatch(setSidebarOpen(false));
     dispatch(setCurrentChatType("groupChat"));
+
+    if (chatId) {
+      disconnect();
+    }
   };
 
   return (

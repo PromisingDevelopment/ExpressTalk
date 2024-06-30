@@ -5,25 +5,20 @@ import { getCurrentTimeString } from "helpers/getCurrentTimeString";
 import React from "react";
 
 interface MessageProps {
-  createdAt: string;
   content: string;
+  createdAt?: string;
   isMine?: boolean;
   senderId?: string;
   senderLogin?: string;
   isGroupMessage?: boolean;
 }
 
-const Message: React.FC<MessageProps> = ({
-  isMine,
-  createdAt,
-  content,
-  senderLogin,
-  isGroupMessage,
-  senderId,
-}) => {
+const Message: React.FC<MessageProps> = (props) => {
+  const { isMine, createdAt, content, senderLogin, isGroupMessage, senderId } = props;
+
   const isLowContent = content.length < 20;
   const isShownLogin = Boolean(isGroupMessage && !isMine && senderLogin);
-  const isAnon = Boolean(content && senderId === null);
+  const isAnon = Boolean(content && !senderId);
 
   return (
     <StyledMessageContainer isAnon={isAnon} isMine={isMine}>
@@ -34,7 +29,9 @@ const Message: React.FC<MessageProps> = ({
         isShownLogin={isShownLogin}>
         {isShownLogin && <StyledName>{senderLogin}</StyledName>}
         <StyledContent isAnon={isAnon}>{content}</StyledContent>
-        {!isAnon && <StyledDate>{getCurrentTimeString(createdAt)}</StyledDate>}
+        {!isAnon && createdAt && (
+          <StyledDate>{getCurrentTimeString(createdAt)}</StyledDate>
+        )}
       </StyledMessageWrapper>
     </StyledMessageContainer>
   );
@@ -101,7 +98,7 @@ const StyledMessageWrapper = styled("div")<{
       : isAnon
       ? {
           borderRadius: "10px",
-          background: "rgba(53, 63, 117, .6 )",
+          background: "rgba(53, 63, 117, .7 )",
           px: {
             md: 2,
             xs: 2,
@@ -115,7 +112,7 @@ const StyledMessageWrapper = styled("div")<{
             background: `url(${LeftMessageTailImage}) 0 0 / auto no-repeat`,
           },
         },
-    isLowContent
+    isLowContent && !isAnon
       ? {
           p: ({ spacing }) => ({
             md: spacing(1, 6.25, 1, 2.5),

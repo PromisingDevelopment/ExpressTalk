@@ -11,7 +11,6 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ login }) => {
-  const currentChat = useAppSelector((state) => state.currentChat.currentChat);
   const currentChatType = useAppSelector((state) => state.root.currentChatType);
   const currentGroupChat = useAppSelector((state) => state.currentChat.currentGroupChat);
 
@@ -29,9 +28,13 @@ const Header: React.FC<HeaderProps> = ({ login }) => {
   const groupLayout = currentGroupChat && (
     <>
       <Logo isMain size={52} />
+
       <div style={{ flexGrow: 1 }}>
         <Title>{currentGroupChat.name}</Title>
-        <GroupMembersInfo members={currentGroupChat.members} />
+        <GroupMembersInfo
+          chatId={currentGroupChat.id}
+          members={currentGroupChat.members}
+        />
       </div>
       <MemberActions />
     </>

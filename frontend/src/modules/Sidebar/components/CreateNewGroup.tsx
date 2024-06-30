@@ -32,7 +32,7 @@ const CreateNewGroup: React.FC<CreateNewGroupProps> = ({ switchChatMode }) => {
       dispatch(setCurrentChatId(newGroupData.id));
       dispatch(setCurrentChatType("groupChat"));
       dispatch(setCurrentChat({ data: newGroupData, type: "groupChat" }));
-      connect(currentUserId, chatId, false);
+      connect(chatId, false);
     }
   };
 
