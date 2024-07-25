@@ -2,31 +2,30 @@ package expresstalk.dev.backend.service;
 
 import expresstalk.dev.backend.dto.request.SendChatMessageDto;
 import expresstalk.dev.backend.entity.PrivateChat;
-import expresstalk.dev.backend.entity.PrivateChatMessage;
+import expresstalk.dev.backend.entity.PrivateChatAccount;
+import expresstalk.dev.backend.entity.PrivateMessage;
 import expresstalk.dev.backend.entity.User;
-import expresstalk.dev.backend.repository.PrivateChatMessageRepository;
+import expresstalk.dev.backend.repository.PrivateChatAccountRepository;
 import expresstalk.dev.backend.repository.PrivateChatRepository;
+import expresstalk.dev.backend.repository.PrivateMessageRepository;
 import expresstalk.dev.backend.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class PrivateChatService {
-    private final PrivateChatMessageRepository privateChatMessageRepository;
+    private final AccountService accountService;
+    private final PrivateMessageRepository privateMessageRepository;
+    private final PrivateChatAccountRepository privateChatAccountRepository;
     private final PrivateChatRepository privateChatRepository;
     private final UserRepository userRepository;
-    private final UserService userService;
-
-    public PrivateChatService(PrivateChatMessageRepository privateChatMessageRepository, PrivateChatRepository chatRoomRepository, UserRepository userRepository, UserService userService) {
-        this.privateChatMessageRepository = privateChatMessageRepository;
-        this.privateChatRepository = chatRoomRepository;
-        this.userRepository = userRepository;
-        this.userService = userService;
-    }
 
     private PrivateChat getChat(User member1, User member2) {
         PrivateChat chat = privateChatRepository.findPrivateChatBy(member1, member2);
@@ -56,15 +55,21 @@ public class PrivateChatService {
             getChat(user1, user2); // throws exception if chat between two users wasn't found
         } catch (Exception ex) {
             PrivateChat chat = new PrivateChat();
+            PrivateChatAccount account1 = new PrivateChatAccount();
+            PrivateChatAccount account2 = new PrivateChatAccount();
 
-            chat.getMembers().add(user1);
-            chat.getMembers().add(user2);
-            user1.getPrivateChats().add(chat);
-            user2.getPrivateChats().add(chat);
+            account1.setUser(user1);
+            account1.setPrivateChat(chat);
+            account2.setUser(user2);
+            account2.setPrivateChat(chat);
+            chat.getMembers().add(account1);
+            chat.getMembers().add(account2);
+            user1.getPrivateChatAccounts().add(account1);
+            user2.getPrivateChatAccounts().add(account2);
 
             privateChatRepository.save(chat);
-            userRepository.save(user1);
-            userRepository.save(user2);
+            privateChatAccountRepository.saveAll(Arrays.asList(account1, account2));
+            userRepository.saveAll(Arrays.asList(user1, user2));
 
             return chat;
         }
@@ -73,26 +78,30 @@ public class PrivateChatService {
 
     }
 
-    public PrivateChatMessage saveMessage(SendChatMessageDto sendPrivateChatMessageDto, User sender, User receiver) {
+    public PrivateMessage saveMessage(SendChatMessageDto sendPrivateChatMessageDto, User sender, User receiver) {
         PrivateChat privateChat = getChat(UUID.fromString(sendPrivateChatMessageDto.chatId()));
-        PrivateChatMessage privateChatMessage = new PrivateChatMessage(
-                sender,
-                receiver,
+        PrivateChatAccount senderAccount = accountService.getPrivateChatAccount(sender, privateChat);
+        PrivateChatAccount receiverAccount = accountService.getPrivateChatAccount(receiver, privateChat);
+        PrivateMessage privateMessage = new PrivateMessage(
+                senderAccount,
+                receiverAccount,
+                privateChat,
                 sendPrivateChatMessageDto.content(),
                 new Date(Long.parseLong(sendPrivateChatMessageDto.createdAt()))
         );
 
-        privateChat.getMessages().add(privateChatMessage);
-        privateChatMessage.setPrivateChat(privateChat);
+        senderAccount.getSentMessages().add(privateMessage);
+        receiverAccount.getReceivedMessages().add(privateMessage);
+        privateChat.getMessages().add(privateMessage);
         privateChatRepository.save(privateChat);
-        privateChatMessageRepository.save(privateChatMessage);
+        privateMessageRepository.save(privateMessage);
 
-        return privateChatMessage;
+        return privateMessage;
     }
 
     public boolean isUserExistsInChat(User user, PrivateChat privateChat) {
-        for (User member : privateChat.getMembers()) {
-            if(member.getId().equals(user.getId())) {
+        for (PrivateChatAccount member : privateChat.getMembers()) {
+            if(member.getUser().getId().equals(user.getId())) {
                 return true;
             }
         }
@@ -112,8 +121,8 @@ public class PrivateChatService {
         }
 
         User secondUser = new User();
-        for (User user : privateChat.getMembers()) {
-            if(!user.getId().equals(firstUser.getId())) secondUser = user;
+        for (PrivateChatAccount member : privateChat.getMembers()) {
+            if(!member.getUser().getId().equals(firstUser.getId())) secondUser = member.getUser();
         }
 
         return secondUser;

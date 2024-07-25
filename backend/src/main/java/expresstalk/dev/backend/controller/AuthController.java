@@ -1,32 +1,29 @@
 package expresstalk.dev.backend.controller;
 
+import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.service.AuthService;
 import expresstalk.dev.backend.dto.request.EmailVerificationDto;
 import expresstalk.dev.backend.dto.request.SignInUserDto;
 import expresstalk.dev.backend.dto.request.SignUpUserDto;
 import expresstalk.dev.backend.service.EmailService;
 import expresstalk.dev.backend.exception.EmailNotVerifiedException;
-import expresstalk.dev.backend.entity.User;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
     private final AuthService authService;
     private final EmailService emailService;
-
-    public AuthController(AuthService authService, EmailService emailService) {
-        this.authService = authService;
-        this.emailService = emailService;
-    }
 
     @ApiResponses(value = {
             @ApiResponse(responseCode = "202", description = "User's email needs verification"),

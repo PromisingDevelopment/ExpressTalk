@@ -1,11 +1,16 @@
 package expresstalk.dev.backend.service;
 
 import expresstalk.dev.backend.dto.request.SendChatMessageDto;
-import expresstalk.dev.backend.entity.*;
+import expresstalk.dev.backend.entity.GroupChat;
+import expresstalk.dev.backend.entity.GroupChatAccount;
+import expresstalk.dev.backend.entity.GroupMessage;
+import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.enums.GroupChatRole;
-import expresstalk.dev.backend.repository.GroupChatMessageRepository;
+import expresstalk.dev.backend.repository.GroupChatAccountRepository;
 import expresstalk.dev.backend.repository.GroupChatRepository;
+import expresstalk.dev.backend.repository.GroupMessageRepository;
 import expresstalk.dev.backend.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -16,24 +21,18 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
+@RequiredArgsConstructor
 @Service
 public class GroupChatSerivce {
+    private final AccountService accountService;
+    private final GroupChatAccountRepository groupChatAccountRepository;
     private final GroupChatRepository groupChatRepository;
-    private final GroupChatMessageRepository groupChatMessageRepository;
+    private final GroupMessageRepository groupMessageRepository;
     private final UserRepository userRepository;
-    private final UserService userService;
-
-    public GroupChatSerivce(GroupChatRepository groupChatRepository, GroupChatMessageRepository groupChatMessageRepository,
-                            UserRepository userRepository, UserService userService) {
-        this.groupChatRepository = groupChatRepository;
-        this.groupChatMessageRepository = groupChatMessageRepository;
-        this.userRepository = userRepository;
-        this.userService = userService;
-    }
 
     private boolean isUserExistsInChat(GroupChat groupChat, User user) {
-        for(User groupChatUser : groupChat.getMembers()) {
-            if(groupChatUser.getId().equals(user.getId())) {
+        for(GroupChatAccount member : groupChat.getMembers()) {
+            if(member.getUser().getId().equals(user.getId())) {
                 return true;
             }
         }
@@ -41,20 +40,9 @@ public class GroupChatSerivce {
         return false;
     }
 
-    private boolean isAdmin(GroupChat groupChat, User user) {
-        for(User groupChatUser : groupChat.getAdmins()) {
-            if(groupChatUser.getId().equals(user.getId())) {
-                return true;
-
-            }
-        }
-
-        return false;
-    }
-
-    public GroupChatRole getRole(GroupChat groupChat, User user) {
-        return isAdmin(groupChat, user) ? GroupChatRole.ADMIN : GroupChatRole.MEMBER;
-    }
+//    public GroupChatRole getRole(GroupChat groupChat, User user) {
+//        return isAdmin(groupChat, user) ? GroupChatRole.ADMIN : GroupChatRole.MEMBER;
+//    }
 
     public GroupChat getChat(UUID chatId) {
         GroupChat groupChat = groupChatRepository.findById(chatId).orElse(null);
@@ -68,101 +56,82 @@ public class GroupChatSerivce {
 
     public void addMemberToChat(GroupChat groupChat, User admin, User member) {
         boolean isMemberAlreadyInChat = isUserExistsInChat(groupChat, member);
-        boolean isAdmin = isAdmin(groupChat, admin);
+        GroupChatAccount adminAccount = accountService.getGroupChatAccount(admin, groupChat);
 
         if(isMemberAlreadyInChat) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "The member is already in this chat");
         }
-
-        if(!isAdmin) {
+        if(!(adminAccount.getGroupChatRole() == GroupChatRole.ADMIN)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User can not add new members to chat because user is not admin");
         }
 
-        groupChat.getMembers().add(member);
-        member.getGroupChats().add(groupChat);
+        GroupChatAccount memberAccount = new GroupChatAccount(groupChat, member);
 
+        groupChat.getMembers().add(memberAccount);
+
+        groupChatAccountRepository.save(memberAccount);
         groupChatRepository.save(groupChat);
         userRepository.save(member);
     }
 
     public void removeMemberFromChat(GroupChat groupChat, User admin, User member) {
-        boolean isMemberInChat = isUserExistsInChat(groupChat, member);
-        boolean isAdmin = isAdmin(groupChat, admin);
+        boolean isMemberAlreadyInChat = isUserExistsInChat(groupChat, member);
+        GroupChatAccount adminAccount = accountService.getGroupChatAccount(admin, groupChat);
+        GroupChatAccount memberAccount = accountService.getGroupChatAccount(member, groupChat);
 
-        if(!isMemberInChat) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The member is not present in the chat");
+        if(!isMemberAlreadyInChat) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Can not remove user who is not present in the chat");
+        }
+        if(!(adminAccount.getGroupChatRole() == GroupChatRole.ADMIN)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User can not remove members from chat because user is not admin");
         }
 
-        if(!isAdmin) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User can not remove members from the chat because user is not admin");
-        }
-
-        int memberIndex = IntStream.range(0, groupChat.getMembers().size())
-                .filter(i -> groupChat.getMembers().get(i).getId().equals(member.getId()))
+        int groupMemberIndex = IntStream.range(0, groupChat.getMembers().size())
+                .filter(i -> groupChat.getMembers().get(i).getId().equals(memberAccount.getId()))
                 .findFirst().orElse(-1);
 
-        int groupIndex = IntStream.range(0, member.getGroupChats().size())
-                .filter(i -> member.getGroupChats().get(i).getId().equals(groupChat.getId()))
+        int userAccountIndex = IntStream.range(0, member.getGroupChatAccounts().size())
+                .filter(i -> member.getGroupChatAccounts().get(i).getId().equals(memberAccount.getId()))
                 .findFirst().orElse(-1);
 
-        groupChat.getMembers().remove(memberIndex);
-        member.getGroupChats().remove(groupIndex);
+        groupChat.getMembers().remove(groupMemberIndex);
+        member.getGroupChatAccounts().remove(userAccountIndex);
 
+        groupChatAccountRepository.delete(memberAccount);
         groupChatRepository.save(groupChat);
         userRepository.save(member);
     }
 
     public GroupChat createChat(User user, String groupName) {
         GroupChat groupChat = new GroupChat(groupName);
+        GroupChatAccount groupChatAccount = new GroupChatAccount(GroupChatRole.ADMIN, groupChat, user);
 
-        groupChat.getMembers().add(user);
-        groupChat.getAdmins().add(user);
-        user.getGroupChats().add(groupChat);
-        user.getAdministratedGroupChats().add(groupChat);
+        groupChat.getMembers().add(groupChatAccount);
+        user.getGroupChatAccounts().add(groupChatAccount);
 
         groupChatRepository.save(groupChat);
+        groupChatAccountRepository.save(groupChatAccount);
         userRepository.save(user);
 
         return groupChat;
     }
 
     public void setRole(GroupChat groupChat, User admin, User member, GroupChatRole role) {
-        boolean isMemberInChat = isUserExistsInChat(groupChat, member);
-        boolean isAdmin = isAdmin(groupChat, admin);
+        boolean isMemberAlreadyInChat = isUserExistsInChat(groupChat, member);
+        GroupChatAccount adminAccount = accountService.getGroupChatAccount(admin, groupChat);
+        GroupChatAccount memberAccount = accountService.getGroupChatAccount(member, groupChat);
 
-        if(!isMemberInChat) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The member is not present in the chat");
+        if(!isMemberAlreadyInChat) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Can not set role for user who is not present in the chat");
         }
-
-        if(!isAdmin) {
+        if(!(adminAccount.getGroupChatRole() == GroupChatRole.ADMIN)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User can not set role for members from the chat because user is not admin");
         }
 
-        if(role.equals(GroupChatRole.ADMIN)) {
-            System.out.println("\nADMIN\n");
-            boolean isMemberAdmin = isAdmin(groupChat, member);
-
-            if(isMemberAdmin) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can not give admin role to the member. The member is already admin in the chat");
-            }
-
-            member.getAdministratedGroupChats().add(groupChat);
-            groupChat.getAdmins().add(member);
-        }
-
-        if(role.equals(GroupChatRole.MEMBER)) {
-            System.out.println("\nMEMBER\n");
-            boolean isMemberAdmin = isAdmin(groupChat, member);
-
-            if(isMemberAdmin) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin can not take off admin rights from another admin");
-            }
-
-            groupChat.getAdmins().remove(member);
-            member.getAdministratedGroupChats().remove(groupChat);
-        }
+        memberAccount.setGroupChatRole(role);
 
         groupChatRepository.save(groupChat);
+        groupChatAccountRepository.save(memberAccount);
         userRepository.save(member);
     }
 
@@ -183,7 +152,11 @@ public class GroupChatSerivce {
     }
 
     public List<User> getOtherUsersOfChat(User currentUser, GroupChat groupChat) {
-        List<User> users = groupChat.getMembers();
+        List<GroupChatAccount> userAccounts = groupChat.getMembers();
+        List<User> users = new ArrayList<>();
+        for(GroupChatAccount account : userAccounts) {
+            users.add(account.getUser());
+        }
         users.stream().filter((User user)-> !user.getId().equals(currentUser.getId()));
 
         return users;
@@ -195,32 +168,24 @@ public class GroupChatSerivce {
         }
     }
 
-    public GroupChatMessage saveMessage(SendChatMessageDto sendChatMessageDto, User sender) {
+    public GroupMessage saveMessage(SendChatMessageDto sendChatMessageDto, User sender) {
         GroupChat groupChat = getChat(UUID.fromString(sendChatMessageDto.chatId()));
+        GroupChatAccount senderAccount = accountService.getGroupChatAccount(sender, groupChat);
 
-        GroupChatMessage groupChatMessage = new GroupChatMessage(
-                sender,
+        GroupMessage groupChatMessage = new GroupMessage(
+                senderAccount,
+                groupChat,
                 sendChatMessageDto.content(),
                 new Date(Long.parseLong(sendChatMessageDto.createdAt()))
         );
 
         groupChat.getMessages().add(groupChatMessage);
+        senderAccount.getGroupMessages().add(groupChatMessage);
         groupChatMessage.setGroupChat(groupChat);
+        groupChatMessage.setSender(senderAccount);
+
         groupChatRepository.save(groupChat);
-        groupChatMessageRepository.save(groupChatMessage);
-
-        return groupChatMessage;
-    }
-
-    public GroupChatMessage saveSystemMessage(String content, GroupChat groupChat) {
-        GroupChatMessage groupChatMessage = new GroupChatMessage(
-                content,
-                new Date()
-        );
-
-        groupChat.getMessages().add(groupChatMessage);
-        groupChatMessage.setGroupChat(groupChat);
-        groupChatRepository.save(groupChat);
+        groupMessageRepository.save(groupChatMessage);
 
         return groupChatMessage;
     }
