@@ -8,20 +8,17 @@ import expresstalk.dev.backend.exception.EmailNotVerifiedException;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.repository.UserRepository;
 import expresstalk.dev.backend.utils.Generator;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.server.ResponseStatusException;
 
+@RequiredArgsConstructor
 @Service
 public class AuthService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-
-    public AuthService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     public User signUp(SignUpUserDto signUpUserDto) {
         User existedUser = userRepository.findUserByLoginOrEmail(signUpUserDto.login(), signUpUserDto.email());

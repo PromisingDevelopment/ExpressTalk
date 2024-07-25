@@ -2,11 +2,11 @@ package expresstalk.dev.backend.controller;
 
 import expresstalk.dev.backend.dto.request.*;
 import expresstalk.dev.backend.dto.response.GroupChatMessageDto;
-import expresstalk.dev.backend.dto.response.PrivateChatMessageDto;
 import expresstalk.dev.backend.dto.response.LastMessageDto;
 import expresstalk.dev.backend.dto.response.UpdatedMembersDto;
 import expresstalk.dev.backend.entity.GroupChat;
-import expresstalk.dev.backend.entity.GroupChatMessage;
+import expresstalk.dev.backend.entity.GroupMessage;
+import expresstalk.dev.backend.entity.SystemMessage;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.service.*;
 import expresstalk.dev.backend.utils.Converter;
@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/group_chats")
 public class GroupChatController {
@@ -35,16 +37,6 @@ public class GroupChatController {
     private final ChatService chatService;
     private final SessionService sessionService;
     private final SimpMessagingTemplate simpMessagingTemplate;
-
-    public GroupChatController(UserService userService, SessionService sessionService,
-                               SimpMessagingTemplate simpMessagingTemplate,
-                          GroupChatSerivce groupChatSerivce, ChatService chatService) {
-        this.userService = userService;
-        this.groupChatSerivce = groupChatSerivce;
-        this.chatService = chatService;
-        this.sessionService = sessionService;
-        this.simpMessagingTemplate = simpMessagingTemplate;
-    }
 
     @MessageMapping("/group_chat/send_message")
     private void sendGroupChatMessage(
@@ -63,18 +55,17 @@ public class GroupChatController {
             GroupChat groupChat = groupChatSerivce.getChat(chatId);
             groupChatSerivce.ensureUserPermissionToSendMessageInChat(sender, chatId);
             List<User> receivers = groupChatSerivce.getOtherUsersOfChat(sender, groupChat);
-            GroupChatMessage groupChatMessage = groupChatSerivce.saveMessage(sendChatMessageDto, sender);
+            GroupMessage groupMessage = groupChatSerivce.saveMessage(sendChatMessageDto, sender);
             GroupChatMessageDto groupChatMessageDto = new GroupChatMessageDto(
-                    groupChatMessage.isSystemMessage(),
-                    groupChatMessage.getCreatedAt(),
-                    groupChatMessage.getContent(),
-                    groupChatMessage.getSenderLogin(),
-                    groupChatSerivce.getRole(groupChat, sender),
+                    groupMessage.getCreatedAt(),
+                    groupMessage.getContent(),
+                    groupMessage.getSender().getUser().getLogin(),
+                    groupMessage.getSender().getGroupChatRole(),
                     sender.getId()
                     );
 
             for(User receiver : receivers) {
-                LastMessageDto lastMessageDto = new LastMessageDto(chatId,groupChatMessage.getContent());
+                LastMessageDto lastMessageDto = new LastMessageDto(chatId,groupMessage.getContent());
                 simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             }
 
@@ -103,20 +94,15 @@ public class GroupChatController {
             GroupChat groupChat = groupChatSerivce.getChat(chatId);
             groupChatSerivce.addMemberToChat(groupChat, admin, member);
             String addMemberMessage = admin.getLogin() + " has added " + member.getLogin();
-            GroupChatMessage groupChatMessage = groupChatSerivce.saveSystemMessage(addMemberMessage, groupChat);
-            GroupChatMessageDto groupChatMessageDto = new GroupChatMessageDto(
-                    groupChatMessage.isSystemMessage(),
-                    groupChatMessage.getCreatedAt(),
-                    groupChatMessage.getContent()
-            );
-            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers(), groupChat.getAdmins());
+            SystemMessage systemMessage = chatService.saveSystemMessage(addMemberMessage, groupChat);
+            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
             List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin, groupChat);
 
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,addMemberMessage);
                 simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             }
-            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + addUserToGroupChatDto.chatId(), groupChatMessageDto);
+            simpMessagingTemplate.convertAndSend("/group_chat/system_messages/" + addUserToGroupChatDto.chatId(), systemMessage);
             simpMessagingTemplate.convertAndSend("/group_chat/updated_members/" + addUserToGroupChatDto.chatId(), updatedMembersDto);
         } catch (Exception ex) {
             simpMessagingTemplate.convertAndSend("/group_chat/add/" + addUserToGroupChatDto.chatId() + "/errors", ex.getMessage());
@@ -141,20 +127,15 @@ public class GroupChatController {
             GroupChat groupChat = groupChatSerivce.getChat(chatId);
             groupChatSerivce.removeMemberFromChat(groupChat, admin, member);
             String removeMemberMessage = admin.getLogin() + " has removed " + member.getLogin();
-            GroupChatMessage groupChatMessage = groupChatSerivce.saveSystemMessage(removeMemberMessage, groupChat);
-            GroupChatMessageDto groupChatMessageDto = new GroupChatMessageDto(
-                    groupChatMessage.isSystemMessage(),
-                    groupChatMessage.getCreatedAt(),
-                    groupChatMessage.getContent()
-            );
-            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers(), groupChat.getAdmins());
+            SystemMessage systemMessage = chatService.saveSystemMessage(removeMemberMessage, groupChat);
+            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
             List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin, groupChat);
 
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,removeMemberMessage);
                 simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             }
-            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + removeUserFromGroupChatDto.chatId(), groupChatMessageDto);
+            simpMessagingTemplate.convertAndSend("/group_chat/system_messages/" + removeUserFromGroupChatDto.chatId(), systemMessage);
             simpMessagingTemplate.convertAndSend("/group_chat/updated_members/" + removeUserFromGroupChatDto.chatId(), updatedMembersDto);
         } catch (Exception ex) {
             simpMessagingTemplate.convertAndSend("/group_chat/remove/" + removeUserFromGroupChatDto.chatId() + "/errors", ex.getMessage());
@@ -179,20 +160,15 @@ public class GroupChatController {
             GroupChat groupChat = groupChatSerivce.getChat(chatId);
             groupChatSerivce.setRole(groupChat, admin, changingUser, setUserRoleInGroupChatDto.groupChatRole());
             String changedRoleMessage = changingUser.getLogin() + " is now " + setUserRoleInGroupChatDto.groupChatRole();
-            GroupChatMessage groupChatMessage = groupChatSerivce.saveSystemMessage(changedRoleMessage, groupChat);
-            GroupChatMessageDto groupChatMessageDto = new GroupChatMessageDto(
-                    groupChatMessage.isSystemMessage(),
-                    groupChatMessage.getCreatedAt(),
-                    groupChatMessage.getContent()
-            );
-            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers(), groupChat.getAdmins());
+            SystemMessage systemMessage = chatService.saveSystemMessage(changedRoleMessage, groupChat);
+            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
             List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin, groupChat);
 
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,changedRoleMessage);
                 simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             }
-            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + setUserRoleInGroupChatDto.chatId(), groupChatMessageDto);
+            simpMessagingTemplate.convertAndSend("/group_chat/system_messages/" + setUserRoleInGroupChatDto.chatId(), systemMessage);
             simpMessagingTemplate.convertAndSend("/group_chat/updated_members/" + setUserRoleInGroupChatDto.chatId(), updatedMembersDto);
         } catch (Exception ex) {
             simpMessagingTemplate.convertAndSend("/group_chat/set_role/" + setUserRoleInGroupChatDto.chatId() + "/errors", ex.getMessage());

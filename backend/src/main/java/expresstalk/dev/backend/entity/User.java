@@ -18,63 +18,43 @@ import java.util.UUID;
 @NoArgsConstructor
 @Data
 public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+        @Id
+        @GeneratedValue(strategy = GenerationType.UUID)
+        private UUID id;
 
-    @NonNull
-    @Column(nullable = false)
-    private String name;
+        @NonNull
+        @Column(nullable = false)
+        private String name;
 
-    @NonNull
-    @Column(nullable = false, unique = true)
-    private String login;
+        @NonNull
+        @Column(nullable = false, unique = true)
+        private String login;
 
-    @NonNull
-    @Column(nullable = false, unique = true)
-    @JsonIgnore
-    private String email;
+        @NonNull
+        @Column(nullable = false, unique = true)
+        @JsonIgnore
+        private String email;
 
-    @NonNull
-    @Column(nullable = false)
-    @JsonIgnore
-    private String passwordHash;
+        @NonNull
+        @Column(nullable = false)
+        @JsonIgnore
+        private String passwordHash;
 
-    @Column
-    @JsonIgnore
-    private String emailCode;
+        @Column
+        @JsonIgnore
+        private String emailCode;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "varchar(7) default 'ONLINE'")
-    private UserStatus status;
+        @Enumerated(EnumType.STRING)
+        @Column(nullable = false, columnDefinition = "varchar(7) default 'ONLINE'")
+        private UserStatus status;
 
-    @ToString.Exclude
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_private_chats",
-            joinColumns = @JoinColumn(name = "users_id"),
-            inverseJoinColumns = @JoinColumn(name = "private_chats_id")
-    )
-    @JsonIgnore
-    private List<PrivateChat> privateChats = new LinkedList<>();
+        @ToString.Exclude
+        @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+        @JsonIgnore
+        private List<PrivateChatAccount> privateChatAccounts = new LinkedList<>();
 
-    @ToString.Exclude
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_group_chats",
-            joinColumns = @JoinColumn(name = "users_id"),
-            inverseJoinColumns = @JoinColumn(name = "group_chats_id")
-    )
-    @JsonIgnore
-    private List<GroupChat> groupChats = new LinkedList<>();
-
-    @ToString.Exclude
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_administrated_group_chats",
-            joinColumns = @JoinColumn(name = "users_id"),
-            inverseJoinColumns = @JoinColumn(name = "group_chats_id")
-    )
-    @JsonIgnore
-    private List<GroupChat> administratedGroupChats = new LinkedList<>();
+        @ToString.Exclude
+        @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+        @JsonIgnore
+        private List<GroupChatAccount> groupChatAccounts = new LinkedList<>();
 }

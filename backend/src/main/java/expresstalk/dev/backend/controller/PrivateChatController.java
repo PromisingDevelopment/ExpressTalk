@@ -5,7 +5,7 @@ import expresstalk.dev.backend.dto.request.CreatePrivateChatRoomDto;
 import expresstalk.dev.backend.dto.response.LastMessageDto;
 import expresstalk.dev.backend.dto.request.SendChatMessageDto;
 import expresstalk.dev.backend.entity.PrivateChat;
-import expresstalk.dev.backend.entity.PrivateChatMessage;
+import expresstalk.dev.backend.entity.PrivateMessage;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.service.*;
 import expresstalk.dev.backend.utils.ValidationErrorChecker;
@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/private_chats")
 public class PrivateChatController {
@@ -33,16 +35,6 @@ public class PrivateChatController {
     private final ChatService chatService;
     private final SessionService sessionService;
     private final SimpMessagingTemplate simpMessagingTemplate;
-
-    public PrivateChatController(UserService userService, PrivateChatService privateChatService,
-                          SessionService sessionService, SimpMessagingTemplate simpMessagingTemplate,
-                                 ChatService chatService) {
-        this.userService = userService;
-        this.privateChatService = privateChatService;
-        this.sessionService = sessionService;
-        this.simpMessagingTemplate = simpMessagingTemplate;
-        this.chatService = chatService;
-    }
 
     @MessageMapping("/private_chat/send_message")
     private void sendPrivateChatMessage(
@@ -61,15 +53,14 @@ public class PrivateChatController {
             PrivateChat privateChat = privateChatService.getChat(chatId);
             privateChatService.ensureUserPermissionToSendMessageInChat(sender, privateChat);
             User receiver = privateChatService.getSecondUserOfChat(sender, privateChat);
-            PrivateChatMessage privateChatMessage = privateChatService.saveMessage(sendChatMessageDto, sender, receiver);
+            PrivateMessage privateMessage = privateChatService.saveMessage(sendChatMessageDto, sender, receiver);
             PrivateChatMessageDto privateChatMessageDto = new PrivateChatMessageDto(
-                    privateChatMessage.isSystemMessage(),
-                    privateChatMessage.getCreatedAt(),
-                    privateChatMessage.getContent(),
+                    privateMessage.getCreatedAt(),
+                    privateMessage.getContent(),
                     sender.getLogin(),
                     sender.getId()
             );
-            LastMessageDto lastMessageDto = new LastMessageDto(chatId,privateChatMessage.getContent());
+            LastMessageDto lastMessageDto = new LastMessageDto(chatId,privateMessage.getContent());
 
             simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             simpMessagingTemplate.convertAndSend("/chat/last_message/" + sender.getId(), lastMessageDto);

@@ -9,24 +9,20 @@ import expresstalk.dev.backend.service.UserService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
     private final SessionService sessionService;
     private final ChatService chatService;
-
-    public UserController(UserService userService, SessionService sessionService, ChatService chatService) {
-        this.userService = userService;
-        this.sessionService = sessionService;
-        this.chatService = chatService;
-    }
 
     @ApiResponses(value = {
             @ApiResponse(responseCode = "404", description =  "User with provided login doesn't exist"),
