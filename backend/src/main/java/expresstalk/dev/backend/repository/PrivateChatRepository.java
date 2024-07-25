@@ -9,6 +9,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.UUID;
 
 public interface PrivateChatRepository extends JpaRepository<PrivateChat, UUID> {
-    @Query("SELECT pc FROM PrivateChat pc WHERE :member1 MEMBER OF pc.members AND :member2 MEMBER OF pc.members")
-    PrivateChat findPrivateChatBy(@Param("member1") User member1, @Param("member2") User member2);
+    @Query("SELECT pc FROM PrivateChat pc " +
+            "JOIN pc.members a1 " +
+            "JOIN pc.members a2 " +
+            "WHERE a1.user = :member1 " +
+            "AND a2.user = :member2")
+    PrivateChat findPrivateChatBetween(@Param("member1") User member1, @Param("member2") User member2);
 }
