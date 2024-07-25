@@ -28,7 +28,7 @@ public class PrivateChatService {
     private final UserRepository userRepository;
 
     private PrivateChat getChat(User member1, User member2) {
-        PrivateChat chat = privateChatRepository.findPrivateChatBy(member1, member2);
+        PrivateChat chat = privateChatRepository.findPrivateChatBetween(member1, member2);
 
         if(chat == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Chat with " + member1.getLogin() + " and " + member2.getLogin() + " doesn't exist.");
