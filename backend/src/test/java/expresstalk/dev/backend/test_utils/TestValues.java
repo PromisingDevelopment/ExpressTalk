@@ -5,8 +5,18 @@ import expresstalk.dev.backend.entity.PrivateChatAccount;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.enums.UserStatus;
 
+import java.util.UUID;
+
 public class TestValues {
     public static int userCounter = 0;
+
+    public static String getEmailCode() {
+        return "63de93";
+    }
+
+    public static String getPassword() {
+        return "money_trees123";
+    }
 
     public static User getUser() {
         userCounter++;
@@ -16,6 +26,7 @@ public class TestValues {
                 "mike1997" + userCounter + "@gmail.com",
                 "$2a$10$Bmlw6xdRNY5J15uwPfIfueuxiN2NCIr3dfZtl4FJsTvlq0UnZ5xyS");
         user.setStatus(UserStatus.ONLINE);
+        user.setId(UUID.fromString("cdf73316-904c-4250-b1c5-7c8190f8f7ff"));
 
         return user;
     }
