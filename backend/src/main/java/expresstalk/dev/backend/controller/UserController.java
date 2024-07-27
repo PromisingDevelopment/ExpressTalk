@@ -32,7 +32,15 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{loginOrId}")
     public User getUserByLoginOrId(@PathVariable String loginOrId) {
-        return userService.findByLoginOrId(loginOrId);
+        UUID id = UUID.randomUUID();
+        String login = loginOrId;
+        try {
+            id = UUID.fromString(loginOrId);
+        } catch (Exception ex) {
+            return userService.findByLogin(login);
+        }
+
+        return userService.findById(id);
     }
 
     @ApiResponses(value = {
