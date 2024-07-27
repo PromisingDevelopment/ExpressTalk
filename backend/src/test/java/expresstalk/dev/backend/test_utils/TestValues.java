@@ -41,10 +41,4 @@ public class TestValues {
 
         return user;
     }
-
-//    private static PrivateChatAccount getPrivateChatAccount
-//
-//    private static PrivateChat getPrivateChat(User user) {
-//        PrivateChatAccount privateChatAccount = new PrivateChatAccount()
-//    }
 }
