@@ -40,10 +40,6 @@ public class GroupChatSerivce {
         return false;
     }
 
-//    public GroupChatRole getRole(GroupChat groupChat, User user) {
-//        return isAdmin(groupChat, user) ? GroupChatRole.ADMIN : GroupChatRole.MEMBER;
-//    }
-
     public GroupChat getChat(UUID chatId) {
         GroupChat groupChat = groupChatRepository.findById(chatId).orElse(null);
 
@@ -104,13 +100,13 @@ public class GroupChatSerivce {
 
     public GroupChat createChat(User user, String groupName) {
         GroupChat groupChat = new GroupChat(groupName);
-        GroupChatAccount groupChatAccount = new GroupChatAccount(GroupChatRole.ADMIN, groupChat, user);
+        GroupChatAccount account = new GroupChatAccount(GroupChatRole.ADMIN, groupChat, user);
 
-        groupChat.getMembers().add(groupChatAccount);
-        user.getGroupChatAccounts().add(groupChatAccount);
+        groupChat.getMembers().add(account);
+        user.getGroupChatAccounts().add(account);
 
         groupChatRepository.save(groupChat);
-        groupChatAccountRepository.save(groupChatAccount);
+        groupChatAccountRepository.save(account);
         userRepository.save(user);
 
         return groupChat;
@@ -172,21 +168,21 @@ public class GroupChatSerivce {
         GroupChat groupChat = getChat(UUID.fromString(sendChatMessageDto.chatId()));
         GroupChatAccount senderAccount = accountService.getGroupChatAccount(sender, groupChat);
 
-        GroupMessage groupChatMessage = new GroupMessage(
+        GroupMessage groupMessage = new GroupMessage(
                 senderAccount,
                 groupChat,
                 sendChatMessageDto.content(),
                 new Date(Long.parseLong(sendChatMessageDto.createdAt()))
         );
 
-        groupChat.getMessages().add(groupChatMessage);
-        senderAccount.getGroupMessages().add(groupChatMessage);
-        groupChatMessage.setGroupChat(groupChat);
-        groupChatMessage.setSender(senderAccount);
+        groupChat.getMessages().add(groupMessage);
+        senderAccount.getGroupMessages().add(groupMessage);
+        groupMessage.setGroupChat(groupChat);
+        groupMessage.setSender(senderAccount);
 
         groupChatRepository.save(groupChat);
-        groupMessageRepository.save(groupChatMessage);
+        groupMessageRepository.save(groupMessage);
 
-        return groupChatMessage;
+        return groupMessage;
     }
 }

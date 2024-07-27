@@ -10,7 +10,6 @@ public record SignUpUserDto(
         String name,
 
         @Size(min = 4, max = 20, message = "Login must be between 4 and 20 characters long.")
-
         @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "Invalid login. It should contain only English letters and numbers.")
         @NotBlank(message = "Login field can't be blank.")
         String login,

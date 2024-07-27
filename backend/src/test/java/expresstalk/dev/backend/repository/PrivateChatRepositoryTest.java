@@ -34,6 +34,8 @@ class PrivateChatRepositoryTest {
     void shouldFindPrivateChatBetween() {
         User user1 = TestValues.getUser();
         User user2 = TestValues.getUser();
+        user1.setId(null);
+        user2.setId(null);
         PrivateChat privateChat = new PrivateChat();
         PrivateChatAccount account1 = new PrivateChatAccount();
         PrivateChatAccount account2 = new PrivateChatAccount();

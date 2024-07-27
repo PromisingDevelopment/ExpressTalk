@@ -17,8 +17,8 @@ public class UserService {
 
     public void handleStatusTo(UUID userId, UserStatus userStatus) {
         User user = findById(userId);
-
         user.setStatus(userStatus);
+
         userRepository.save(user);
     }
 
@@ -31,24 +31,12 @@ public class UserService {
         return user;
     }
 
-    private User findByLogin(String login) {
+    public User findByLogin(String login) {
         User user = userRepository.findUserByLogin(login);
         if(user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with login: " + login + " doesn't exist");
         }
 
         return user;
-    }
-
-    public User findByLoginOrId(String loginOrId) {
-        UUID id = UUID.randomUUID();
-        String login = loginOrId;
-        try {
-            id = UUID.fromString(loginOrId);
-        } catch (Exception ex) {
-            return findByLogin(login);
-        }
-
-        return findById(id);
     }
 }
