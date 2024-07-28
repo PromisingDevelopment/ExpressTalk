@@ -2,6 +2,7 @@ package expresstalk.dev.backend.service;
 
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.enums.UserStatus;
+import expresstalk.dev.backend.exception.UserIsNotFoundException;
 import expresstalk.dev.backend.repository.UserRepository;
 import expresstalk.dev.backend.test_utils.TestValues;
 import org.junit.jupiter.api.Test;
@@ -52,7 +53,7 @@ class UserServiceTest {
         user.setId(UUID.randomUUID());
 
         when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
-        assertThrows(ResponseStatusException.class, () -> userService.findById(user.getId()));
+        assertThrows(UserIsNotFoundException.class, () -> userService.findById(user.getId()));
     }
 
     @Test
@@ -68,6 +69,6 @@ class UserServiceTest {
         User user = TestValues.getUser();
 
         when(userRepository.findUserByLogin(user.getLogin())).thenReturn(null);
-        assertThrows(ResponseStatusException.class, () -> userService.findByLogin(user.getLogin()));
+        assertThrows(UserIsNotFoundException.class, () -> userService.findByLogin(user.getLogin()));
     }
 }
