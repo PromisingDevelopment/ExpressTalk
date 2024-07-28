@@ -45,7 +45,8 @@ class AccountServiceTest {
         User user = TestValues.getUser();
         PrivateChat privateChat = new PrivateChat();
 
-        assertThrows(ResponseStatusException.class, () -> accountService.getPrivateChatAccount(user, privateChat));
+        PrivateChatAccount result = assertDoesNotThrow(() -> accountService.getPrivateChatAccount(user, privateChat));
+        assertEquals(result, null);
     }
 
     @Test
@@ -66,6 +67,7 @@ class AccountServiceTest {
         User user = TestValues.getUser();
         GroupChat groupChat = new GroupChat("Work");
 
-        assertThrows(ResponseStatusException.class, () -> accountService.getGroupChatAccount(user, groupChat));
+        GroupChatAccount result = assertDoesNotThrow(() -> accountService.getGroupChatAccount(user, groupChat));
+        assertEquals(result, null);
     }
 }

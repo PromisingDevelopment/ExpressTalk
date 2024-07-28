@@ -5,6 +5,8 @@ import expresstalk.dev.backend.dto.request.SignInUserDto;
 import expresstalk.dev.backend.dto.request.SignUpUserDto;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.exception.EmailNotVerifiedException;
+import expresstalk.dev.backend.exception.UserIsNotAdminException;
+import expresstalk.dev.backend.exception.UserIsNotFoundException;
 import expresstalk.dev.backend.repository.UserRepository;
 import expresstalk.dev.backend.test_utils.TestValues;
 import org.junit.jupiter.api.Test;
@@ -91,7 +93,7 @@ class AuthServiceTest {
         );
 
         when(userRepository.findUserByLoginOrEmail(anyString(), anyString())).thenReturn(null);
-        assertThrows(ResponseStatusException.class, () -> authService.signIn(signInUserDto));
+        assertThrows(UserIsNotFoundException.class, () -> authService.signIn(signInUserDto));
         when(userRepository.findUserByLoginOrEmail(anyString(), anyString())).thenReturn(user);
         user.setEmailCode(TestValues.getEmailCode());
         assertThrows(ResponseStatusException.class, () -> authService.signIn(signInUserDto));
@@ -103,10 +105,11 @@ class AuthServiceTest {
     @Test
     void shouldMakeEmailVerification() {
         User user = TestValues.getUser();
-        user.setEmailCode(TestValues.getEmailCode());
+        String emailCode = TestValues.getEmailCode();
+        user.setEmailCode(emailCode);
         EmailVerificationDto emailVerificationDto = new EmailVerificationDto(
                 user.getEmail(),
-                TestValues.getEmailCode()
+                emailCode
         );
 
         when(userRepository.findUserByLoginOrEmail(anyString(), anyString())).thenReturn(user);
