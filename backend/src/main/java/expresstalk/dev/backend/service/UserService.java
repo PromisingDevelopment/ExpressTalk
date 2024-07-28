@@ -2,6 +2,7 @@ package expresstalk.dev.backend.service;
 
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.enums.UserStatus;
+import expresstalk.dev.backend.exception.UserIsNotFoundException;
 import expresstalk.dev.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,9 +25,7 @@ public class UserService {
 
     public User findById(UUID userId) {
         User user = userRepository.findById(userId).orElse(null);
-        if(user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id: " + userId + " doesn't exist");
-        }
+        if(user == null) throw new UserIsNotFoundException(userId);
 
         return user;
     }
@@ -34,7 +33,7 @@ public class UserService {
     public User findByLogin(String login) {
         User user = userRepository.findUserByLogin(login);
         if(user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with login: " + login + " doesn't exist");
+            throw new UserIsNotFoundException(HttpStatus.NOT_FOUND, "User with login: " + login + " doesn't exist");
         }
 
         return user;

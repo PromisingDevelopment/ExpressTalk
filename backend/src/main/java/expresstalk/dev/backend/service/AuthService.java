@@ -6,6 +6,7 @@ import expresstalk.dev.backend.dto.request.SignUpUserDto;
 import expresstalk.dev.backend.enums.UserStatus;
 import expresstalk.dev.backend.exception.EmailNotVerifiedException;
 import expresstalk.dev.backend.entity.User;
+import expresstalk.dev.backend.exception.UserIsNotFoundException;
 import expresstalk.dev.backend.repository.UserRepository;
 import expresstalk.dev.backend.utils.Generator;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +54,7 @@ public class AuthService {
         User existedUser = userRepository.findUserByLoginOrEmail(signInUserDto.login(), signInUserDto.login());
 
         if(existedUser == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User doesn't exist.");
+            throw new UserIsNotFoundException(HttpStatus.NOT_FOUND, "User doesn't exist.");
         }
 
         if(existedUser.getEmailCode() != null) {

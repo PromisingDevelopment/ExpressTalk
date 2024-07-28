@@ -5,7 +5,6 @@ import expresstalk.dev.backend.dto.response.BriefGroupChatDto;
 import expresstalk.dev.backend.dto.response.BriefPrivateChatDto;
 import expresstalk.dev.backend.entity.*;
 import expresstalk.dev.backend.repository.GroupChatRepository;
-import expresstalk.dev.backend.repository.PrivateChatRepository;
 import expresstalk.dev.backend.repository.SystemMessageRepository;
 import expresstalk.dev.backend.utils.Converter;
 import lombok.RequiredArgsConstructor;
@@ -22,10 +21,8 @@ import java.util.UUID;
 @Service
 public class ChatService {
     private final GroupChatRepository groupChatRepository;
-    private final PrivateChatRepository privateChatRepository;
     private final PrivateChatService privateChatService;
     private final SystemMessageRepository systemMessageRepository;
-    private final AccountService accountService;
 
     public GetUserChatsDto getChats(User user) {
         List<BriefPrivateChatDto> briefPrivateChatDtos = new ArrayList<>();
@@ -70,7 +67,7 @@ public class ChatService {
         return getUserChatsDto;
     }
 
-    public UUID checkAndGetChatUUID(String chatStrId) {
+    public UUID verifyAndGetChatUUID(String chatStrId) {
         UUID chatId = UUID.randomUUID();
         try {
             chatId = Converter.convertStringToUUID(chatStrId);

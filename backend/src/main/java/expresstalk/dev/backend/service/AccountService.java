@@ -14,7 +14,7 @@ public class AccountService {
             }
         }
 
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable find private chat account by provided user and private chat");
+        return null;
     }
 
     public GroupChatAccount getGroupChatAccount(User user, GroupChat groupChat) {
@@ -24,6 +24,6 @@ public class AccountService {
             }
         }
 
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable find group chat account by provided user and group chat");
+        return null;
     }
 }

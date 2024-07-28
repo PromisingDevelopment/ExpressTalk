@@ -47,7 +47,7 @@ public class PrivateChatController {
             sessionService.ensureSessionExistense(session);
             ValidationErrorChecker.<SendChatMessageDto>checkDtoForErrors(sendChatMessageDto);
 
-            UUID chatId = chatService.checkAndGetChatUUID(sendChatMessageDto.chatId());
+            UUID chatId = chatService.verifyAndGetChatUUID(sendChatMessageDto.chatId());
             UUID userId = sessionService.getUserIdFromSession(session);
             User sender = userService.findById(userId);
             PrivateChat privateChat = privateChatService.getChat(chatId);
@@ -82,7 +82,7 @@ public class PrivateChatController {
     public PrivateChat getPrivateChatRoom(@PathVariable String chatStrId, HttpServletRequest request) {
         sessionService.ensureSessionExistense(request);
 
-        UUID chatId = chatService.checkAndGetChatUUID(chatStrId);
+        UUID chatId = chatService.verifyAndGetChatUUID(chatStrId);
         PrivateChat chat = privateChatService.getChat(chatId);
 
         return chat;
