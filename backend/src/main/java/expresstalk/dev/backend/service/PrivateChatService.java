@@ -1,10 +1,9 @@
 package expresstalk.dev.backend.service;
 
 import expresstalk.dev.backend.dto.request.SendChatMessageDto;
-import expresstalk.dev.backend.entity.PrivateChat;
-import expresstalk.dev.backend.entity.PrivateChatAccount;
-import expresstalk.dev.backend.entity.PrivateMessage;
-import expresstalk.dev.backend.entity.User;
+import expresstalk.dev.backend.entity.*;
+import expresstalk.dev.backend.exception.ChatIsNotFoundException;
+import expresstalk.dev.backend.exception.UserAbsentInChatException;
 import expresstalk.dev.backend.repository.PrivateChatAccountRepository;
 import expresstalk.dev.backend.repository.PrivateChatRepository;
 import expresstalk.dev.backend.repository.PrivateMessageRepository;
@@ -27,21 +26,17 @@ public class PrivateChatService {
     private final PrivateChatRepository privateChatRepository;
     private final UserRepository userRepository;
 
-    private PrivateChat getChat(User member1, User member2) {
+    public PrivateChat getChat(User member1, User member2) {
         PrivateChat chat = privateChatRepository.findPrivateChatBetween(member1, member2);
-
         if(chat == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Chat with " + member1.getLogin() + " and " + member2.getLogin() + " doesn't exist.");
+            throw new ChatIsNotFoundException(HttpStatus.NOT_FOUND, "Chat with " + member1.getLogin() + " and " + member2.getLogin() + " doesn't exist.");
         }
 
         return chat;
     }
     public PrivateChat getChat(UUID chatId) {
         PrivateChat chat = privateChatRepository.findById(chatId).orElse(null);
-
-        if(chat == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Chat with id: " + chatId + " doesn't exist.");
-        }
+        if(chat == null) throw new ChatIsNotFoundException(chatId);
 
         return chat;
     }
@@ -75,13 +70,12 @@ public class PrivateChatService {
         }
 
         throw new ResponseStatusException(HttpStatus.CONFLICT, "Private chat with provided two members had already been created");
-
     }
 
     public PrivateMessage saveMessage(SendChatMessageDto sendPrivateChatMessageDto, User sender, User receiver) {
         PrivateChat privateChat = getChat(UUID.fromString(sendPrivateChatMessageDto.chatId()));
-        PrivateChatAccount senderAccount = accountService.getPrivateChatAccount(sender, privateChat);
-        PrivateChatAccount receiverAccount = accountService.getPrivateChatAccount(receiver, privateChat);
+        PrivateChatAccount senderAccount = verifyAndGetPrivateChatAccount(sender, privateChat);
+        PrivateChatAccount receiverAccount = verifyAndGetPrivateChatAccount(receiver, privateChat);
         PrivateMessage privateMessage = new PrivateMessage(
                 senderAccount,
                 receiverAccount,
@@ -93,6 +87,8 @@ public class PrivateChatService {
         senderAccount.getSentMessages().add(privateMessage);
         receiverAccount.getReceivedMessages().add(privateMessage);
         privateChat.getMessages().add(privateMessage);
+
+        privateChatAccountRepository.saveAll(Arrays.asList(senderAccount, receiverAccount));
         privateChatRepository.save(privateChat);
         privateMessageRepository.save(privateMessage);
 
@@ -100,13 +96,9 @@ public class PrivateChatService {
     }
 
     public boolean isUserExistsInChat(User user, PrivateChat privateChat) {
-        for (PrivateChatAccount member : privateChat.getMembers()) {
-            if(member.getUser().getId().equals(user.getId())) {
-                return true;
-            }
-        }
+        PrivateChatAccount account = accountService.getPrivateChatAccount(user, privateChat);
 
-        return false;
+        return account != null;
     }
 
     public void ensureUserPermissionToSendMessageInChat(User user, PrivateChat privateChat) {
@@ -115,9 +107,9 @@ public class PrivateChatService {
         }
     }
 
-    public User getSecondUserOfChat(User firstUser, PrivateChat privateChat) throws Exception {
+    public User getSecondUserOfChat(User firstUser, PrivateChat privateChat) {
         if(!isUserExistsInChat(firstUser, privateChat)) {
-            throw new Exception("Searching of the second user of chat was failed because the first user doesn't exist in chat");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Searching of the second user of chat was failed because the first user doesn't exist in chat");
         }
 
         User secondUser = new User();
@@ -126,5 +118,12 @@ public class PrivateChatService {
         }
 
         return secondUser;
+    }
+
+    public PrivateChatAccount verifyAndGetPrivateChatAccount(User user, PrivateChat privateChat) {
+        PrivateChatAccount account = accountService.getPrivateChatAccount(user, privateChat);
+        if(account == null) throw new UserAbsentInChatException(user.getId());
+
+        return account;
     }
 }

@@ -33,7 +33,7 @@ import java.util.UUID;
 @RequestMapping("/group_chats")
 public class GroupChatController {
     private final UserService userService;
-    private final GroupChatSerivce groupChatSerivce;
+    private final GroupChatService groupChatService;
     private final ChatService chatService;
     private final SessionService sessionService;
     private final SimpMessagingTemplate simpMessagingTemplate;
@@ -49,13 +49,13 @@ public class GroupChatController {
             sessionService.ensureSessionExistense(session);
             ValidationErrorChecker.<SendChatMessageDto>checkDtoForErrors(sendChatMessageDto);
 
-            UUID chatId = chatService.checkAndGetChatUUID(sendChatMessageDto.chatId());
+            UUID chatId = chatService.verifyAndGetChatUUID(sendChatMessageDto.chatId());
             UUID userId = sessionService.getUserIdFromSession(session);
             User sender = userService.findById(userId);
-            GroupChat groupChat = groupChatSerivce.getChat(chatId);
-            groupChatSerivce.ensureUserPermissionToSendMessageInChat(sender, chatId);
-            List<User> receivers = groupChatSerivce.getOtherUsersOfChat(sender, groupChat);
-            GroupMessage groupMessage = groupChatSerivce.saveMessage(sendChatMessageDto, sender);
+            GroupChat groupChat = groupChatService.getChat(chatId);
+            groupChatService.ensureUserExistsInChat(sender, groupChat);
+            List<User> receivers = groupChatService.getOtherUsersOfChat(sender, groupChat);
+            GroupMessage groupMessage = groupChatService.saveMessage(sender, sendChatMessageDto);
             GroupChatMessageDto groupChatMessageDto = new GroupChatMessageDto(
                     groupMessage.getCreatedAt(),
                     groupMessage.getContent(),
@@ -87,16 +87,16 @@ public class GroupChatController {
             sessionService.ensureSessionExistense(session);
             ValidationErrorChecker.<AddUserToGroupChatDto>checkDtoForErrors(addUserToGroupChatDto);
 
-            UUID chatId = chatService.checkAndGetChatUUID(addUserToGroupChatDto.chatId());
+            UUID chatId = chatService.verifyAndGetChatUUID(addUserToGroupChatDto.chatId());
             UUID userId = sessionService.getUserIdFromSession(session);
             User admin = userService.findById(userId);
             User member = userService.findById(Converter.convertStringToUUID(addUserToGroupChatDto.memberId()));
-            GroupChat groupChat = groupChatSerivce.getChat(chatId);
-            groupChatSerivce.addMemberToChat(groupChat, admin, member);
+            GroupChat groupChat = groupChatService.getChat(chatId);
+            groupChatService.addMemberToChat(admin, member, groupChat);
             String addMemberMessage = admin.getLogin() + " has added " + member.getLogin();
             SystemMessage systemMessage = chatService.saveSystemMessage(addMemberMessage, groupChat);
             UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
-            List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin, groupChat);
+            List<User> receivers = groupChatService.getOtherUsersOfChat(admin, groupChat);
 
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,addMemberMessage);
@@ -120,16 +120,16 @@ public class GroupChatController {
             sessionService.ensureSessionExistense(session);
             ValidationErrorChecker.<RemoveUserFromGroupChatDto>checkDtoForErrors(removeUserFromGroupChatDto);
 
-            UUID chatId = chatService.checkAndGetChatUUID(removeUserFromGroupChatDto.chatId());
+            UUID chatId = chatService.verifyAndGetChatUUID(removeUserFromGroupChatDto.chatId());
             UUID userId = sessionService.getUserIdFromSession(session);
             User admin = userService.findById(userId);
             User member = userService.findById(Converter.convertStringToUUID(removeUserFromGroupChatDto.memberId()));
-            GroupChat groupChat = groupChatSerivce.getChat(chatId);
-            groupChatSerivce.removeMemberFromChat(groupChat, admin, member);
+            GroupChat groupChat = groupChatService.getChat(chatId);
+            groupChatService.removeMemberFromChat(admin, member, groupChat);
             String removeMemberMessage = admin.getLogin() + " has removed " + member.getLogin();
             SystemMessage systemMessage = chatService.saveSystemMessage(removeMemberMessage, groupChat);
             UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
-            List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin, groupChat);
+            List<User> receivers = groupChatService.getOtherUsersOfChat(admin, groupChat);
 
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,removeMemberMessage);
@@ -153,16 +153,16 @@ public class GroupChatController {
             sessionService.ensureSessionExistense(session);
             ValidationErrorChecker.<SetUserRoleInGroupChatDto>checkDtoForErrors(setUserRoleInGroupChatDto);
 
-            UUID chatId = chatService.checkAndGetChatUUID(setUserRoleInGroupChatDto.chatId());
+            UUID chatId = chatService.verifyAndGetChatUUID(setUserRoleInGroupChatDto.chatId());
             UUID userId = sessionService.getUserIdFromSession(session);
             User admin = userService.findById(userId);
             User changingUser = userService.findById(Converter.convertStringToUUID(setUserRoleInGroupChatDto.userToGiveRoleId()));
-            GroupChat groupChat = groupChatSerivce.getChat(chatId);
-            groupChatSerivce.setRole(groupChat, admin, changingUser, setUserRoleInGroupChatDto.groupChatRole());
+            GroupChat groupChat = groupChatService.getChat(chatId);
+            groupChatService.setRole(admin, changingUser, setUserRoleInGroupChatDto.groupChatRole(), groupChat);
             String changedRoleMessage = changingUser.getLogin() + " is now " + setUserRoleInGroupChatDto.groupChatRole();
             SystemMessage systemMessage = chatService.saveSystemMessage(changedRoleMessage, groupChat);
             UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
-            List<User> receivers = groupChatSerivce.getOtherUsersOfChat(admin, groupChat);
+            List<User> receivers = groupChatService.getOtherUsersOfChat(admin, groupChat);
 
             for(User receiver : receivers) {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,changedRoleMessage);
@@ -185,26 +185,30 @@ public class GroupChatController {
     public GroupChat createGroupChatRoom(@RequestBody CreateGroupChatRoomDto createGroupChatRoomDto, HttpServletRequest request) {
         UUID userId = sessionService.getUserIdFromSession(request);
         User user = userService.findById(userId);
-        GroupChat chat = groupChatSerivce.createChat(user, createGroupChatRoomDto.groupName());
+        GroupChat chat = groupChatService.createChat(user, createGroupChatRoomDto.groupName());
 
         return chat;
     }
 
     @ApiResponses(value = {
             @ApiResponse(responseCode = "400", description = "Provided chat id in the path is not UUID"),
-            @ApiResponse(responseCode = "401", description = "The member is not present in the chat"),
             @ApiResponse(responseCode = "403", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "Group chat with provided id wasn't found"),
+            @ApiResponse(responseCode = "404", description = "User with provided login doesn't exist in the group chat"),
+            @ApiResponse(responseCode = "404", description = "User with provided id doesn't exist"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping ("/{chatStrId}")
     @ResponseBody
     public GroupChat getGroupChat(@PathVariable String chatStrId, HttpServletRequest request) {
-        UUID chatId = chatService.checkAndGetChatUUID(chatStrId);
+        UUID chatId = chatService.verifyAndGetChatUUID(chatStrId);
         UUID userId = sessionService.getUserIdFromSession(request);
         User user = userService.findById(userId);
+        GroupChat groupChat = groupChatService.getChat(chatId);
 
-        return groupChatSerivce.getChat(user, chatId);
+        groupChatService.ensureUserExistsInChat(user, groupChat);
+
+        return groupChat;
     }
 }
