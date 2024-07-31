@@ -1,46 +1,23 @@
 package expresstalk.dev.backend.utils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.Inflater;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class ImageUtils {
-    public static final int BITE_SIZE = 4 * 1024;
+    public static void validateImage(MultipartFile imageFile) throws Exception {
+        List<String> acceptedMimeTypes = Arrays.asList(
+                "image/jpeg",
+                "image/png",
+                "image/gif",
+                "image/bmp",
+                "image/webp"
+        );
 
-
-    public static byte[] compressImage(byte[] data) throws IOException {
-        Deflater deflater = new Deflater();
-        deflater.setLevel(Deflater.BEST_COMPRESSION);
-        deflater.setInput(data);
-        deflater.finish();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
-        byte[] temp = new byte[BITE_SIZE];
-
-        while (!deflater.finished()) {
-            int size = deflater.deflate(temp);
-            outputStream.write(temp, 0, size);
+        String contentType = imageFile.getContentType();
+        if (contentType == null || !acceptedMimeTypes.contains(contentType)) {
+            throw new Exception("Invalid file. Only images are allowed");
         }
-
-        outputStream.close();
-
-        return outputStream.toByteArray();
-    }
-
-    public static byte[] decompressImage(byte[] data) throws DataFormatException, IOException {
-        Inflater inflater = new Inflater();
-        inflater.setInput(data);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
-        byte[] temp = new byte[BITE_SIZE];
-
-        while (!inflater.finished()) {
-            int count = inflater.inflate(temp);
-            outputStream.write(temp, 0, count);
-        }
-
-        outputStream.close();
-
-        return outputStream.toByteArray();
     }
 }

@@ -4,10 +4,12 @@ import expresstalk.dev.backend.entity.AvatarImage;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.enums.UserStatus;
 import expresstalk.dev.backend.exception.ImageIsNotFoundException;
+import expresstalk.dev.backend.exception.InvalidFileTypeException;
 import expresstalk.dev.backend.exception.UserIsNotFoundException;
 import expresstalk.dev.backend.repository.AvatarImageRepository;
 import expresstalk.dev.backend.repository.UserRepository;
 import expresstalk.dev.backend.test_utils.TestValues;
+import expresstalk.dev.backend.utils.FileUtils;
 import expresstalk.dev.backend.utils.ImageUtils;
 import org.apache.commons.lang3.exception.ContextedRuntimeException;
 import org.checkerframework.checker.units.qual.A;
@@ -17,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.util.MimeType;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -116,6 +119,44 @@ class UserServiceTest {
     }
 
     @Test
+    void shouldNotSetAvatarImage() {
+        User user = TestValues.getUser();
+        String imageName = TestValues.getWord();
+        String extension = ".docx";
+        MultipartFile file1 = new MockMultipartFile(
+                imageName,
+                imageName + extension,
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                TestValues.getSentence().getBytes()
+        );
+
+        assertThrows(InvalidFileTypeException.class, () -> userService.setAvatarImage(user, file1));
+
+        imageName = TestValues.getWord();
+        extension = ".xls";
+        MultipartFile file2 = new MockMultipartFile(
+                imageName,
+                imageName + extension,
+                "application/vnd.ms-excel",
+                TestValues.getSentence().getBytes()
+        );
+
+        assertThrows(InvalidFileTypeException.class, () -> userService.setAvatarImage(user, file2));
+
+        imageName = TestValues.getWord();
+        extension = ".txt";
+        MultipartFile file3 = new MockMultipartFile(
+                imageName,
+                imageName + extension,
+                "text/plain",
+                TestValues.getSentence().getBytes()
+        );
+
+        assertThrows(InvalidFileTypeException.class, () -> userService.setAvatarImage(user, file3));
+
+    }
+
+    @Test
     void shouldGetAvatarImage() {
         UUID avatarId = UUID.randomUUID();
         String imageName = TestValues.getWord();
@@ -125,7 +166,7 @@ class UserServiceTest {
             avatarImage = new AvatarImage(
                     imageName + extension,
                     "image/jpeg",
-                    ImageUtils.compressImage(TestValues.getSentence().getBytes())
+                    FileUtils.compressFile(TestValues.getSentence().getBytes())
             );
         } catch (Exception exception) {
             fail("Unable to compress image");
