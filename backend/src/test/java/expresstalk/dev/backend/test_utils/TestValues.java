@@ -66,14 +66,20 @@ public class TestValues {
 
     public static String getSentence() {
         Random random = new Random();
-
         String subject = SUBJECTS[random.nextInt(SUBJECTS.length)];
         String verb = VERBS[random.nextInt(VERBS.length)];
         String object = OBJECTS[random.nextInt(OBJECTS.length)];
         String adverb = ADVERBS[random.nextInt(ADVERBS.length)];
-
         String randomSentence = subject + " " + verb + " " + object + " " + adverb + ".";
+
         return randomSentence;
+    }
+
+    public static String getWord() {
+        Random random = new Random();
+        String subject = SUBJECTS[random.nextInt(SUBJECTS.length)];
+
+        return subject;
     }
 
     public static String getCreatedAt() {

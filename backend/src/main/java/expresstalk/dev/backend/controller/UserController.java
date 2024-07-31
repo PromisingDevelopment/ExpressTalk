@@ -1,17 +1,22 @@
 package expresstalk.dev.backend.controller;
 
 import expresstalk.dev.backend.dto.request.GetUserChatsDto;
+import expresstalk.dev.backend.dto.response.ImageId;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.enums.UserStatus;
 import expresstalk.dev.backend.service.ChatService;
 import expresstalk.dev.backend.service.SessionService;
 import expresstalk.dev.backend.service.UserService;
+import expresstalk.dev.backend.utils.Converter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
@@ -63,17 +68,40 @@ public class UserController {
     @GetMapping("/chats")
     @ResponseBody
     public GetUserChatsDto getChatsPage(HttpServletRequest request) {
-        request.getSession(false);
         UUID userId = sessionService.getUserIdFromSession(request);
         User user = userService.findById(userId);
 
         try {
             userService.handleStatusTo(userId, UserStatus.ONLINE);
         } catch (Exception ex) {
-            System.out.println("ERROR: " + ex.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
         }
 
         return chatService.getChats(user);
+    }
+
+    @PostMapping("/avatar")
+    public ImageId setAvatarImage(@RequestParam("avatarImage") MultipartFile avatarImage, HttpServletRequest request) {
+        UUID userId = sessionService.getUserIdFromSession(request);
+        User user = userService.findById(userId);
+
+        return userService.setAvatarImage(user, avatarImage);
+    }
+
+    @GetMapping("/avatar/{avatarStrId}")
+    public ResponseEntity getAvatarImage(@PathVariable String avatarStrId, HttpServletRequest request) {
+        sessionService.ensureSessionExistense(request);
+
+        UUID avatarId;
+        try {
+            avatarId = Converter.convertStringToUUID(avatarStrId);
+        } catch (Exception exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to convert provided UUID from path");
+        }
+
+        byte[] imageData = userService.getAvatarImage(avatarId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.valueOf(MediaType.IMAGE_PNG_VALUE))
+                .body(imageData);
     }
 }

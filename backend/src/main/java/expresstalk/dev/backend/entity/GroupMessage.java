@@ -22,12 +22,12 @@ public class GroupMessage extends Message {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "sender_id", referencedColumnName = "id")
+    @JoinColumn(name = "senderId", referencedColumnName = "id")
     private GroupChatAccount sender;
 
     @ToString.Exclude
     @ManyToOne
-    @JoinColumn(name = "group_chat_id", referencedColumnName = "id")
+    @JoinColumn(name = "groupChatId", referencedColumnName = "id")
     @JsonIgnore
     private GroupChat groupChat;
 

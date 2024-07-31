@@ -22,16 +22,16 @@ public class PrivateMessage extends Message {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "sender_id", referencedColumnName = "id")
+    @JoinColumn(name = "senderId", referencedColumnName = "id")
     private PrivateChatAccount sender;
 
     @ManyToOne
-    @JoinColumn(name = "receiver_id", referencedColumnName = "id")
+    @JoinColumn(name = "receiverId", referencedColumnName = "id")
     private PrivateChatAccount receiver;
 
     @ToString.Exclude
     @ManyToOne
-    @JoinColumn(name = "private_chat_id", referencedColumnName = "id")
+    @JoinColumn(name = "privateChatId", referencedColumnName = "id")
     @JsonIgnore
     private PrivateChat privateChat;
 
