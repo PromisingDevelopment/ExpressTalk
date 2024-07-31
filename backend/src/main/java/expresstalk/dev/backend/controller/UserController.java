@@ -81,6 +81,12 @@ public class UserController {
     }
 
     @PostMapping("/avatar")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "403", description = "Invalid file type provided. Only image acceptable"),
+            @ApiResponse(responseCode = "403", description = "User is not authenticated"),
+            @ApiResponse(responseCode = "404", description = "User is not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ImageId setAvatarImage(@RequestParam("avatarImage") MultipartFile avatarImage, HttpServletRequest request) {
         UUID userId = sessionService.getUserIdFromSession(request);
         User user = userService.findById(userId);
@@ -89,6 +95,15 @@ public class UserController {
     }
 
     @GetMapping("/avatar/{avatarStrId}")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "400", description = "Unable to convert provided UUID from path"),
+            @ApiResponse(responseCode = "403", description = "Invalid file type provided. Only image acceptable"),
+            @ApiResponse(responseCode = "403", description = "User is not authenticated"),
+            @ApiResponse(responseCode = "404", description = "User is not found"),
+            @ApiResponse(responseCode = "404", description = "Avatar image is not found by provided id"),
+            @ApiResponse(responseCode = "500", description = "Error downloading an image"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity getAvatarImage(@PathVariable String avatarStrId, HttpServletRequest request) {
         sessionService.ensureSessionExistense(request);
 

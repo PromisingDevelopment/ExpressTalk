@@ -2,13 +2,14 @@ package expresstalk.dev.backend.service;
 
 import expresstalk.dev.backend.dto.response.ImageId;
 import expresstalk.dev.backend.entity.AvatarImage;
-import expresstalk.dev.backend.entity.Image;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.enums.UserStatus;
 import expresstalk.dev.backend.exception.ImageIsNotFoundException;
+import expresstalk.dev.backend.exception.InvalidFileTypeException;
 import expresstalk.dev.backend.exception.UserIsNotFoundException;
 import expresstalk.dev.backend.repository.AvatarImageRepository;
 import expresstalk.dev.backend.repository.UserRepository;
+import expresstalk.dev.backend.utils.FileUtils;
 import expresstalk.dev.backend.utils.ImageUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -50,9 +51,15 @@ public class UserService {
     }
 
     public ImageId setAvatarImage(User user, MultipartFile avatarImage) {
+        try {
+            ImageUtils.validateImage(avatarImage);
+        } catch (Exception exception) {
+            throw new InvalidFileTypeException("image");
+        }
+
         byte[] compressedData;
         try {
-            compressedData = ImageUtils.compressImage(avatarImage.getBytes());
+            compressedData = FileUtils.compressFile(avatarImage.getBytes());
         } catch (Exception exception) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to compress image");
         }
@@ -79,11 +86,9 @@ public class UserService {
 
         byte[] imageBytes;
         try {
-            return ImageUtils.decompressImage(image.getImageData());
+            return FileUtils.decompressFile(image.getImageData());
         } catch (Exception exception) {
-            throw new ContextedRuntimeException("Error downloading an image", exception)
-                    .addContextValue("Image ID",  image.getId())
-                    .addContextValue("Image name", image.getName());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error downloading an image");
         }
     }
 }
