@@ -25,11 +25,11 @@ public class GroupChatAccount {
     private List<GroupMessage> groupMessages = new ArrayList<>();
 
     @ManyToOne
-    @JoinColumn(name = "group_chat_id", referencedColumnName = "id")
+    @JoinColumn(name = "groupChatId", referencedColumnName = "id")
     private GroupChat groupChat;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "userId", referencedColumnName = "id")
     private User user;
 
     public GroupChatAccount(GroupChatRole groupChatRole, GroupChat groupChat, User user) {

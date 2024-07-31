@@ -48,6 +48,10 @@ public class User {
         @Column(nullable = false, columnDefinition = "varchar(7) default 'ONLINE'")
         private UserStatus status;
 
+        @OneToOne
+        @JoinColumn(referencedColumnName = "avatarImageId", name = "id")
+        private AvatarImage avatarImage;
+
         @ToString.Exclude
         @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
         @JsonIgnore

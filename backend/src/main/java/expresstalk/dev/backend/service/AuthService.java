@@ -73,10 +73,10 @@ public class AuthService {
     public User makeEmailVerification(EmailVerificationDto emailVerificationDto) {
         User existedUser = userRepository.findUserByLoginOrEmail(emailVerificationDto.email(), emailVerificationDto.email());
 
+        if(existedUser == null) throw new UserIsNotFoundException(existedUser.getId());
         if(existedUser.getEmailCode() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User's email has already verified.");
         }
-
         if(!emailVerificationDto.code().equals(existedUser.getEmailCode())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect code provided.");
         }

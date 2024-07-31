@@ -20,7 +20,7 @@ public class SystemMessage extends Message {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "chat_id", referencedColumnName = "id")
+    @JoinColumn(name = "chatId", referencedColumnName = "id")
     private Chat chat;
 
     public SystemMessage(String content, Date createdAt, Chat chat) {

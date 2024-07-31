@@ -28,10 +28,10 @@ public class PrivateChatAccount {
     @ToString.Exclude
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "private_chat_id", referencedColumnName = "id")
+    @JoinColumn(name = "privateChatId", referencedColumnName = "id")
     private PrivateChat privateChat;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "userId", referencedColumnName = "id")
     private User user;
 }
