@@ -23,9 +23,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -53,14 +51,17 @@ public class PrivateChatController {
             UUID userId = sessionService.getUserIdFromSession(session);
             User sender = userService.findById(userId);
             PrivateChat privateChat = privateChatService.getChat(chatId);
+
             privateChatService.ensureUserPermissionToSendMessageInChat(sender, privateChat);
+
             User receiver = privateChatService.getSecondUserOfChat(sender, privateChat);
             PrivateMessage privateMessage = privateChatService.saveMessage(sendChatMessageDto, sender, receiver);
             PrivateChatMessageDto privateChatMessageDto = new PrivateChatMessageDto(
                     privateMessage.getCreatedAt(),
                     privateMessage.getContent(),
                     sender.getLogin(),
-                    sender.getId()
+                    sender.getId(),
+                    privateMessage.getAttachedFile()
             );
             LastMessageDto lastMessageDto = new LastMessageDto(chatId,privateMessage.getContent());
 
@@ -98,7 +99,7 @@ public class PrivateChatController {
             @ApiResponse(responseCode = "409", description = "Private chat with provided two members had already been created"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     @ResponseBody
     public PrivateChat createPrivateChatRoom(@RequestBody @Valid CreatePrivateChatRoomDto createPrivateChatRoomDto, HttpServletRequest request) {

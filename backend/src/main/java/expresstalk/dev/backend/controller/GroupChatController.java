@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
@@ -61,7 +62,8 @@ public class GroupChatController {
                     groupMessage.getContent(),
                     groupMessage.getSender().getUser().getLogin(),
                     groupMessage.getSender().getGroupChatRole(),
-                    sender.getId()
+                    sender.getId(),
+                        groupMessage.getAttachedFile()
                     );
 
             for(User receiver : receivers) {
@@ -182,7 +184,7 @@ public class GroupChatController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     @ResponseBody
-    public GroupChat createGroupChatRoom(@RequestBody CreateGroupChatRoomDto createGroupChatRoomDto, HttpServletRequest request) {
+    public GroupChat createGroupChatRoom(@RequestBody @Valid CreateGroupChatRoomDto createGroupChatRoomDto, HttpServletRequest request) {
         UUID userId = sessionService.getUserIdFromSession(request);
         User user = userService.findById(userId);
         GroupChat chat = groupChatService.createChat(user, createGroupChatRoomDto.groupName());

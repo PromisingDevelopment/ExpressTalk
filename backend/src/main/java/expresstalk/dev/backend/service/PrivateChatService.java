@@ -1,13 +1,11 @@
 package expresstalk.dev.backend.service;
 
 import expresstalk.dev.backend.dto.request.SendChatMessageDto;
+import expresstalk.dev.backend.dto.request.SendFileDto;
 import expresstalk.dev.backend.entity.*;
 import expresstalk.dev.backend.exception.ChatIsNotFoundException;
 import expresstalk.dev.backend.exception.UserAbsentInChatException;
-import expresstalk.dev.backend.repository.PrivateChatAccountRepository;
-import expresstalk.dev.backend.repository.PrivateChatRepository;
-import expresstalk.dev.backend.repository.PrivateMessageRepository;
-import expresstalk.dev.backend.repository.UserRepository;
+import expresstalk.dev.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,6 +23,7 @@ public class PrivateChatService {
     private final PrivateChatAccountRepository privateChatAccountRepository;
     private final PrivateChatRepository privateChatRepository;
     private final UserRepository userRepository;
+    private final AttachedFileRepository attachedFileRepository;
 
     public PrivateChat getChat(User member1, User member2) {
         PrivateChat chat = privateChatRepository.findPrivateChatBetween(member1, member2);
@@ -72,17 +71,26 @@ public class PrivateChatService {
         throw new ResponseStatusException(HttpStatus.CONFLICT, "Private chat with provided two members had already been created");
     }
 
-    public PrivateMessage saveMessage(SendChatMessageDto sendPrivateChatMessageDto, User sender, User receiver) {
-        PrivateChat privateChat = getChat(UUID.fromString(sendPrivateChatMessageDto.chatId()));
+    public PrivateMessage saveMessage(SendChatMessageDto sendChatMessageDto, User sender, User receiver) {
+        PrivateChat privateChat = getChat(UUID.fromString(sendChatMessageDto.chatId()));
         PrivateChatAccount senderAccount = verifyAndGetPrivateChatAccount(sender, privateChat);
         PrivateChatAccount receiverAccount = verifyAndGetPrivateChatAccount(receiver, privateChat);
         PrivateMessage privateMessage = new PrivateMessage(
                 senderAccount,
                 receiverAccount,
                 privateChat,
-                sendPrivateChatMessageDto.content(),
-                new Date(Long.parseLong(sendPrivateChatMessageDto.createdAt()))
+                sendChatMessageDto.content(),
+                new Date(Long.parseLong(sendChatMessageDto.createdAt()))
         );
+
+        SendFileDto sendFileDto = sendChatMessageDto.sendFileDto();
+        if(sendFileDto != null) {
+            AttachedFile attachedFile = new AttachedFile(sendFileDto.name(), sendFileDto.type(), sendFileDto.data());
+            attachedFile.setMessage(privateMessage);
+            privateMessage.setAttachedFile(attachedFile);
+
+            attachedFileRepository.save(attachedFile);
+        }
 
         senderAccount.getSentMessages().add(privateMessage);
         receiverAccount.getReceivedMessages().add(privateMessage);

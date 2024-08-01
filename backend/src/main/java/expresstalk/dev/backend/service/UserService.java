@@ -1,31 +1,32 @@
 package expresstalk.dev.backend.service;
 
 import expresstalk.dev.backend.dto.response.ImageId;
-import expresstalk.dev.backend.entity.AvatarImage;
+import expresstalk.dev.backend.entity.AvatarFile;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.enums.UserStatus;
 import expresstalk.dev.backend.exception.ImageIsNotFoundException;
 import expresstalk.dev.backend.exception.InvalidFileTypeException;
 import expresstalk.dev.backend.exception.UserIsNotFoundException;
-import expresstalk.dev.backend.repository.AvatarImageRepository;
+import expresstalk.dev.backend.repository.AvatarFileRepository;
 import expresstalk.dev.backend.repository.UserRepository;
-import expresstalk.dev.backend.utils.FileUtils;
 import expresstalk.dev.backend.utils.ImageUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.exception.ContextedRuntimeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectStreamException;
 import java.util.*;
 
 @RequiredArgsConstructor
 @Service
 public class UserService {
     private final UserRepository userRepository;
-    private final AvatarImageRepository avatarImageRepository;
+    private final AvatarFileRepository avatarFileRepository;
 
     public void handleStatusTo(UUID userId, UserStatus userStatus) {
         User user = findById(userId);
@@ -51,44 +52,40 @@ public class UserService {
     }
 
     public ImageId setAvatarImage(User user, MultipartFile avatarImage) {
+        byte[] data;
         try {
             ImageUtils.validateImage(avatarImage);
-        } catch (Exception exception) {
+            data = avatarImage.getBytes();
+        } catch (InvalidObjectException exception) {
             throw new InvalidFileTypeException("image");
+        } catch (IOException exception) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
         }
 
-        byte[] compressedData;
-        try {
-            compressedData = FileUtils.compressFile(avatarImage.getBytes());
-        } catch (Exception exception) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to compress image");
-        }
-
-        AvatarImage avatarImageEntity = new AvatarImage(
+        AvatarFile avatarFileEntity = new AvatarFile(
                 avatarImage.getOriginalFilename(),
                 avatarImage.getContentType(),
-                compressedData
+                data
         );
 
-        user.setAvatarImage(avatarImageEntity);
-        avatarImageRepository.save(avatarImageEntity);
+        if(user.getAvatarFile() != null) {
+            avatarFileRepository.delete(user.getAvatarFile());
+        }
+
+        user.setAvatarFile(avatarFileEntity);
+        avatarFileRepository.save(avatarFileEntity);
         userRepository.save(user);
 
-        return new ImageId(avatarImageEntity.getId());
+        return new ImageId(avatarFileEntity.getId());
     }
 
     @Transactional
     public byte[] getAvatarImage(UUID avatarId) {
-        AvatarImage image = avatarImageRepository.findById(avatarId).orElse(null);
+        AvatarFile image = avatarFileRepository.findById(avatarId).orElse(null);
         if(image == null) {
             throw new ImageIsNotFoundException(avatarId);
         }
 
-        byte[] imageBytes;
-        try {
-            return FileUtils.decompressFile(image.getImageData());
-        } catch (Exception exception) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error downloading an image");
-        }
+        return image.getData();
     }
 }

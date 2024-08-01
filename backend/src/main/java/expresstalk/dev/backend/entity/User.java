@@ -49,8 +49,8 @@ public class User {
         private UserStatus status;
 
         @OneToOne
-        @JoinColumn(referencedColumnName = "avatarImageId", name = "id")
-        private AvatarImage avatarImage;
+        @JoinColumn(name = "avatarFileId", referencedColumnName = "id")
+        private AvatarFile avatarFile;
 
         @ToString.Exclude
         @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)

@@ -1,18 +1,13 @@
 package expresstalk.dev.backend.service;
 
 import expresstalk.dev.backend.dto.request.SendChatMessageDto;
-import expresstalk.dev.backend.entity.GroupChat;
-import expresstalk.dev.backend.entity.GroupChatAccount;
-import expresstalk.dev.backend.entity.GroupMessage;
-import expresstalk.dev.backend.entity.User;
+import expresstalk.dev.backend.dto.request.SendFileDto;
+import expresstalk.dev.backend.entity.*;
 import expresstalk.dev.backend.enums.GroupChatRole;
 import expresstalk.dev.backend.exception.ChatIsNotFoundException;
 import expresstalk.dev.backend.exception.UserAbsentInChatException;
 import expresstalk.dev.backend.exception.UserIsNotAdminException;
-import expresstalk.dev.backend.repository.GroupChatAccountRepository;
-import expresstalk.dev.backend.repository.GroupChatRepository;
-import expresstalk.dev.backend.repository.GroupMessageRepository;
-import expresstalk.dev.backend.repository.UserRepository;
+import expresstalk.dev.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,6 +24,7 @@ public class GroupChatService {
     private final GroupChatRepository groupChatRepository;
     private final GroupMessageRepository groupMessageRepository;
     private final UserRepository userRepository;
+    private final AttachedFileRepository attachedFileRepository;
 
     public void ensureUserExistsInChat(User user, GroupChat groupChat) {
         verifyAndGetGroupChatAccount(user, groupChat);
@@ -133,6 +129,15 @@ public class GroupChatService {
                 sendChatMessageDto.content(),
                 new Date(Long.parseLong(sendChatMessageDto.createdAt()))
         );
+
+        SendFileDto sendFileDto = sendChatMessageDto.sendFileDto();
+        if(sendFileDto != null) {
+            AttachedFile attachedFile = new AttachedFile(sendFileDto.name(), sendFileDto.type(), sendFileDto.data());
+            attachedFile.setMessage(groupMessage);
+            groupMessage.setAttachedFile(attachedFile);
+
+            attachedFileRepository.save(attachedFile);
+        }
 
         groupChat.getMessages().add(groupMessage);
         senderAccount.getGroupMessages().add(groupMessage);

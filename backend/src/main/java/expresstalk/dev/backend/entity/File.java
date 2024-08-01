@@ -13,11 +13,11 @@ import java.util.UUID;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-@Table(name = "images")
+@Table(name = "files")
 @Data
 @RequiredArgsConstructor
 @NoArgsConstructor
-public abstract class Image {
+public abstract class File {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     protected UUID id;
@@ -33,5 +33,5 @@ public abstract class Image {
     @NonNull
     @Lob
     @Column(nullable = false)
-    protected byte[] imageData;
+    protected byte[] data;
 }
