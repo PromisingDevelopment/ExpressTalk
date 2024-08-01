@@ -11,5 +11,11 @@ public record SendChatMessageDto(
         String content,
 
         @NotBlank(message = "created at date can't be blank")
-        String createdAt
-) { }
+        String createdAt,
+
+        SendFileDto sendFileDto
+) {
+        public SendChatMessageDto(String chatId, String content, String createdAt) {
+                this(chatId, content, createdAt, null);
+        }
+}

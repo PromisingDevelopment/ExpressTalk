@@ -1,27 +1,22 @@
 package expresstalk.dev.backend.service;
 
-import expresstalk.dev.backend.entity.AvatarImage;
+import expresstalk.dev.backend.entity.AvatarFile;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.enums.UserStatus;
 import expresstalk.dev.backend.exception.ImageIsNotFoundException;
 import expresstalk.dev.backend.exception.InvalidFileTypeException;
 import expresstalk.dev.backend.exception.UserIsNotFoundException;
-import expresstalk.dev.backend.repository.AvatarImageRepository;
+import expresstalk.dev.backend.repository.AvatarFileRepository;
 import expresstalk.dev.backend.repository.UserRepository;
 import expresstalk.dev.backend.test_utils.TestValues;
-import expresstalk.dev.backend.utils.FileUtils;
-import expresstalk.dev.backend.utils.ImageUtils;
 import org.apache.commons.lang3.exception.ContextedRuntimeException;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.util.MimeType;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -36,7 +31,7 @@ class UserServiceTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private AvatarImageRepository avatarImageRepository;
+    private AvatarFileRepository avatarFileRepository;
     @InjectMocks
     private UserService userService;
 
@@ -100,9 +95,9 @@ class UserServiceTest {
 
         assertDoesNotThrow(() -> userService.setAvatarImage(user, image1));
 
-        verify(avatarImageRepository).save(any(AvatarImage.class));
+        verify(avatarFileRepository).save(any(AvatarFile.class));
         verify(userRepository).save(user);
-        assertEquals(user.getAvatarImage().getName(), imageName + extension);
+        assertEquals(user.getAvatarFile().getName(), imageName + extension);
 
         imageName = TestValues.getWord();
         extension = ".png";
@@ -115,7 +110,7 @@ class UserServiceTest {
 
         assertDoesNotThrow(() -> userService.setAvatarImage(user, image2));
 
-        assertEquals(user.getAvatarImage().getName(), imageName + extension);
+        assertEquals(user.getAvatarFile().getName(), imageName + extension);
     }
 
     @Test
@@ -161,22 +156,20 @@ class UserServiceTest {
         UUID avatarId = UUID.randomUUID();
         String imageName = TestValues.getWord();
         String extension = ".jpg";
-        AvatarImage avatarImage = new AvatarImage();
+        AvatarFile avatarFile = new AvatarFile();
         try {
-            avatarImage = new AvatarImage(
+            avatarFile = new AvatarFile(
                     imageName + extension,
                     "image/jpeg",
-                    FileUtils.compressFile(TestValues.getSentence().getBytes())
+                    TestValues.getSentence().getBytes()
             );
         } catch (Exception exception) {
             fail("Unable to compress image");
         }
 
-        when(avatarImageRepository.findById(avatarId)).thenReturn(Optional.of(avatarImage));
+        when(avatarFileRepository.findById(avatarId)).thenReturn(Optional.of(avatarFile));
         assertDoesNotThrow(() -> userService.getAvatarImage(avatarId));
-        when(avatarImageRepository.findById(avatarId)).thenReturn(Optional.empty());
+        when(avatarFileRepository.findById(avatarId)).thenReturn(Optional.empty());
         assertThrows(ImageIsNotFoundException.class, () -> userService.getAvatarImage(avatarId));
-        when(avatarImageRepository.findById(avatarId)).thenReturn(Optional.of(new AvatarImage()));
-        assertThrows(ContextedRuntimeException.class, () -> userService.getAvatarImage(avatarId));
     }
 }

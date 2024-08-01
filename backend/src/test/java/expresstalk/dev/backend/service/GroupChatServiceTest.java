@@ -1,18 +1,13 @@
 package expresstalk.dev.backend.service;
 
 import expresstalk.dev.backend.dto.request.SendChatMessageDto;
-import expresstalk.dev.backend.entity.GroupChat;
-import expresstalk.dev.backend.entity.GroupChatAccount;
-import expresstalk.dev.backend.entity.GroupMessage;
-import expresstalk.dev.backend.entity.User;
+import expresstalk.dev.backend.dto.request.SendFileDto;
+import expresstalk.dev.backend.entity.*;
 import expresstalk.dev.backend.enums.GroupChatRole;
 import expresstalk.dev.backend.exception.ChatIsNotFoundException;
 import expresstalk.dev.backend.exception.UserAbsentInChatException;
 import expresstalk.dev.backend.exception.UserIsNotAdminException;
-import expresstalk.dev.backend.repository.GroupChatAccountRepository;
-import expresstalk.dev.backend.repository.GroupChatRepository;
-import expresstalk.dev.backend.repository.GroupMessageRepository;
-import expresstalk.dev.backend.repository.UserRepository;
+import expresstalk.dev.backend.repository.*;
 import expresstalk.dev.backend.test_utils.TestValues;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +36,8 @@ class GroupChatServiceTest {
     private GroupMessageRepository groupMessageRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private AttachedFileRepository attachedFileRepository;
     @InjectMocks
     private GroupChatService groupChatService;
 
@@ -221,6 +218,34 @@ class GroupChatServiceTest {
         verify(groupChatRepository).save(any(GroupChat.class));
         verify(groupChatAccountRepository).save(any(GroupChatAccount.class));
         verify(groupMessageRepository).save(any(GroupMessage.class));
+    }
+
+    @Test
+    void shouldSaveMessageWithAttachedFile() {
+        SendFileDto sendFileDto = new SendFileDto(
+                TestValues.getWord() + ".jpg",
+                "image/jpeg",
+                TestValues.getSentence().getBytes()
+        );
+        UUID chatId = UUID.randomUUID();
+        SendChatMessageDto sendChatMessageDto = new SendChatMessageDto(
+                chatId.toString(),
+                TestValues.getSentence(),
+                TestValues.getCreatedAt(),
+                sendFileDto
+        );
+
+        when(groupChatRepository.findById(chatId)).thenReturn(Optional.of(new GroupChat()));
+        when(accountService.getGroupChatAccount(any(User.class), any(GroupChat.class)))
+                .thenReturn(new GroupChatAccount());
+
+        GroupMessage groupMessage =
+                assertDoesNotThrow(() -> groupChatService.saveMessage(new User(), sendChatMessageDto));
+        verify(groupChatRepository).save(any(GroupChat.class));
+        verify(groupChatAccountRepository).save(any(GroupChatAccount.class));
+        verify(groupMessageRepository).save(any(GroupMessage.class));
+        verify(attachedFileRepository).save(any(AttachedFile.class));
+        assertEquals(groupMessage.getAttachedFile().getName(), sendFileDto.name());
     }
 
     @Test

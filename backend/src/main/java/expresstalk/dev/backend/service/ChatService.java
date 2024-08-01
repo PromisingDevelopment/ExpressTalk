@@ -1,6 +1,6 @@
 package expresstalk.dev.backend.service;
 
-import expresstalk.dev.backend.dto.request.GetUserChatsDto;
+import expresstalk.dev.backend.dto.response.GetUserChatsDto;
 import expresstalk.dev.backend.dto.response.BriefGroupChatDto;
 import expresstalk.dev.backend.dto.response.BriefPrivateChatDto;
 import expresstalk.dev.backend.entity.*;

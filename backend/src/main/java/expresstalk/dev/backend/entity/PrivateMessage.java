@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.Date;
-import java.util.UUID;
 
 @Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
@@ -17,10 +16,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @Data
 public class PrivateMessage extends Message {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
     @ManyToOne
     @JoinColumn(name = "senderId", referencedColumnName = "id")
     private PrivateChatAccount sender;
@@ -36,10 +31,9 @@ public class PrivateMessage extends Message {
     private PrivateChat privateChat;
 
     public PrivateMessage(PrivateChatAccount sender, PrivateChatAccount receiver, PrivateChat privateChat, String content, Date createdAt) {
+        super(content, createdAt);
         this.sender = sender;
         this.receiver = receiver;
         this.privateChat = privateChat;
-        this.content = content;
-        this.createdAt = createdAt;
     }
 }

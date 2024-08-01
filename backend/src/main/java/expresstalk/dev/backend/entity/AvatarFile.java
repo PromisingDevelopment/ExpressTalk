@@ -8,15 +8,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "avatar_images")
+@Table(name = "avatar_files")
 @NoArgsConstructor
 @Data
-public class AvatarImage extends Image {
+public class AvatarFile extends File {
     @OneToOne
-    @JoinColumn(referencedColumnName = "userId", name = "id")
+    @JoinColumn(name = "userId", referencedColumnName = "id")
     private User user;
 
-    public AvatarImage(String name, String type, byte[] imageData) {
+    public AvatarFile(String name, String type, byte[] imageData) {
         super(name, type, imageData);
     }
 }

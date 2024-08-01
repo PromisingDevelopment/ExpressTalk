@@ -1,4 +1,4 @@
-package expresstalk.dev.backend.dto.request;
+package expresstalk.dev.backend.dto.response;
 
 import expresstalk.dev.backend.dto.response.BriefGroupChatDto;
 import expresstalk.dev.backend.dto.response.BriefPrivateChatDto;

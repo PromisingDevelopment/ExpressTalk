@@ -1,5 +1,6 @@
 package expresstalk.dev.backend.dto.response;
 
+import expresstalk.dev.backend.entity.AttachedFile;
 import expresstalk.dev.backend.enums.GroupChatRole;
 
 import java.util.Date;
@@ -10,7 +11,8 @@ public record GroupChatMessageDto(
         String content,
         String senderLogin,
         GroupChatRole senderRole,
-        UUID senderId
+        UUID senderId,
+        AttachedFile attachedFile
 ) {
 }
 

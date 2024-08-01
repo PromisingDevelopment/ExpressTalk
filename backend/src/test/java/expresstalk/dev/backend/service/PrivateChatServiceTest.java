@@ -1,16 +1,11 @@
 package expresstalk.dev.backend.service;
 
 import expresstalk.dev.backend.dto.request.SendChatMessageDto;
-import expresstalk.dev.backend.entity.PrivateChat;
-import expresstalk.dev.backend.entity.PrivateChatAccount;
-import expresstalk.dev.backend.entity.PrivateMessage;
-import expresstalk.dev.backend.entity.User;
+import expresstalk.dev.backend.dto.request.SendFileDto;
+import expresstalk.dev.backend.entity.*;
 import expresstalk.dev.backend.exception.ChatIsNotFoundException;
 import expresstalk.dev.backend.exception.UserAbsentInChatException;
-import expresstalk.dev.backend.repository.PrivateChatAccountRepository;
-import expresstalk.dev.backend.repository.PrivateChatRepository;
-import expresstalk.dev.backend.repository.PrivateMessageRepository;
-import expresstalk.dev.backend.repository.UserRepository;
+import expresstalk.dev.backend.repository.*;
 import expresstalk.dev.backend.test_utils.TestValues;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -45,6 +40,8 @@ class PrivateChatServiceTest {
     private PrivateChatRepository privateChatRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private AttachedFileRepository attachedFileRepository;
     @InjectMocks
     private PrivateChatService privateChatService;
 
@@ -96,15 +93,16 @@ class PrivateChatServiceTest {
 
     @Test
     void shouldSaveMessage() {
+        UUID chatId = UUID.randomUUID();
         SendChatMessageDto sendChatMessageDto = new SendChatMessageDto(
-                UUID.randomUUID().toString(),
+                chatId.toString(),
                 TestValues.getSentence(),
                 TestValues.getCreatedAt()
         );
         User sender = TestValues.getUser();
         User receiver = TestValues.getUser();
 
-        when(privateChatRepository.findById(any(UUID.class))).thenReturn(Optional.of(new PrivateChat()));
+        when(privateChatRepository.findById(chatId)).thenReturn(Optional.of(new PrivateChat()));
         when(accountService.getPrivateChatAccount(
                 any(User.class), any(PrivateChat.class))).thenReturn(new PrivateChatAccount());
 
@@ -112,6 +110,36 @@ class PrivateChatServiceTest {
         verify(privateChatRepository).save(any(PrivateChat.class));
         verify(privateMessageRepository).save(any(PrivateMessage.class));
         verify(privateChatAccountRepository).saveAll(anyList());
+    }
+
+    @Test
+    void shouldSaveMessageWithAttachedFile() {
+        SendFileDto sendFileDto = new SendFileDto(
+                TestValues.getWord() + ".jpg",
+                "image/jpeg",
+                TestValues.getSentence().getBytes()
+        );
+        UUID chatId = UUID.randomUUID();
+        SendChatMessageDto sendChatMessageDto = new SendChatMessageDto(
+                chatId.toString(),
+                TestValues.getSentence(),
+                TestValues.getCreatedAt(),
+                sendFileDto
+        );
+        User sender = TestValues.getUser();
+        User receiver = TestValues.getUser();
+
+        when(privateChatRepository.findById(chatId)).thenReturn(Optional.of(new PrivateChat()));
+        when(accountService.getPrivateChatAccount(
+                any(User.class), any(PrivateChat.class))).thenReturn(new PrivateChatAccount());
+
+        PrivateMessage privateMessage = assertDoesNotThrow(
+                () -> privateChatService.saveMessage(sendChatMessageDto, sender, receiver));
+        verify(privateChatRepository).save(any(PrivateChat.class));
+        verify(privateMessageRepository).save(any(PrivateMessage.class));
+        verify(privateChatAccountRepository).saveAll(anyList());
+        verify(attachedFileRepository).save(any(AttachedFile.class));
+        assertEquals(privateMessage.getAttachedFile().getName(), sendFileDto.name());
     }
 
     @Test

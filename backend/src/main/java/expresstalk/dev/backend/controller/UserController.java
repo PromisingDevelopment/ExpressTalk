@@ -1,6 +1,6 @@
 package expresstalk.dev.backend.controller;
 
-import expresstalk.dev.backend.dto.request.GetUserChatsDto;
+import expresstalk.dev.backend.dto.response.GetUserChatsDto;
 import expresstalk.dev.backend.dto.response.ImageId;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.enums.UserStatus;

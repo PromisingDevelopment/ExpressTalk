@@ -32,9 +32,8 @@ public class GroupMessage extends Message {
     private GroupChat groupChat;
 
     public GroupMessage(GroupChatAccount sender, GroupChat groupChat, String content, Date createdAt) {
+        super(content, createdAt);
         this.sender = sender;
         this.groupChat = groupChat;
-        this.content = content;
-        this.createdAt = createdAt;
     }
 }
