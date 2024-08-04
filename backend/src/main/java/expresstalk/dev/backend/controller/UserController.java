@@ -49,7 +49,7 @@ public class UserController {
     }
 
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "403", description = "User is not authenticated"),
+            @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @ResponseStatus(HttpStatus.OK)
@@ -61,7 +61,7 @@ public class UserController {
     }
 
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "403", description = "User is not authenticated"),
+            @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @ResponseStatus(HttpStatus.OK)
@@ -82,8 +82,8 @@ public class UserController {
 
     @PostMapping("/avatar")
     @ApiResponses(value = {
+            @ApiResponse(responseCode = "401", description = "User is not authenticated"),
             @ApiResponse(responseCode = "403", description = "Invalid file type provided. Only image acceptable"),
-            @ApiResponse(responseCode = "403", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User is not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })

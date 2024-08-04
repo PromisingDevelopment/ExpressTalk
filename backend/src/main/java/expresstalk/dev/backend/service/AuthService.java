@@ -4,16 +4,14 @@ import expresstalk.dev.backend.dto.request.EmailVerificationDto;
 import expresstalk.dev.backend.dto.request.SignInUserDto;
 import expresstalk.dev.backend.dto.request.SignUpUserDto;
 import expresstalk.dev.backend.enums.UserStatus;
-import expresstalk.dev.backend.exception.EmailNotVerifiedException;
+import expresstalk.dev.backend.exception.*;
 import expresstalk.dev.backend.entity.User;
-import expresstalk.dev.backend.exception.UserIsNotFoundException;
 import expresstalk.dev.backend.repository.UserRepository;
 import expresstalk.dev.backend.utils.Generator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.server.ResponseStatusException;
 
 @RequiredArgsConstructor
 @Service
@@ -29,7 +27,7 @@ public class AuthService {
                 throw new EmailNotVerifiedException(HttpStatus.ACCEPTED, "User's email needs verification");
             }
 
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User already exists");
+            throw new UserAlreadyExistsException();
         }
 
         String passwordHash = passwordEncoder.encode(signUpUserDto.password());
@@ -54,7 +52,7 @@ public class AuthService {
         User existedUser = userRepository.findUserByLoginOrEmail(signInUserDto.login(), signInUserDto.login());
 
         if(existedUser == null) {
-            throw new UserIsNotFoundException(HttpStatus.NOT_FOUND, "User doesn't exist.");
+            throw new UserNotFoundException(HttpStatus.NOT_FOUND, "User doesn't exist.");
         }
 
         if(existedUser.getEmailCode() != null) {
@@ -64,7 +62,7 @@ public class AuthService {
         Boolean isPasswordValid = passwordEncoder.matches(signInUserDto.password(), existedUser.getPasswordHash());
 
         if(!isPasswordValid) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Password or email is not correct.");
+                throw new PasswordOrEmailNotCorrectException();
         }
 
         return existedUser;
@@ -73,13 +71,9 @@ public class AuthService {
     public User makeEmailVerification(EmailVerificationDto emailVerificationDto) {
         User existedUser = userRepository.findUserByLoginOrEmail(emailVerificationDto.email(), emailVerificationDto.email());
 
-        if(existedUser == null) throw new UserIsNotFoundException(existedUser.getId());
-        if(existedUser.getEmailCode() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User's email has already verified.");
-        }
-        if(!emailVerificationDto.code().equals(existedUser.getEmailCode())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect code provided.");
-        }
+        if(existedUser == null) throw new UserNotFoundException(emailVerificationDto.email());
+        if(existedUser.getEmailCode() == null) return existedUser;
+        if(!emailVerificationDto.code().equals(existedUser.getEmailCode())) throw new IncorrectEmailCodeException();
 
         existedUser.setEmailCode(null);
         userRepository.save(existedUser);

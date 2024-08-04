@@ -3,22 +3,18 @@ package expresstalk.dev.backend.service;
 import expresstalk.dev.backend.dto.request.SendChatMessageDto;
 import expresstalk.dev.backend.dto.request.SendFileDto;
 import expresstalk.dev.backend.entity.*;
-import expresstalk.dev.backend.exception.ChatIsNotFoundException;
+import expresstalk.dev.backend.exception.CantCreatePrivateChatAloneException;
+import expresstalk.dev.backend.exception.ChatNotFoundException;
+import expresstalk.dev.backend.exception.InternalServerErrorException;
 import expresstalk.dev.backend.exception.UserAbsentInChatException;
 import expresstalk.dev.backend.repository.*;
 import expresstalk.dev.backend.test_utils.TestValues;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.parameters.P;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -59,12 +55,12 @@ class PrivateChatServiceTest {
     @Test
     void shouldNotGetChat() {
         when(privateChatRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
-        assertThrows(ChatIsNotFoundException.class, () -> privateChatService.getChat(UUID.randomUUID()));
+        assertThrows(ChatNotFoundException.class, () -> privateChatService.getChat(UUID.randomUUID()));
 
         User user1 = TestValues.getUser();
         User user2 = TestValues.getUser();
         when(privateChatRepository.findPrivateChatBetween(user1, user2)).thenReturn(null);
-        assertThrows(ChatIsNotFoundException.class, () -> privateChatService.getChat(user1, user2));
+        assertThrows(ChatNotFoundException.class, () -> privateChatService.getChat(user1, user2));
     }
 
     @Test
@@ -83,12 +79,7 @@ class PrivateChatServiceTest {
     @Test
     void shouldNotCreatePrivateChat() {
         User user = TestValues.getUser();
-        assertThrows(ResponseStatusException.class, () -> privateChatService.createPrivateChat(user, user));
-
-        User user1 = TestValues.getUser();
-        User user2 = TestValues.getUser();
-        when(privateChatRepository.findPrivateChatBetween(user1, user2)).thenReturn(new PrivateChat());
-        assertThrows(ResponseStatusException.class, () -> privateChatService.createPrivateChat(user1, user2));
+        assertThrows(CantCreatePrivateChatAloneException.class, () -> privateChatService.createPrivateChat(user, user));
     }
 
     @Test
@@ -153,7 +144,7 @@ class PrivateChatServiceTest {
         User receiver = TestValues.getUser();
 
         when(privateChatRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
-        assertThrows(ChatIsNotFoundException.class,
+        assertThrows(ChatNotFoundException.class,
                 () -> privateChatService.saveMessage(sendChatMessageDto, sender, receiver));
 
         when(privateChatRepository.findById(any(UUID.class))).thenReturn(Optional.of(new PrivateChat()));
@@ -218,7 +209,7 @@ class PrivateChatServiceTest {
         when(accountService.getPrivateChatAccount(user1, privateChat)).thenReturn(null);
         when(accountService.getPrivateChatAccount(user2, privateChat)).thenReturn(null);
 
-        assertThrows(ResponseStatusException.class, () -> privateChatService.getSecondUserOfChat(user1, privateChat));
-        assertThrows(ResponseStatusException.class, () -> privateChatService.getSecondUserOfChat(user2, privateChat));
+        assertThrows(InternalServerErrorException.class, () -> privateChatService.getSecondUserOfChat(user1, privateChat));
+        assertThrows(InternalServerErrorException.class, () -> privateChatService.getSecondUserOfChat(user2, privateChat));
     }
 }

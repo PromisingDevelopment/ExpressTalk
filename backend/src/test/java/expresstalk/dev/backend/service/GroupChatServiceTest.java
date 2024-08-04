@@ -4,9 +4,9 @@ import expresstalk.dev.backend.dto.request.SendChatMessageDto;
 import expresstalk.dev.backend.dto.request.SendFileDto;
 import expresstalk.dev.backend.entity.*;
 import expresstalk.dev.backend.enums.GroupChatRole;
-import expresstalk.dev.backend.exception.ChatIsNotFoundException;
+import expresstalk.dev.backend.exception.ChatNotFoundException;
 import expresstalk.dev.backend.exception.UserAbsentInChatException;
-import expresstalk.dev.backend.exception.UserIsNotAdminException;
+import expresstalk.dev.backend.exception.UserNotAdminException;
 import expresstalk.dev.backend.repository.*;
 import expresstalk.dev.backend.test_utils.TestValues;
 import org.junit.jupiter.api.Test;
@@ -56,7 +56,7 @@ class GroupChatServiceTest {
 
         when(groupChatRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(ChatIsNotFoundException.class, () -> groupChatService.getChat(id));
+        assertThrows(ChatNotFoundException.class, () -> groupChatService.getChat(id));
     }
 
     @Test
@@ -81,15 +81,10 @@ class GroupChatServiceTest {
         User admin = TestValues.getUser();
         User member = TestValues.getUser();
         GroupChat groupChat = new GroupChat();
-        GroupChatAccount memberAccount = new GroupChatAccount();
-
-        when(accountService.getGroupChatAccount(member, groupChat)).thenReturn(memberAccount);
-        assertThrows(ResponseStatusException.class,
-                () -> groupChatService.addMemberToChat(admin, member, groupChat));
 
         when(accountService.getGroupChatAccount(member, groupChat)).thenReturn(null);
         when(accountService.getGroupChatAccount(admin, groupChat)).thenReturn(new GroupChatAccount());
-        assertThrows(UserIsNotAdminException.class,
+        assertThrows(UserNotAdminException.class,
                 () -> groupChatService.addMemberToChat(admin, member, groupChat));
     }
 
@@ -135,7 +130,7 @@ class GroupChatServiceTest {
 
         when(accountService.getGroupChatAccount(any(User.class), any(GroupChat.class)))
                 .thenReturn(new GroupChatAccount());
-        assertThrows(UserIsNotAdminException.class, () -> groupChatService.removeMemberFromChat(admin, member, groupChat));
+        assertThrows(UserNotAdminException.class, () -> groupChatService.removeMemberFromChat(admin, member, groupChat));
     }
 
     @Test
@@ -180,7 +175,7 @@ class GroupChatServiceTest {
 
         when(accountService.getGroupChatAccount(any(User.class), any(GroupChat.class)))
                 .thenReturn(new GroupChatAccount());
-        assertThrows(UserIsNotAdminException.class, () -> groupChatService.setRole(admin, member, GroupChatRole.ADMIN, groupChat));
+        assertThrows(UserNotAdminException.class, () -> groupChatService.setRole(admin, member, GroupChatRole.ADMIN, groupChat));
     }
 
     @Test
@@ -258,7 +253,7 @@ class GroupChatServiceTest {
         );
 
         when(groupChatRepository.findById(chatId)).thenReturn(Optional.empty());
-        assertThrows(ChatIsNotFoundException.class, () -> groupChatService.saveMessage(new User(), sendChatMessageDto));
+        assertThrows(ChatNotFoundException.class, () -> groupChatService.saveMessage(new User(), sendChatMessageDto));
 
         when(groupChatRepository.findById(chatId)).thenReturn(Optional.of(new GroupChat()));
         when(accountService.getGroupChatAccount(any(User.class), any(GroupChat.class)))

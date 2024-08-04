@@ -3,13 +3,12 @@ package expresstalk.dev.backend.service;
 import expresstalk.dev.backend.entity.AvatarFile;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.enums.UserStatus;
-import expresstalk.dev.backend.exception.ImageIsNotFoundException;
+import expresstalk.dev.backend.exception.ImageNotFoundException;
 import expresstalk.dev.backend.exception.InvalidFileTypeException;
-import expresstalk.dev.backend.exception.UserIsNotFoundException;
+import expresstalk.dev.backend.exception.UserNotFoundException;
 import expresstalk.dev.backend.repository.AvatarFileRepository;
 import expresstalk.dev.backend.repository.UserRepository;
 import expresstalk.dev.backend.test_utils.TestValues;
-import org.apache.commons.lang3.exception.ContextedRuntimeException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -62,7 +61,7 @@ class UserServiceTest {
         user.setId(UUID.randomUUID());
 
         when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
-        assertThrows(UserIsNotFoundException.class, () -> userService.findById(user.getId()));
+        assertThrows(UserNotFoundException.class, () -> userService.findById(user.getId()));
     }
 
     @Test
@@ -78,7 +77,7 @@ class UserServiceTest {
         User user = TestValues.getUser();
 
         when(userRepository.findUserByLogin(user.getLogin())).thenReturn(null);
-        assertThrows(UserIsNotFoundException.class, () -> userService.findByLogin(user.getLogin()));
+        assertThrows(UserNotFoundException.class, () -> userService.findByLogin(user.getLogin()));
     }
 
     @Test
@@ -170,6 +169,6 @@ class UserServiceTest {
         when(avatarFileRepository.findById(avatarId)).thenReturn(Optional.of(avatarFile));
         assertDoesNotThrow(() -> userService.getAvatarImage(avatarId));
         when(avatarFileRepository.findById(avatarId)).thenReturn(Optional.empty());
-        assertThrows(ImageIsNotFoundException.class, () -> userService.getAvatarImage(avatarId));
+        assertThrows(ImageNotFoundException.class, () -> userService.getAvatarImage(avatarId));
     }
 }

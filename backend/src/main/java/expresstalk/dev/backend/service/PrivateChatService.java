@@ -3,13 +3,11 @@ package expresstalk.dev.backend.service;
 import expresstalk.dev.backend.dto.request.SendChatMessageDto;
 import expresstalk.dev.backend.dto.request.SendFileDto;
 import expresstalk.dev.backend.entity.*;
-import expresstalk.dev.backend.exception.ChatIsNotFoundException;
-import expresstalk.dev.backend.exception.UserAbsentInChatException;
+import expresstalk.dev.backend.exception.*;
 import expresstalk.dev.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -28,25 +26,25 @@ public class PrivateChatService {
     public PrivateChat getChat(User member1, User member2) {
         PrivateChat chat = privateChatRepository.findPrivateChatBetween(member1, member2);
         if(chat == null) {
-            throw new ChatIsNotFoundException(HttpStatus.NOT_FOUND, "Chat with " + member1.getLogin() + " and " + member2.getLogin() + " doesn't exist.");
+            throw new ChatNotFoundException(HttpStatus.NOT_FOUND, "Chat with " + member1.getLogin() + " and " + member2.getLogin() + " doesn't exist.");
         }
 
         return chat;
     }
     public PrivateChat getChat(UUID chatId) {
         PrivateChat chat = privateChatRepository.findById(chatId).orElse(null);
-        if(chat == null) throw new ChatIsNotFoundException(chatId);
+        if(chat == null) throw new ChatNotFoundException(chatId);
 
         return chat;
     }
 
     public PrivateChat createPrivateChat(User user1, User user2) {
         if(user1.getId().equals(user2.getId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can not create private chat with 1 person");
+            throw new CantCreatePrivateChatAloneException();
         }
 
         try {
-            getChat(user1, user2); // throws exception if chat between two users wasn't found
+            return getChat(user1, user2); // throws exception if chat between two users wasn't found
         } catch (Exception ex) {
             PrivateChat chat = new PrivateChat();
             PrivateChatAccount account1 = new PrivateChatAccount();
@@ -67,8 +65,6 @@ public class PrivateChatService {
 
             return chat;
         }
-
-        throw new ResponseStatusException(HttpStatus.CONFLICT, "Private chat with provided two members had already been created");
     }
 
     public PrivateMessage saveMessage(SendChatMessageDto sendChatMessageDto, User sender, User receiver) {
@@ -110,14 +106,12 @@ public class PrivateChatService {
     }
 
     public void ensureUserPermissionToSendMessageInChat(User user, PrivateChat privateChat) {
-        if(!isUserExistsInChat(user, privateChat)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User with id " + user.getId() + " can't send messages to other people's chat");
-        }
+        if(!isUserExistsInChat(user, privateChat)) throw new UserCantSendMessagesToOthersException(user.getId());
     }
 
     public User getSecondUserOfChat(User firstUser, PrivateChat privateChat) {
         if(!isUserExistsInChat(firstUser, privateChat)) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Searching of the second user of chat was failed because the first user doesn't exist in chat");
+            throw new InternalServerErrorException("Searching of the second user of chat was failed because the first user doesn't exist in chat");
         }
 
         User secondUser = new User();

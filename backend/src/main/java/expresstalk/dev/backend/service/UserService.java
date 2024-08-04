@@ -4,9 +4,10 @@ import expresstalk.dev.backend.dto.response.ImageId;
 import expresstalk.dev.backend.entity.AvatarFile;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.enums.UserStatus;
-import expresstalk.dev.backend.exception.ImageIsNotFoundException;
+import expresstalk.dev.backend.exception.ImageNotFoundException;
+import expresstalk.dev.backend.exception.InternalServerErrorException;
 import expresstalk.dev.backend.exception.InvalidFileTypeException;
-import expresstalk.dev.backend.exception.UserIsNotFoundException;
+import expresstalk.dev.backend.exception.UserNotFoundException;
 import expresstalk.dev.backend.repository.AvatarFileRepository;
 import expresstalk.dev.backend.repository.UserRepository;
 import expresstalk.dev.backend.utils.ImageUtils;
@@ -15,11 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;
-import java.io.ObjectStreamException;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -37,7 +36,7 @@ public class UserService {
 
     public User findById(UUID userId) {
         User user = userRepository.findById(userId).orElse(null);
-        if(user == null) throw new UserIsNotFoundException(userId);
+        if(user == null) throw new UserNotFoundException(userId);
 
         return user;
     }
@@ -45,7 +44,7 @@ public class UserService {
     public User findByLogin(String login) {
         User user = userRepository.findUserByLogin(login);
         if(user == null) {
-            throw new UserIsNotFoundException(HttpStatus.NOT_FOUND, "User with login: " + login + " doesn't exist");
+            throw new UserNotFoundException(HttpStatus.NOT_FOUND, "User with login: " + login + " doesn't exist");
         }
 
         return user;
@@ -59,7 +58,7 @@ public class UserService {
         } catch (InvalidObjectException exception) {
             throw new InvalidFileTypeException("image");
         } catch (IOException exception) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
+            throw new InternalServerErrorException(exception.getMessage());
         }
 
         AvatarFile avatarFileEntity = new AvatarFile(
@@ -83,7 +82,7 @@ public class UserService {
     public byte[] getAvatarImage(UUID avatarId) {
         AvatarFile image = avatarFileRepository.findById(avatarId).orElse(null);
         if(image == null) {
-            throw new ImageIsNotFoundException(avatarId);
+            throw new ImageNotFoundException(avatarId);
         }
 
         return image.getData();
