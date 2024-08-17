@@ -29,8 +29,6 @@ const CreateNewChat: React.FC<CreateNewChatProps> = ({ switchChatMode }) => {
       const createdPrivateChat = await createPrivateChat(secondMember.id);
       const chatId = createdPrivateChat.id;
 
-      console.log("created");
-
       if (chatId && currentUserId) {
         switchChatMode(0);
         connect(chatId, true);

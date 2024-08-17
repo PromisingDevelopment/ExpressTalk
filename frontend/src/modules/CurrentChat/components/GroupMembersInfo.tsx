@@ -48,6 +48,10 @@ const GroupMembersInfo: React.FC<GroupMembersInfoProps> = ({ members, chatId }) 
     closeModal();
   };
 
+  React.useEffect(() => {
+    console.log("group members", members);
+  }, [members]);
+
   return (
     <StyledWrapper>
       <span>
@@ -57,8 +61,8 @@ const GroupMembersInfo: React.FC<GroupMembersInfoProps> = ({ members, chatId }) 
         <Popover>
           {members.map((member) => (
             <PopoverItem key={member.id}>
-              <h4>{member.login}</h4>
-              <span>{member.status}</span>
+              <h4>{member.user.login}</h4>
+              <span>{member.user.status}</span>
               <CustomIconButton
                 isSmall
                 label="add role"
@@ -68,9 +72,9 @@ const GroupMembersInfo: React.FC<GroupMembersInfoProps> = ({ members, chatId }) 
               <Modal onClose={closeModal} open={open}>
                 <ModalContent
                   isSmallMargin
-                  title={"Set a role to " + member.login}
+                  title={"Set a role to " + member.user.login}
                   onCloseModal={closeModal}>
-                  <form onSubmit={(e) => handleSubmit(e, member.id)}>
+                  <form onSubmit={(e) => handleSubmit(e, member.user.id)}>
                     <StyledRadioGroup value={roleValue} onChange={onChangeRole}>
                       <StyledFormControlLabel
                         value={MemberRoles.MEMBER}

@@ -112,7 +112,7 @@ export function subscribeLastMessages(userId: string) {
     },
   });
 
-  console.log("%c" + "last_message", "color: red;");
+  console.log("last_message subscription");
 
   sidebarClient.activate();
 }

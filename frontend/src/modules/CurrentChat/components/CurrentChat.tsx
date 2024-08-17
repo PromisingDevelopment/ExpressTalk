@@ -29,8 +29,8 @@ const CurrentChat: React.FC<CurrentChatProps> = () => {
   }, [currentChatId]);
 
   React.useEffect(() => {
-    //console.log("group: ", currentGroupChat);
-    //console.log("private: ", currentChat);
+    console.log("group: ", currentGroupChat);
+    console.log("private: ", currentChat);
   }, [currentChat, currentGroupChat]);
 
   if (!currentChat && !currentGroupChat) return <NoChat />;

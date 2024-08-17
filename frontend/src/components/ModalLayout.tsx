@@ -43,8 +43,9 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
   };
   const onCloseModal = () => {
     setOpenModal(false);
-    closeMenu();
     setTimeout(hideFocus, 300);
+
+    if (closeMenu) closeMenu();
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -91,7 +92,7 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
             )}
             {errorMessage && (
               <Typography variant="body1" color="error.main" mt={0.5}>
-                {errorMessage}
+                {errorMessage.toString()}
               </Typography>
             )}
 
