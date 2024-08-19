@@ -37,7 +37,6 @@ public class WebSocketPrivateChatController {
         try {
             MessageHeaders headers = message.getHeaders();
             HttpSession session = (HttpSession) SimpMessageHeaderAccessor.getSessionAttributes(headers).get("session");
-            sessionService.ensureSessionExistense(session);
             ValidationErrorChecker.<SendChatMessageDto>checkDtoForErrors(sendChatMessageDto);
 
             UUID chatId = chatService.verifyAndGetChatUUID(sendChatMessageDto.chatId());
