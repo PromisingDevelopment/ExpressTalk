@@ -10,6 +10,10 @@ public class InternalServerErrorException extends ResponseStatusException {
         super(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error: " + message);
     }
 
+    public InternalServerErrorException() {
+        super(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+    }
+
     public InternalServerErrorException(HttpStatus status) {
         super(status);
     }
