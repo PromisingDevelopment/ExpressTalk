@@ -7,7 +7,6 @@ import expresstalk.dev.backend.enums.GroupChatRole;
 import expresstalk.dev.backend.exception.ChatNotFoundException;
 import expresstalk.dev.backend.exception.UserAbsentInChatException;
 import expresstalk.dev.backend.exception.UserNotAdminException;
-import expresstalk.dev.backend.exception.UserNotFoundException;
 import expresstalk.dev.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

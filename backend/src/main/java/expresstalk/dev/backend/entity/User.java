@@ -50,6 +50,7 @@ public class User {
 
         @OneToOne
         @JoinColumn(name = "avatarFileId", referencedColumnName = "id")
+        @JsonIgnore
         private AvatarFile avatarFile;
 
         @ToString.Exclude

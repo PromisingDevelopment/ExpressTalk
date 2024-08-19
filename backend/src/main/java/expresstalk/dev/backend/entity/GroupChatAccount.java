@@ -21,7 +21,7 @@ public class GroupChatAccount {
     @Column(nullable = false)
     private GroupChatRole groupChatRole;
 
-    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<GroupMessage> groupMessages = new ArrayList<>();
 
     @ManyToOne

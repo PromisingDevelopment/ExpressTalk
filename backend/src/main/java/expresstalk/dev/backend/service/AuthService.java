@@ -17,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @Service
 public class AuthService {
     private final UserRepository userRepository;
+    private final UserService userService;
     private final BCryptPasswordEncoder passwordEncoder;
 
     public User signUp(SignUpUserDto signUpUserDto) {
@@ -47,25 +48,22 @@ public class AuthService {
         return newUser;
     };
 
+
     public User signIn(SignInUserDto signInUserDto) {
         // signInUserDto.login() can be login or email
-        User existedUser = userRepository.findUserByLoginOrEmail(signInUserDto.login(), signInUserDto.login());
+        User user = userService.findUserByLoginOrEmail(signInUserDto.login(), signInUserDto.login());
 
-        if(existedUser == null) {
-            throw new UserNotFoundException(HttpStatus.NOT_FOUND, "User doesn't exist.");
-        }
-
-        if(existedUser.getEmailCode() != null) {
+        if(user.getEmailCode() != null) {
             throw new EmailNotVerifiedException(HttpStatus.ACCEPTED, "User's email needs verification");
         }
 
-        Boolean isPasswordValid = passwordEncoder.matches(signInUserDto.password(), existedUser.getPasswordHash());
+        Boolean isPasswordValid = passwordEncoder.matches(signInUserDto.password(), user.getPasswordHash());
 
         if(!isPasswordValid) {
                 throw new PasswordOrEmailNotCorrectException();
         }
 
-        return existedUser;
+        return user;
     };
 
     public User makeEmailVerification(EmailVerificationDto emailVerificationDto) {
