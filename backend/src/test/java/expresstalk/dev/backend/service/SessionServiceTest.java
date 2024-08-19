@@ -1,5 +1,6 @@
 package expresstalk.dev.backend.service;
 
+import expresstalk.dev.backend.exception.UserNotAuthenticatedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.Test;
@@ -7,7 +8,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -47,9 +47,9 @@ class SessionServiceTest {
 
     @Test
     void shouldThrowWhenSessionWithUserDoesNotExist() {
-        assertThrows(ResponseStatusException.class, () -> sessionService.ensureSessionExistense(httpServletRequest));
-        assertThrows(ResponseStatusException.class, () -> sessionService.ensureSessionExistense(httpSession));
+        assertThrows(UserNotAuthenticatedException.class, () -> sessionService.ensureSessionExistense(httpServletRequest));
+        assertThrows(UserNotAuthenticatedException.class, () -> sessionService.ensureSessionExistense(httpSession));
         when(httpServletRequest.getSession(false)).thenReturn(httpSession);
-        assertThrows(ResponseStatusException.class, () -> sessionService.ensureSessionExistense(httpServletRequest));
+        assertThrows(UserNotAuthenticatedException.class, () -> sessionService.ensureSessionExistense(httpServletRequest));
     }
 }

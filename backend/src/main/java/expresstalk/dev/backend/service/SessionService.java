@@ -1,5 +1,6 @@
 package expresstalk.dev.backend.service;
 
+import expresstalk.dev.backend.exception.UserNotAuthenticatedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
@@ -19,15 +20,11 @@ public class SessionService {
     }
 
     public void ensureSessionExistense(HttpServletRequest request) {
-        if(!isSessionWithUserExists(request.getSession(false))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not authenticated");
-        }
+        if(!isSessionWithUserExists(request.getSession(false))) throw new UserNotAuthenticatedException();
     }
 
     public void ensureSessionExistense(HttpSession session) {
-        if(!isSessionWithUserExists(session)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not authenticated");
-        }
+        if(!isSessionWithUserExists(session)) throw new UserNotAuthenticatedException();
     }
 
     public UUID getUserIdFromSession(HttpServletRequest request) {

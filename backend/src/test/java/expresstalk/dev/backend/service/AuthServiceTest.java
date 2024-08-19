@@ -4,9 +4,7 @@ import expresstalk.dev.backend.dto.request.EmailVerificationDto;
 import expresstalk.dev.backend.dto.request.SignInUserDto;
 import expresstalk.dev.backend.dto.request.SignUpUserDto;
 import expresstalk.dev.backend.entity.User;
-import expresstalk.dev.backend.exception.EmailNotVerifiedException;
-import expresstalk.dev.backend.exception.UserIsNotAdminException;
-import expresstalk.dev.backend.exception.UserIsNotFoundException;
+import expresstalk.dev.backend.exception.*;
 import expresstalk.dev.backend.repository.UserRepository;
 import expresstalk.dev.backend.test_utils.TestValues;
 import org.junit.jupiter.api.Test;
@@ -16,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -63,7 +60,7 @@ class AuthServiceTest {
 
         when(userRepository.findUserByLoginOrEmail(anyString(), anyString())).thenReturn(user);
 
-        assertThrows(ResponseStatusException.class, () -> authService.signUp(signUpUserDto));
+        assertThrows(UserAlreadyExistsException.class, () -> authService.signUp(signUpUserDto));
         user.setEmailCode(TestValues.getEmailCode());
         assertThrows(EmailNotVerifiedException.class, () -> authService.signUp(signUpUserDto));
     }
@@ -93,13 +90,13 @@ class AuthServiceTest {
         );
 
         when(userRepository.findUserByLoginOrEmail(anyString(), anyString())).thenReturn(null);
-        assertThrows(UserIsNotFoundException.class, () -> authService.signIn(signInUserDto));
+        assertThrows(UserNotFoundException.class, () -> authService.signIn(signInUserDto));
         when(userRepository.findUserByLoginOrEmail(anyString(), anyString())).thenReturn(user);
         user.setEmailCode(TestValues.getEmailCode());
-        assertThrows(ResponseStatusException.class, () -> authService.signIn(signInUserDto));
+        assertThrows(EmailNotVerifiedException.class, () -> authService.signIn(signInUserDto));
         user.setEmailCode(null);
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
-        assertThrows(ResponseStatusException.class, () -> authService.signIn(signInUserDto));
+        assertThrows(PasswordOrEmailNotCorrectException.class, () -> authService.signIn(signInUserDto));
     }
 
     @Test
@@ -127,8 +124,11 @@ class AuthServiceTest {
                 TestValues.getEmailCode()
         );
 
-        when(userRepository.findUserByLoginOrEmail(anyString(), anyString())).thenReturn(user);
+        when(userRepository.findUserByLoginOrEmail(anyString(), anyString())).thenReturn(null);
+        assertThrows(UserNotFoundException.class, () -> authService.makeEmailVerification(emailVerificationDto));
 
-        assertThrows(ResponseStatusException.class, () -> authService.makeEmailVerification(emailVerificationDto));
+        when(userRepository.findUserByLoginOrEmail(anyString(), anyString())).thenReturn(user);
+        user.setEmailCode(TestValues.getEmailCode());
+        assertThrows(IncorrectEmailCodeException.class, () -> authService.makeEmailVerification(emailVerificationDto));
     }
 }

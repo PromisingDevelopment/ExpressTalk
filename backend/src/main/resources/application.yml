@@ -1,6 +1,0 @@
-server:
-  error:
-    include-message: always
-spring:
-  profiles:
-    active: docker

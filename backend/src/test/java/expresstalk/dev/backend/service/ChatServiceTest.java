@@ -2,6 +2,7 @@ package expresstalk.dev.backend.service;
 
 import expresstalk.dev.backend.entity.GroupChat;
 import expresstalk.dev.backend.entity.SystemMessage;
+import expresstalk.dev.backend.exception.InvalidIdException;
 import expresstalk.dev.backend.repository.GroupChatRepository;
 import expresstalk.dev.backend.repository.SystemMessageRepository;
 import expresstalk.dev.backend.test_utils.TestValues;
@@ -23,8 +24,6 @@ class ChatServiceTest {
     @Mock
     private GroupChatRepository groupChatRepository;
     @Mock
-    private PrivateChatService privateChatService;
-    @Mock
     private SystemMessageRepository systemMessageRepository;
     @InjectMocks
     private ChatService chatService;
@@ -37,9 +36,9 @@ class ChatServiceTest {
         String testId4 = TestValues.getCreatedAt();
 
         assertDoesNotThrow(() -> chatService.verifyAndGetChatUUID(testId1));
-        assertThrows(RuntimeException.class, () -> chatService.verifyAndGetChatUUID(testId2));
-        assertThrows(RuntimeException.class, () -> chatService.verifyAndGetChatUUID(testId3));
-        assertThrows(RuntimeException.class, () -> chatService.verifyAndGetChatUUID(testId4));
+        assertThrows(InvalidIdException.class, () -> chatService.verifyAndGetChatUUID(testId2));
+        assertThrows(InvalidIdException.class, () -> chatService.verifyAndGetChatUUID(testId3));
+        assertThrows(InvalidIdException.class, () -> chatService.verifyAndGetChatUUID(testId4));
     }
 
     @Test

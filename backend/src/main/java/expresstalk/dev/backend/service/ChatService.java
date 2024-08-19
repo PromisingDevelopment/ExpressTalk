@@ -4,13 +4,13 @@ import expresstalk.dev.backend.dto.response.GetUserChatsDto;
 import expresstalk.dev.backend.dto.response.BriefGroupChatDto;
 import expresstalk.dev.backend.dto.response.BriefPrivateChatDto;
 import expresstalk.dev.backend.entity.*;
+import expresstalk.dev.backend.exception.InternalServerErrorException;
+import expresstalk.dev.backend.exception.InvalidIdException;
 import expresstalk.dev.backend.repository.GroupChatRepository;
 import expresstalk.dev.backend.repository.SystemMessageRepository;
 import expresstalk.dev.backend.utils.Converter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,7 +32,7 @@ public class ChatService {
             try {
                 secondUser = privateChatService.getSecondUserOfChat(user, privateChat);
             } catch (Exception ex) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+                throw new InternalServerErrorException(ex.getMessage());
             }
             List<PrivateMessage> messages = privateChat.getMessages();
             String lastMessage = messages.size() == 0 ? "" : messages.getLast().getContent();
@@ -72,7 +72,7 @@ public class ChatService {
         try {
             chatId = Converter.convertStringToUUID(chatStrId);
         } catch (Exception ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Provided chat id in the path is not UUID");
+            throw new InvalidIdException("chat");
         }
 
         return chatId;
