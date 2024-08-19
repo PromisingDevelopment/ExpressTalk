@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
-    @Value("${frontend.host}")
+    @Value("${spring.frontend.host}")
     private String allowedOrigin;
 
     @Override

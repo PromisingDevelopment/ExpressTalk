@@ -34,6 +34,8 @@ public class UserService {
         userRepository.save(user);
     }
 
+
+    @Transactional
     public User findById(UUID userId) {
         User user = userRepository.findById(userId).orElse(null);
         if(user == null) throw new UserNotFoundException(userId);
@@ -41,10 +43,22 @@ public class UserService {
         return user;
     }
 
+    @Transactional
     public User findByLogin(String login) {
         User user = userRepository.findUserByLogin(login);
         if(user == null) {
             throw new UserNotFoundException(HttpStatus.NOT_FOUND, "User with login: " + login + " doesn't exist");
+        }
+
+        return user;
+    }
+
+    @Transactional
+    public User findUserByLoginOrEmail(String login, String email) {
+        User user = userRepository.findUserByLoginOrEmail(login, email);
+
+        if(user == null) {
+            throw new UserNotFoundException(HttpStatus.NOT_FOUND, "User doesn't exist.");
         }
 
         return user;
