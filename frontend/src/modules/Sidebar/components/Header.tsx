@@ -61,7 +61,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(
             px: 1,
           },
         }}>
-        <Logo isMain size={64} />
+        <Logo isAbleToChange isMain size={64} />
         <Typography
           sx={{
             fontSize: { lg: 24, md: 18, sm: 16, xs: 14 },

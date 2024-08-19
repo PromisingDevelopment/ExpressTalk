@@ -2,6 +2,7 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SendIcon from "@mui/icons-material/Send";
 import { Box, IconButton } from "@mui/material";
 import { CustomInput } from "components/CustomInput";
+import { ImageFileInput } from "components/ImageFileInput";
 import { useAppDispatch, useAppSelector } from "hooks/redux";
 import React from "react";
 import { privateChatSendMessage, sendGroupMessage } from "wsConfig";
@@ -63,6 +64,7 @@ const WriteMessage: React.FC<WriteMessageProps> = ({ chatId }) => {
         />
 
         <IconButton
+          title="Upload image"
           sx={[
             {
               color: "#6A73A6",
@@ -70,7 +72,6 @@ const WriteMessage: React.FC<WriteMessageProps> = ({ chatId }) => {
               top: "50%",
               right: 10,
               transform: "translateY(-50%)",
-              bgcolor: "#1F274E",
               transition: "opacity 0.3s ease 0s",
             },
             isHiddenAttachFile && {
@@ -78,6 +79,7 @@ const WriteMessage: React.FC<WriteMessageProps> = ({ chatId }) => {
               pointerEvents: "none",
             },
           ]}>
+          <ImageFileInput />
           <AttachFileIcon
             sx={{
               fontSize: 30,

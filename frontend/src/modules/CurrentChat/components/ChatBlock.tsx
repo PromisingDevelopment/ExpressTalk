@@ -15,9 +15,6 @@ const ChatBlock: React.FC<ChatBlockProps> = () => {
     (state) => state.currentChat
   );
   const { user } = useAppSelector((state) => state.root.currentUser);
-  const { currentChatId } = useAppSelector((state) => state.root);
-
-  const dispatch = useAppDispatch();
 
   const privateLayout = (
     <>

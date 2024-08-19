@@ -18,7 +18,9 @@ export function connect(chatId: string, isPrivate: boolean) {
     chatClient.subscribe(`/group_chat/messages/${chatId}`, (data) => {
       const json = JSON.parse(data.body);
       const type: CurrentChatType = "groupChat";
-      console.log(json);
+
+      console.log("/group_chat/messages", json);
+
       const messageData = {
         data: json,
         type: type,
@@ -55,6 +57,10 @@ export function connect(chatId: string, isPrivate: boolean) {
       const error = JSON.parse(data.body);
 
       console.log("/group_chat/set_role/errors: ", error);
+    });
+    chatClient.subscribe(`/group_chat/system_messages/${chatId}`, (res) => {
+      const system_msg = JSON.parse(res.body);
+      console.log("/group_chat/system_messages/", system_msg);
     });
   };
 
@@ -112,7 +118,7 @@ export function subscribeLastMessages(userId: string) {
     },
   });
 
-  console.log("%c" + "last_message", "color: red;");
+  //console.log("last_message subscription");
 
   sidebarClient.activate();
 }

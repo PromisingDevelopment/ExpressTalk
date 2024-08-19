@@ -5,12 +5,21 @@ export interface GroupChatMessage {
   createdAt: string;
   groupChat: string;
 }
+
 export interface GroupChatMember {
   id: string;
-  name: string;
-  login: string;
-  status: "ONLINE" | "OFFLINE";
+  groupChat: string;
+  groupChatRole: "ADMIN" | "MEMBER";
+  groupMessages: GroupChatMessage[];
+  user: {
+    avatarFile: null;
+    id: string;
+    login: string;
+    name: string;
+    status: "ONLINE" | "OFFLINE";
+  };
 }
+
 interface GroupChatAdmin {
   id: string;
   name: string;
