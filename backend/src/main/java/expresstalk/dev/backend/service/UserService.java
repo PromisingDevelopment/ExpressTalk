@@ -1,5 +1,6 @@
 package expresstalk.dev.backend.service;
 
+import expresstalk.dev.backend.dto.request.EditUserDto;
 import expresstalk.dev.backend.dto.response.ImageId;
 import expresstalk.dev.backend.entity.AvatarFile;
 import expresstalk.dev.backend.entity.User;
@@ -100,5 +101,16 @@ public class UserService {
         }
 
         return image.getData();
+    }
+
+    public User editUser(User currentUser, EditUserDto editUserDto) {
+        if(currentUser == null) throw new InternalServerErrorException();
+
+        currentUser.setLogin(editUserDto.login());
+        currentUser.setName(editUserDto.name());
+
+        userRepository.save(currentUser);
+
+        return currentUser;
     }
 }

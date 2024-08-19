@@ -1,5 +1,6 @@
 package expresstalk.dev.backend.controller;
 
+import expresstalk.dev.backend.dto.request.EditUserDto;
 import expresstalk.dev.backend.dto.response.GetUserChatsDto;
 import expresstalk.dev.backend.dto.response.ImageId;
 import expresstalk.dev.backend.entity.User;
@@ -11,6 +12,7 @@ import expresstalk.dev.backend.utils.Converter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -118,5 +120,18 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.valueOf(MediaType.IMAGE_PNG_VALUE))
                 .body(imageData);
+    }
+
+    @PostMapping("/edit")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "403", description = "User is not authenticated"),
+            @ApiResponse(responseCode = "404", description = "User is not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public User editUser(@RequestBody @Valid EditUserDto editUserDto, HttpServletRequest request) {
+        UUID userId = sessionService.getUserIdFromSession(request);
+        User user = userService.findById(userId);
+
+        return userService.editUser(user, editUserDto);
     }
 }
