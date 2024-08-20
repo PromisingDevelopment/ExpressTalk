@@ -79,7 +79,7 @@ const ChatList: React.FC<ChatListProps> = ({
   }, [isCreatedNewChat]);
 
   React.useEffect(() => {
-    if (chatsList.errorCode === 403) {
+    if (chatsList.errorCode === 403 || chatsList.errorCode === 401) {
       navigate("/auth/home");
 
       return () => {
