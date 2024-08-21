@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
@@ -161,9 +162,9 @@ public class GroupChatService {
         for(GroupChatAccount account : userAccounts) {
             users.add(account.getUser());
         }
-        users.stream().filter((User user)-> !user.getId().equals(currentUser.getId()));
-
-        return users;
+        return users.stream()
+                .filter((User user)-> !user.getId().equals(currentUser.getId()))
+                .collect(Collectors.toList());
     }
 
     public GroupChatAccount verifyAndGetGroupChatAccount(User user, GroupChat groupChat) {
