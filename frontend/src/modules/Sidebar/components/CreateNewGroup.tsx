@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from "hooks/redux";
 import { setCurrentChat } from "modules/CurrentChat";
 import { setSidebarOpen } from "modules/Sidebar";
 import React from "react";
-import { connect } from "wsConfig";
+import { connect, disconnect } from "wsConfig";
 import {
   setCurrentChatId,
   setCurrentChatType,
@@ -32,6 +32,8 @@ const CreateNewGroup: React.FC<CreateNewGroupProps> = ({ switchChatMode }) => {
       dispatch(setCurrentChatId(newGroupData.id));
       dispatch(setCurrentChatType("groupChat"));
       dispatch(setCurrentChat({ data: newGroupData, type: "groupChat" }));
+      console.log("%c create group disconnect", "color: #DC143C");
+      disconnect();
       connect(chatId, false);
     }
   };

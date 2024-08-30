@@ -140,6 +140,7 @@ const ChatList: React.FC<ChatListProps> = ({
     dispatch(setCurrentChatType("privateChat"));
 
     if (chatId) {
+      console.log("private disconnect");
       disconnect();
     }
   };
@@ -155,6 +156,7 @@ const ChatList: React.FC<ChatListProps> = ({
     dispatch(setCurrentChatType("groupChat"));
 
     if (chatId) {
+      console.log("%c group disconnect", "color: #DC143C");
       disconnect();
     }
   };

@@ -43,6 +43,8 @@ export function connect(chatId: string, isPrivate: boolean) {
       const json = JSON.parse(data.body);
       const members = json.members;
 
+      console.log("updated_members", json);
+
       store.dispatch(updateGroupMembers(members));
     });
     chatClient.subscribe(`/group_chat/add/${chatId}/errors`, (data) => {
@@ -82,7 +84,7 @@ export function connect(chatId: string, isPrivate: boolean) {
       return socket;
     },
     debug: (str) => {
-      //console.log("debug: ", str);
+      console.log("debug: ", str);
     },
   });
 
@@ -156,7 +158,7 @@ export function sendGroupMessage(content: string, chatId: string, createdAt: num
 // ADD/REMOVE GROUP MEMBERS ------------------------------------------
 export function addGroupMember(chatId: string, memberId: string) {
   chatClient.publish({
-    destination: `/app/group_chat/add`,
+    destination: `/app/group_chat/add_member`,
     body: JSON.stringify({
       chatId,
       memberId,
@@ -165,7 +167,7 @@ export function addGroupMember(chatId: string, memberId: string) {
 }
 export function removeGroupMember(chatId: string, memberId: string) {
   chatClient.publish({
-    destination: `/app/group_chat/remove`,
+    destination: `/app/group_chat/remove_member`,
     body: JSON.stringify({
       chatId,
       memberId,
