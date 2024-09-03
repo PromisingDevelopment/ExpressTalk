@@ -89,7 +89,6 @@ public class PrivateChatService {
         }
 
         senderAccount.getSentMessages().add(privateMessage);
-        receiverAccount.getReceivedMessages().add(privateMessage);
         privateChat.getMessages().add(privateMessage);
 
         privateChatAccountRepository.saveAll(Arrays.asList(senderAccount, receiverAccount));

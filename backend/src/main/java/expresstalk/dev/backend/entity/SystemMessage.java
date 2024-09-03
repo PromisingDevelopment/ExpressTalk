@@ -19,6 +19,9 @@ public class SystemMessage extends Message {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false, updatable = false)
+    private boolean isSystemMessage = true;
+
     @ManyToOne
     @JoinColumn(name = "chatId", referencedColumnName = "id")
     private Chat chat;

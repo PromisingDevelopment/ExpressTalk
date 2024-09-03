@@ -1,7 +1,9 @@
 package expresstalk.dev.backend.controller;
 
 import expresstalk.dev.backend.dto.request.*;
+import expresstalk.dev.backend.dto.response.GetGroupChatDto;
 import expresstalk.dev.backend.entity.GroupChat;
+import expresstalk.dev.backend.entity.Message;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.service.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,6 +13,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.TreeSet;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -48,7 +52,7 @@ public class GroupChatController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping ("/{chatStrId}")
     @ResponseBody
-    public GroupChat getGroupChat(@PathVariable String chatStrId, HttpServletRequest request) {
+    public GetGroupChatDto getGroupChat(@PathVariable String chatStrId, HttpServletRequest request) {
         UUID chatId = chatService.verifyAndGetChatUUID(chatStrId);
         UUID userId = sessionService.getUserIdFromSession(request);
         User user = userService.findById(userId);
@@ -56,6 +60,17 @@ public class GroupChatController {
 
         groupChatService.ensureUserExistsInChat(user, groupChat);
 
-        return groupChat;
+        TreeSet<Message> sortedMessages = new TreeSet<>();
+        sortedMessages.addAll(groupChat.getMessages());
+        sortedMessages.addAll(groupChat.getSystemMessages());
+
+        GetGroupChatDto getGroupChatDto = new GetGroupChatDto(
+                groupChat.getId(),
+                groupChat.getName(),
+                sortedMessages,
+                groupChat.getMembers()
+        );
+
+        return getGroupChatDto;
     }
 }

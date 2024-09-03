@@ -6,8 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.TreeSet;
 
 @Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
@@ -20,7 +20,7 @@ public class GroupChat extends Chat {
 
     @ToString.Exclude
     @OneToMany(mappedBy = "groupChat", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<GroupMessage> messages = new LinkedList<>();
+    private TreeSet<GroupMessage> messages = new TreeSet<>();
 
     @ToString.Exclude
     @OneToMany(mappedBy = "groupChat", fetch = FetchType.EAGER)

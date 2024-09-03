@@ -17,7 +17,7 @@ import java.util.UUID;
 @Table(name = "messages")
 @Data
 @NoArgsConstructor
-public abstract class Message {
+public abstract class Message implements Comparable<Message> {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -35,5 +35,10 @@ public abstract class Message {
     public Message(String content, Date createdAt) {
         this.content = content;
         this.createdAt = createdAt;
+    }
+
+    @Override
+    public int compareTo(Message other) {
+        return this.createdAt.compareTo(other.createdAt);
     }
 }
