@@ -2,6 +2,7 @@ package expresstalk.dev.backend.service;
 
 import expresstalk.dev.backend.dto.request.SendChatMessageDto;
 import expresstalk.dev.backend.dto.request.SendFileDto;
+import expresstalk.dev.backend.dto.response.GetGroupChatDto;
 import expresstalk.dev.backend.entity.*;
 import expresstalk.dev.backend.enums.GroupChatRole;
 import expresstalk.dev.backend.exception.ChatNotFoundException;

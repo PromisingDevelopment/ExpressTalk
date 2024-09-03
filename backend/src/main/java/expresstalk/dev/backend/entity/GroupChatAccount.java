@@ -1,5 +1,6 @@
 package expresstalk.dev.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import expresstalk.dev.backend.enums.GroupChatRole;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.UUID;
 
 @Entity
@@ -22,7 +24,8 @@ public class GroupChatAccount {
     private GroupChatRole groupChatRole;
 
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<GroupMessage> groupMessages = new ArrayList<>();
+    @JsonIgnore
+    private TreeSet<GroupMessage> groupMessages = new TreeSet<>();
 
     @ManyToOne
     @JoinColumn(name = "groupChatId", referencedColumnName = "id")

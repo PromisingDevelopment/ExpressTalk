@@ -8,6 +8,7 @@ import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.UUID;
 
 @Entity
@@ -20,10 +21,8 @@ public class PrivateChatAccount {
     private UUID id;
 
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<PrivateMessage> sentMessages = new ArrayList<>();
-
-    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<PrivateMessage> receivedMessages = new ArrayList<>();
+    @JsonIgnore
+    private TreeSet<PrivateMessage> sentMessages = new TreeSet<>();
 
     @ToString.Exclude
     @JsonIgnore

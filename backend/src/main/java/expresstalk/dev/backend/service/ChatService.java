@@ -12,10 +12,7 @@ import expresstalk.dev.backend.utils.Converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -25,43 +22,8 @@ public class ChatService {
     private final SystemMessageRepository systemMessageRepository;
 
     public GetUserChatsDto getChats(User user) {
-        List<BriefPrivateChatDto> briefPrivateChatDtos = new ArrayList<>();
-        for(PrivateChatAccount privateAccount : user.getPrivateChatAccounts()) {
-            PrivateChat privateChat = privateAccount.getPrivateChat();
-            User secondUser = new User();
-            try {
-                secondUser = privateChatService.getSecondUserOfChat(user, privateChat);
-            } catch (Exception ex) {
-                throw new InternalServerErrorException(ex.getMessage());
-            }
-            List<PrivateMessage> messages = privateChat.getMessages();
-            String lastMessage = messages.size() == 0 ? "" : messages.getLast().getContent();
-
-            briefPrivateChatDtos.add(
-                    new BriefPrivateChatDto(
-                            privateChat.getId(),
-                            secondUser.getId(),
-                            secondUser.getLogin(),
-                            lastMessage
-                    )
-            );
-        }
-
-        List<BriefGroupChatDto> briefGroupChatDtos = new ArrayList<>();
-        for(GroupChatAccount groupAccount : user.getGroupChatAccounts()) {
-            GroupChat groupChat = groupAccount.getGroupChat();
-            List<GroupMessage> messages = groupChat.getMessages();
-            String lastMessage = messages.size() == 0 ? "" : messages.getLast().getContent();
-
-            briefGroupChatDtos.add(
-                    new BriefGroupChatDto(
-                            groupChat.getId(),
-                            groupChat.getName(),
-                            lastMessage
-                    )
-            );
-        }
-
+        List<BriefPrivateChatDto> briefPrivateChatDtos = getBriefPrivateChatsDtos(user);
+        List<BriefGroupChatDto> briefGroupChatDtos = getBriefGroupChatsDtos(user);
         GetUserChatsDto getUserChatsDto = new GetUserChatsDto(briefPrivateChatDtos, briefGroupChatDtos);
 
         return getUserChatsDto;
@@ -80,10 +42,58 @@ public class ChatService {
 
     public SystemMessage saveSystemMessage(String message, GroupChat groupChat) {
         SystemMessage systemMessage = new SystemMessage(message, new Date(), groupChat);
+        groupChat.getSystemMessages().add(systemMessage);
 
         systemMessageRepository.save(systemMessage);
         groupChatRepository.save(groupChat);
 
         return systemMessage;
+    }
+
+    private List<BriefGroupChatDto> getBriefGroupChatsDtos(User user) {
+        List<BriefGroupChatDto> briefGroupChatDtos = new ArrayList<>();
+
+        for(GroupChatAccount groupAccount : user.getGroupChatAccounts()) {
+            GroupChat groupChat = groupAccount.getGroupChat();
+            TreeSet<GroupMessage> messages = groupChat.getMessages();
+            String lastMessage = messages.isEmpty() ? "" : messages.getLast().getContent();
+
+            briefGroupChatDtos.add(
+                    new BriefGroupChatDto(
+                            groupChat.getId(),
+                            groupChat.getName(),
+                            lastMessage
+                    )
+            );
+        }
+
+        return briefGroupChatDtos;
+    }
+
+    private List<BriefPrivateChatDto> getBriefPrivateChatsDtos(User user) {
+        List<BriefPrivateChatDto> briefPrivateChatDtos = new ArrayList<>();
+
+        for(PrivateChatAccount privateAccount : user.getPrivateChatAccounts()) {
+            PrivateChat privateChat = privateAccount.getPrivateChat();
+            User secondUser = new User();
+            try {
+                secondUser = privateChatService.getSecondUserOfChat(user, privateChat);
+            } catch (Exception ex) {
+                throw new InternalServerErrorException(ex.getMessage());
+            }
+            TreeSet<PrivateMessage> messages = privateChat.getMessages();
+            String lastMessage = messages.isEmpty() ? "" : messages.getLast().getContent();
+
+            briefPrivateChatDtos.add(
+                    new BriefPrivateChatDto(
+                            privateChat.getId(),
+                            secondUser.getId(),
+                            secondUser.getLogin(),
+                            lastMessage
+                    )
+            );
+        }
+
+        return briefPrivateChatDtos;
     }
 }

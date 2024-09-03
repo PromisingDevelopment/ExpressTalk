@@ -1,6 +1,9 @@
 package expresstalk.dev.backend.controller;
 
 import expresstalk.dev.backend.dto.request.CreatePrivateChatRoomDto;
+import expresstalk.dev.backend.dto.response.GetGroupChatDto;
+import expresstalk.dev.backend.dto.response.GetPrivateChatDto;
+import expresstalk.dev.backend.entity.Message;
 import expresstalk.dev.backend.entity.PrivateChat;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.service.*;
@@ -13,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.TreeSet;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -34,13 +38,23 @@ public class PrivateChatController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{chatStrId}")
     @ResponseBody
-    public PrivateChat getPrivateChatRoom(@PathVariable String chatStrId, HttpServletRequest request) {
+    public GetPrivateChatDto getPrivateChatRoom(@PathVariable String chatStrId, HttpServletRequest request) {
         sessionService.ensureSessionExistense(request);
 
         UUID chatId = chatService.verifyAndGetChatUUID(chatStrId);
-        PrivateChat chat = privateChatService.getChat(chatId);
+        PrivateChat privateChat = privateChatService.getChat(chatId);
 
-        return chat;
+        TreeSet<Message> sortedMessages = new TreeSet<>();
+        sortedMessages.addAll(privateChat.getMessages());
+        sortedMessages.addAll(privateChat.getSystemMessages());
+
+        GetPrivateChatDto getPrivateChatDto = new GetPrivateChatDto(
+                privateChat.getId(),
+                sortedMessages,
+                privateChat.getMembers()
+        );
+
+        return getPrivateChatDto;
     }
 
     @ApiResponses(value = {
