@@ -1,10 +1,10 @@
+import { CssBaseline, ThemeProvider } from "@mui/material";
 import React from "react";
 import { Provider } from "react-redux";
-import { store, persistor } from "./redux/store";
 import { PersistGate } from "redux-persist/integration/react";
-import { CssBaseline, ThemeProvider } from "@mui/material";
-import theme from "./theme";
 import { Main } from "./pages/Main";
+import { persistor, store } from "./redux/store";
+import theme from "./theme";
 
 function App() {
   return (

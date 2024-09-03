@@ -23,9 +23,16 @@ export const chatDeleteUrls = {
   removeGroup: BASE_URL + "/chats/group/remove",
 };
 
-export const userUrls = {
+export const userGetUrls = {
   user: (login: string) => BASE_URL + "/users/" + login,
+  avatar: (avatar: string) => BASE_URL + "/users/avatar/" + avatar,
   self: BASE_URL + "/users/self",
+  chats: BASE_URL + "/users/chats",
+};
+
+export const userPostUrls = {
+  edit: BASE_URL + "/users/edit",
+  avatar: BASE_URL + "/users/avatar",
 };
 
 export const navigateUrls = {
