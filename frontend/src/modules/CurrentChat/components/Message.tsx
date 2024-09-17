@@ -8,17 +8,22 @@ interface MessageProps {
   content: string;
   createdAt?: string;
   isMine?: boolean;
-  senderId?: string;
   senderLogin?: string;
   isGroupMessage?: boolean;
+  isSystemMessage?: boolean;
+  //message: PrivateMessage
 }
 
 const Message: React.FC<MessageProps> = (props) => {
-  const { isMine, createdAt, content, senderLogin, isGroupMessage, senderId } = props;
+  const { isMine, createdAt, content, senderLogin, isGroupMessage, isSystemMessage } =
+    props;
 
   const isLowContent = content.length < 20;
   const isShownLogin = Boolean(isGroupMessage && !isMine && senderLogin);
-  const isAnon = Boolean(content && !senderId);
+  //const isAnon = Boolean(content && !senderId);
+  const isAnon = isSystemMessage;
+  //console.log("isShownLogin", isShownLogin);
+  //console.log(isGroupMessage, !isMine, senderLogin);
 
   return (
     <StyledMessageContainer isAnon={isAnon} isMine={isMine}>

@@ -1,36 +1,23 @@
-export interface GroupChatMessage {
+import { Message } from "./Message";
+
+export interface GroupChat {
   id: string;
-  senderId: string;
-  content: string;
-  createdAt: string;
-  groupChat: string;
+  systemMessages: any; // прибрати
+  name: string;
+  messages: Message<GroupChatMember, null>[];
+  members: GroupChatMember[];
 }
 
 export interface GroupChatMember {
   id: string;
-  groupChat: string;
   groupChatRole: "ADMIN" | "MEMBER";
-  groupMessages: GroupChatMessage[];
+  groupMessages: any; // прибрати
+  groupChat: string; // прибрати
   user: {
-    avatarFile: null;
+    avatarFile: any; // додати
     id: string;
-    login: string;
     name: string;
+    login: string;
     status: "ONLINE" | "OFFLINE";
   };
-}
-
-interface GroupChatAdmin {
-  id: string;
-  name: string;
-  login: string;
-  status: "ONLINE";
-}
-
-export interface GroupChat {
-  id: string;
-  name: string;
-  messages: GroupChatMessage[];
-  members: GroupChatMember[];
-  admins: GroupChatAdmin[];
 }

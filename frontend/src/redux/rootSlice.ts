@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
-import { userUrls } from "config";
+import { userGetUrls } from "config";
 import { CurrentChatType } from "types/CurrentChatType";
 import { IUser } from "types/IUser";
 
@@ -63,7 +63,9 @@ export const getCurrentUser = createAsyncThunk<any, void>(
   "@@root/getCurrentUser",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(userUrls.self, { withCredentials: true });
+      const { data } = await axios.get(userGetUrls.self, { withCredentials: true });
+
+      console.log(data);
 
       return data;
     } catch (error) {
@@ -72,7 +74,6 @@ export const getCurrentUser = createAsyncThunk<any, void>(
   }
 );
 
-export const { setCurrentChatId, setIsCreatedNewChat, setCurrentChatType, resetChatId } =
-  rootSlice.actions;
+export const { setCurrentChatId, setIsCreatedNewChat, setCurrentChatType, resetChatId } = rootSlice.actions;
 
 export default rootSlice.reducer;

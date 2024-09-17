@@ -1,8 +1,8 @@
-import { userUrls } from "config";
+import { userGetUrls } from "config";
 import { axiosRequest } from "./axiosRequest";
 
 function getMemberByLogin(login: string) {
-  const url = userUrls.user(login);
+  const url = userGetUrls.user(login);
   return axiosRequest(url, "get");
 }
 

@@ -1,19 +1,20 @@
+import { Message } from "./Message";
+
 export interface PrivateChat {
   id: string;
-  messages: IMessage[];
-  members: IMember[];
+  systemMessages: any; // прибрати
+  messages: Message<PrivateMember, PrivateMember>[];
+  members: PrivateMember[];
 }
 
-export interface IMessage {
+export interface PrivateMember {
   id: string;
-  senderId: string;
-  receiverId: string;
-  content: string;
-  createdAt: string;
-}
-export interface IMember {
-  id: string;
-  name: string;
-  login: string;
-  status: "ONLINE" | "OFFLINE";
+  sentMessages: string[]; // прибрати
+  receivedMessages: string[]; // прибрати
+  user: {
+    id: string;
+    name: string;
+    login: string;
+    status: "ONLINE" | "OFFLINE";
+  };
 }

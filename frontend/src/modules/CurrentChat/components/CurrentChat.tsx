@@ -6,7 +6,6 @@ import { Header } from "./Header";
 import { NoChat } from "./NoChat";
 import { WriteMessage } from "./WriteMessage";
 import { getCurrentChat } from "../store/currentChatSlice";
-import { setCurrentChat } from "../store/currentChatSlice";
 
 interface CurrentChatProps {}
 
@@ -17,7 +16,7 @@ const CurrentChat: React.FC<CurrentChatProps> = () => {
   const { currentChatId, currentUser, isCreatedNewChat, currentChatType } =
     useAppSelector((state) => state.root);
   const secondMember = currentChat?.members.find(
-    (member) => member.login !== currentUser.user?.login
+    (member) => member.user.login !== currentUser.user?.login
   );
 
   React.useEffect(() => {
@@ -44,7 +43,7 @@ const CurrentChat: React.FC<CurrentChatProps> = () => {
           width: 1,
           bgcolor: "background.paper",
         }}>
-        <Header login={secondMember?.login} />
+        <Header login={secondMember?.user.login} />
         <ChatBlock />
         <WriteMessage chatId={currentChatId} />
       </Box>

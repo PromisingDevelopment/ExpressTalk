@@ -78,8 +78,7 @@ const sidebarSlice = createSlice({
       })
       .addCase(getChatsList.rejected, (state, action: PayloadAction<any>) => {
         state.chatsList.status = "error";
-        state.chatsList.errorMessage =
-          action.payload.response?.data?.message || action.payload.message;
+        state.chatsList.errorMessage = action.payload.response?.data?.message || action.payload.message;
         state.chatsList.errorCode = action.payload.response?.data?.status || 500;
       });
   },
@@ -100,19 +99,15 @@ export const getChatsList = createAsyncThunk<any, void>(
   }
 );
 
-export const logout = createAsyncThunk<void, void>(
-  "@@sidebar/logout",
-  async (_, { rejectWithValue }) => {
-    try {
-      await axios.delete(chatDeleteUrls.logOut, {
-        withCredentials: true,
-      });
-    } catch (error) {
-      return rejectWithValue(error);
-    }
+export const logout = createAsyncThunk<void, void>("@@sidebar/logout", async (_, { rejectWithValue }) => {
+  try {
+    await axios.delete(chatDeleteUrls.logOut, {
+      withCredentials: true,
+    });
+  } catch (error) {
+    return rejectWithValue(error);
   }
-);
+});
 
-export const { setSidebarOpen, resetChatListError, updateLastMessage } =
-  sidebarSlice.actions;
+export const { setSidebarOpen, resetChatListError, updateLastMessage } = sidebarSlice.actions;
 export default sidebarSlice.reducer;
