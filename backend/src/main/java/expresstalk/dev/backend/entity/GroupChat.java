@@ -7,20 +7,22 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 
 @Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Table(name = "group_chats")
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 public class GroupChat extends Chat {
     @Column(nullable = false)
     private String name;
 
     @ToString.Exclude
     @OneToMany(mappedBy = "groupChat", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private TreeSet<GroupMessage> messages = new TreeSet<>();
+    private Set<GroupMessage> messages = new TreeSet<>();
 
     @ToString.Exclude
     @OneToMany(mappedBy = "groupChat", fetch = FetchType.EAGER)

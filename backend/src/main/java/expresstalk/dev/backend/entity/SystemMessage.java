@@ -3,8 +3,7 @@ package expresstalk.dev.backend.entity;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 import java.util.UUID;
@@ -13,7 +12,8 @@ import java.util.UUID;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Table(name = "system_messages")
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 public class SystemMessage extends Message {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

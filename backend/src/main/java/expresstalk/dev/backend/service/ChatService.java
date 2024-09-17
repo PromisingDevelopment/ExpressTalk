@@ -55,7 +55,7 @@ public class ChatService {
 
         for(GroupChatAccount groupAccount : user.getGroupChatAccounts()) {
             GroupChat groupChat = groupAccount.getGroupChat();
-            TreeSet<GroupMessage> messages = groupChat.getMessages();
+            TreeSet<GroupMessage> messages = new TreeSet<>(groupChat.getMessages());
             String lastMessage = messages.isEmpty() ? "" : messages.getLast().getContent();
 
             briefGroupChatDtos.add(
@@ -81,7 +81,7 @@ public class ChatService {
             } catch (Exception ex) {
                 throw new InternalServerErrorException(ex.getMessage());
             }
-            TreeSet<PrivateMessage> messages = privateChat.getMessages();
+            TreeSet<PrivateMessage> messages = new TreeSet<>(privateChat.getMessages());
             String lastMessage = messages.isEmpty() ? "" : messages.getLast().getContent();
 
             briefPrivateChatDtos.add(
