@@ -4,17 +4,17 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import expresstalk.dev.backend.enums.GroupChatRole;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "group_chat_accounts")
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 public class GroupChatAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -25,7 +25,7 @@ public class GroupChatAccount {
 
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonIgnore
-    private TreeSet<GroupMessage> groupMessages = new TreeSet<>();
+    private Set<GroupMessage> groupMessages = new TreeSet<>();
 
     @ManyToOne
     @JoinColumn(name = "groupChatId", referencedColumnName = "id")
