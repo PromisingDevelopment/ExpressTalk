@@ -94,10 +94,10 @@ public class UserService {
     }
 
     @Transactional
-    public byte[] getAvatarImage(UUID avatarId) {
-        AvatarFile image = avatarFileRepository.findById(avatarId).orElse(null);
+    public byte[] getAvatarImage(User user) {
+        AvatarFile image = user.getAvatarFile();
         if(image == null) {
-            throw new ImageNotFoundException(avatarId);
+            throw new ImageNotFoundException(HttpStatus.NOT_FOUND, "User with id " + user.getId() + " does not have avatar image");
         }
 
         return image.getData();
