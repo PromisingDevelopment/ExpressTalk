@@ -1,11 +1,12 @@
+import React from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 import { Logo } from "components/Logo";
 import { useAppDispatch, useAppSelector } from "hooks/redux";
-import React from "react";
-import { getCurrentUser } from "redux/rootSlice";
+import { getCurrentUser, getUserAvatar } from "redux/rootSlice";
 import { CreateNewChat } from "./CreateNewChat";
 import { CreateNewGroup } from "./CreateNewGroup";
 import { Logout } from "./Logout";
+import { UserProfile } from "./UserProfile";
 
 interface HeaderProps {
   switchChatMode: any;
@@ -15,34 +16,21 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({ switchChatMode }
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const { status, user } = useAppSelector((state) => state.root.currentUser);
-  const [login, setLogin] = React.useState(user?.login || "");
+  const [openProfile, setOpenProfile] = React.useState(false);
 
-  console.log(user);
-
-  React.useEffect(() => {
-    const setCorrectedLogin = () => {
-      const width = document.body.clientWidth;
-
-      const userLogin = user?.login;
-      if (!userLogin) return;
-
-      if (width > 900 && userLogin.length > 28) {
-        setLogin(login.slice(0, 28) + "...");
-      } else if (width > 600 && userLogin.length > 26) {
-        setLogin(login.slice(0, 26) + "...");
-      } else if (width > 0 && userLogin.length > 20) {
-        setLogin(login.slice(0, 20) + "...");
-      }
-      setLogin(userLogin);
-    };
-
-    window.addEventListener("resize", setCorrectedLogin);
-    setCorrectedLogin();
-  }, [user]);
+  const onOpenProfile = () => {
+    setOpenProfile(true);
+  };
 
   React.useEffect(() => {
     dispatch(getCurrentUser());
   }, []);
+
+  React.useEffect(() => {
+    if (user) {
+      dispatch(getUserAvatar(user.id));
+    }
+  }, [user]);
 
   return (
     <Box
@@ -62,19 +50,37 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({ switchChatMode }
           px: 1,
         },
       }}>
-      <Logo isAbleToChange isMain size={64} />
-      <Typography
+      <Box
         sx={{
-          fontSize: { lg: 24, md: 18, sm: 16, xs: 14 },
+          cursor: "pointer",
+          display: "flex",
           flexGrow: 1,
-          lineHeight: 1.3,
-          textTransform: "capitalize",
-          wordBreak: "break-all",
-        }}>
-        {status === "error" && "Guest"}
-        {status === "loading" && "Loading..."}
-        {user && login}
-      </Typography>
+          alignItems: "center",
+          gap: { md: 2, xs: 1 },
+        }}
+        onClick={onOpenProfile}>
+        <Logo isMain size={64} />
+        <Typography
+          sx={{
+            fontSize: { lg: 24, md: 18, sm: 16, xs: 14 },
+            lineHeight: 1.3,
+            textTransform: "capitalize",
+            wordBreak: "break-all",
+          }}>
+          {status === "error" && "Guest"}
+          {status === "loading" && "Loading..."}
+          {user && user.login}
+        </Typography>
+      </Box>
+
+      {user && (
+        <UserProfile
+          userData={{ user, avatar: "" }}
+          setOpenProfile={setOpenProfile}
+          openProfile={openProfile}
+        />
+      )}
+
       <Box display="flex" gap={{ xs: 0.5, lg: 1 }}>
         <CreateNewGroup switchChatMode={switchChatMode} />
         <CreateNewChat switchChatMode={switchChatMode} />
