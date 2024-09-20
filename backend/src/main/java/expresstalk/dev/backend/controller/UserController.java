@@ -96,27 +96,28 @@ public class UserController {
         return userService.setAvatarImage(user, avatarImage);
     }
 
-    @GetMapping("/avatar/{avatarStrId}")
+    @GetMapping("/avatar/{userStrId}")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "400", description = "Unable to convert provided UUID from path"),
             @ApiResponse(responseCode = "403", description = "Invalid file type provided. Only image acceptable"),
             @ApiResponse(responseCode = "403", description = "User is not authenticated"),
             @ApiResponse(responseCode = "404", description = "User is not found"),
-            @ApiResponse(responseCode = "404", description = "Avatar image is not found by provided id"),
+            @ApiResponse(responseCode = "404", description = "User does not have avatar image"),
             @ApiResponse(responseCode = "500", description = "Error downloading an image"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity getAvatarImage(@PathVariable String avatarStrId, HttpServletRequest request) {
+    public ResponseEntity getAvatarImage(@PathVariable String userStrId, HttpServletRequest request) {
         sessionService.ensureSessionExistense(request);
 
-        UUID avatarId;
+        UUID userId;
         try {
-            avatarId = Converter.convertStringToUUID(avatarStrId);
+            userId = Converter.convertStringToUUID(userStrId);
         } catch (Exception exception) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to convert provided UUID from path");
         }
 
-        byte[] imageData = userService.getAvatarImage(avatarId);
+        User user = userService.findById(userId);
+        byte[] imageData = userService.getAvatarImage(user);
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.valueOf(MediaType.IMAGE_PNG_VALUE))
                 .body(imageData);
