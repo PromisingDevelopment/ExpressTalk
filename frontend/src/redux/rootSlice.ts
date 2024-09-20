@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
-import { userGetUrls } from "config";
+import { userGetUrls, userPostUrls } from "config";
 import { CurrentChatType } from "types/CurrentChatType";
 import { IUser } from "types/IUser";
 
@@ -10,6 +10,7 @@ interface InitialState {
     user: IUser | null;
     errorCode: number | null;
   };
+  avatar: string | null;
   currentChatId: string | null;
   isCreatedNewChat: boolean;
   currentChatType: CurrentChatType;
@@ -21,6 +22,7 @@ const initialState: InitialState = {
     user: null,
     errorCode: null,
   },
+  avatar: null,
   currentChatId: null,
   isCreatedNewChat: false,
   currentChatType: "privateChat",
@@ -65,7 +67,46 @@ export const getCurrentUser = createAsyncThunk<any, void>(
     try {
       const { data } = await axios.get(userGetUrls.self, { withCredentials: true });
 
+      return data;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
+export const getUserAvatar = createAsyncThunk<any, string>(
+  "@@/getUserAvatar",
+  async (userId, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.get(userGetUrls.avatar(userId), { withCredentials: true });
+
       console.log(data);
+
+      return data.avatarString;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
+export const editCurrentUser = createAsyncThunk<any, { name: string; login: string }>(
+  "@@/editCurrentUser",
+  async (newUserData, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.post(userPostUrls.edit, newUserData);
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
+export const editAvatar = createAsyncThunk<string, string>(
+  "@@/editAvatar",
+  async (id, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.post(userPostUrls.avatar, id);
 
       return data;
     } catch (error) {
