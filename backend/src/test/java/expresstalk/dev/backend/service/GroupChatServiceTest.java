@@ -70,7 +70,7 @@ class GroupChatServiceTest {
         when(accountService.getGroupChatAccount(member, groupChat)).thenReturn(null);
         when(accountService.getGroupChatAccount(admin, groupChat)).thenReturn(adminAccount);
 
-        assertDoesNotThrow(() -> groupChatService.addMemberToChat(admin, member, groupChat));
+        assertDoesNotThrow(() -> groupChatService.addMember(admin, member, groupChat));
         verify(groupChatAccountRepository).save(any(GroupChatAccount.class));
         verify(groupChatRepository).save(groupChat);
         verify(userRepository).save(member);
@@ -85,7 +85,7 @@ class GroupChatServiceTest {
         when(accountService.getGroupChatAccount(member, groupChat)).thenReturn(null);
         when(accountService.getGroupChatAccount(admin, groupChat)).thenReturn(new GroupChatAccount());
         assertThrows(UserNotAdminException.class,
-                () -> groupChatService.addMemberToChat(admin, member, groupChat));
+                () -> groupChatService.addMember(admin, member, groupChat));
     }
 
     @Test
@@ -112,7 +112,7 @@ class GroupChatServiceTest {
         when(accountService.getGroupChatAccount(member, groupChat)).thenReturn(memberAccount);
         when(accountService.getGroupChatAccount(admin, groupChat)).thenReturn(adminAccount);
 
-        assertDoesNotThrow(() -> groupChatService.removeMemberFromChat(admin, member, groupChat));
+        assertDoesNotThrow(() -> groupChatService.removeMember(admin, member, groupChat));
         verify(groupChatAccountRepository).delete(memberAccount);
         verify(groupChatRepository).save(groupChat);
         verify(userRepository).save(member);
@@ -126,11 +126,11 @@ class GroupChatServiceTest {
 
         when(accountService.getGroupChatAccount(any(User.class), any(GroupChat.class)))
                 .thenReturn(null);
-        assertThrows(UserAbsentInChatException.class, () -> groupChatService.removeMemberFromChat(admin, member, groupChat));
+        assertThrows(UserAbsentInChatException.class, () -> groupChatService.removeMember(admin, member, groupChat));
 
         when(accountService.getGroupChatAccount(any(User.class), any(GroupChat.class)))
                 .thenReturn(new GroupChatAccount());
-        assertThrows(UserNotAdminException.class, () -> groupChatService.removeMemberFromChat(admin, member, groupChat));
+        assertThrows(UserNotAdminException.class, () -> groupChatService.removeMember(admin, member, groupChat));
     }
 
     @Test

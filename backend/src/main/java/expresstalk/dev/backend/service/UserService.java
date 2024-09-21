@@ -65,6 +65,7 @@ public class UserService {
         return user;
     }
 
+    @Transactional
     public ImageId setAvatarImage(User user, MultipartFile avatarImage) {
         byte[] data;
         try {

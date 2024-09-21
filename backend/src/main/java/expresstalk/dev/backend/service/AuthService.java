@@ -8,6 +8,7 @@ import expresstalk.dev.backend.exception.*;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.repository.UserRepository;
 import expresstalk.dev.backend.utils.Generator;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class AuthService {
     private final UserService userService;
     private final BCryptPasswordEncoder passwordEncoder;
 
+    @Transactional
     public User signUp(SignUpUserDto signUpUserDto) {
         User existedUser = userRepository.findUserByLoginOrEmail(signUpUserDto.login(), signUpUserDto.email());
 

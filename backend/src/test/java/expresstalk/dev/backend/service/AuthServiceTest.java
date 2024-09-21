@@ -25,6 +25,8 @@ import static org.mockito.Mockito.when;
 class AuthServiceTest {
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private UserService userService;
     @Spy
     private BCryptPasswordEncoder passwordEncoder;
     @InjectMocks
@@ -73,7 +75,7 @@ class AuthServiceTest {
                 TestValues.getPassword()
         );
 
-        when(userRepository.findUserByLoginOrEmail(anyString(), anyString())).thenReturn(user);
+        when(userService.findUserByLoginOrEmail(anyString(), anyString())).thenReturn(user);
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
 
         User result = assertDoesNotThrow(() -> authService.signIn(signInUserDto));
@@ -89,9 +91,7 @@ class AuthServiceTest {
                 TestValues.getPassword()
         );
 
-        when(userRepository.findUserByLoginOrEmail(anyString(), anyString())).thenReturn(null);
-        assertThrows(UserNotFoundException.class, () -> authService.signIn(signInUserDto));
-        when(userRepository.findUserByLoginOrEmail(anyString(), anyString())).thenReturn(user);
+        when(userService.findUserByLoginOrEmail(anyString(), anyString())).thenReturn(user);
         user.setEmailCode(TestValues.getEmailCode());
         assertThrows(EmailNotVerifiedException.class, () -> authService.signIn(signInUserDto));
         user.setEmailCode(null);

@@ -152,7 +152,7 @@ class UserServiceTest {
 
     @Test
     void shouldGetAvatarImage() {
-        UUID avatarId = UUID.randomUUID();
+        User user = TestValues.getUser();
         String imageName = TestValues.getWord();
         String extension = ".jpg";
         AvatarFile avatarFile = new AvatarFile();
@@ -166,9 +166,9 @@ class UserServiceTest {
             fail("Unable to compress image");
         }
 
-        when(avatarFileRepository.findById(avatarId)).thenReturn(Optional.of(avatarFile));
-        assertDoesNotThrow(() -> userService.getAvatarImage(avatarId));
-        when(avatarFileRepository.findById(avatarId)).thenReturn(Optional.empty());
-        assertThrows(ImageNotFoundException.class, () -> userService.getAvatarImage(avatarId));
+        user.setAvatarFile(avatarFile);
+        assertDoesNotThrow(() -> userService.getAvatarImage(user));
+        user.setAvatarFile(null);
+        assertThrows(ImageNotFoundException.class, () -> userService.getAvatarImage(user));
     }
 }
