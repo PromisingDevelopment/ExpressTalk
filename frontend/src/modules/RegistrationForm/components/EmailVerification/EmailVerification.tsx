@@ -2,7 +2,7 @@ import React from "react";
 import { Title } from "../../UI/Title";
 import { CustomInput } from "../../UI/CustomInput";
 import { CustomLink } from "../../UI/CustomLink";
-import { GoBack } from "../../UI/GoBack";
+import { GoBack } from "UI/GoBack";
 import { object, string } from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { type SubmitHandler, useForm } from "react-hook-form";
@@ -26,9 +26,7 @@ const EmailVerification: React.FC<EmailVerificationProps> = () => {
   });
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { errorMessage, status } = useAppSelector(
-    (state) => state.auth.emailVerification
-  );
+  const { errorMessage, status } = useAppSelector((state) => state.auth.emailVerification);
 
   React.useEffect(() => {
     if (status === "fulfilled") {
@@ -44,11 +42,7 @@ const EmailVerification: React.FC<EmailVerificationProps> = () => {
   return (
     <Box component="form" sx={{ pb: 7.5 }} onSubmit={handleSubmit(onSubmit)}>
       <Title>Email verification</Title>
-      <CustomInput
-        {...register("code")}
-        errorMessage={formState.errors.code?.message}
-        label="Code"
-      />
+      <CustomInput {...register("code")} errorMessage={formState.errors.code?.message} label="Code" />
       <CustomLink sx={{ mt: 6 }} isLoading={status === "loading"} uppercase submit>
         done
       </CustomLink>

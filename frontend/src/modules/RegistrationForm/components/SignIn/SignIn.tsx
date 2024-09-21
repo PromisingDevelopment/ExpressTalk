@@ -1,7 +1,7 @@
 import React from "react";
 import { Title } from "../../UI/Title";
 import { CustomLink } from "../../UI/CustomLink";
-import { GoBack } from "../../UI/GoBack";
+import { GoBack } from "UI/GoBack";
 import { CustomInput } from "../../UI/CustomInput";
 import { InputsWrapper } from "../../UI/InputsWrapper";
 import { object, string } from "yup";
@@ -15,12 +15,8 @@ import { AlertError } from "../AlertError";
 import { Box } from "@mui/material";
 
 const scheme = object().shape({
-  loginOrEmail: string()
-    .min(4, "This field length should be more than 4 characters")
-    .required(),
-  password: string()
-    .min(6, "password length should be more than 6 characters")
-    .required(),
+  loginOrEmail: string().min(4, "This field length should be more than 4 characters").required(),
+  password: string().min(6, "password length should be more than 6 characters").required(),
 });
 
 interface SignInProps {}

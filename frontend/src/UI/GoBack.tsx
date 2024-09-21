@@ -1,18 +1,21 @@
 import React from "react";
 import ArrowLeftIcon from "@mui/icons-material/KeyboardBackspaceRounded";
-import { Button, useTheme } from "@mui/material";
+import { Button, SxProps, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-interface GoBackProps {}
+interface GoBackProps {
+  onClick?: any;
+  sx?: SxProps;
+}
 
-const GoBack: React.FC<GoBackProps> = () => {
+const GoBack: React.FC<GoBackProps> = ({ onClick, sx }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const handleClick = () => navigate(-1);
 
   return (
     <Button
-      onClick={handleClick}
+      onClick={onClick || handleClick}
       sx={{
         color: "#E9EFFF",
         textDecoration: "none",
@@ -34,6 +37,8 @@ const GoBack: React.FC<GoBackProps> = () => {
         [theme.breakpoints.down("sm")]: {
           fontSize: "1.4rem",
         },
+
+        ...sx,
       }}>
       <ArrowLeftIcon sx={{ mr: 1, transition: "all .3s ease 0s" }} />
       Back

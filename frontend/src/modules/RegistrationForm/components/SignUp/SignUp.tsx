@@ -1,6 +1,6 @@
 import React from "react";
 import { Title } from "../../UI/Title";
-import { GoBack } from "../../UI/GoBack";
+import { GoBack } from "UI/GoBack";
 import { CustomLink } from "../../UI/CustomLink";
 import { CustomInput } from "../../UI/CustomInput";
 import { InputsWrapper } from "../../UI/InputsWrapper";
@@ -19,9 +19,7 @@ const scheme = object().shape({
   login: string().min(4, "login length should be more than 4 characters").required(),
   name: string().required(),
   email: string().email().required(),
-  password: string()
-    .min(6, "password length should be more than 6 characters")
-    .required(),
+  password: string().min(6, "password length should be more than 6 characters").required(),
 });
 
 interface SignUpProps {}
