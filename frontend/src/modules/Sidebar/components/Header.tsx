@@ -7,6 +7,7 @@ import { CreateNewChat } from "./CreateNewChat";
 import { CreateNewGroup } from "./CreateNewGroup";
 import { Logout } from "./Logout";
 import { UserProfile } from "./UserProfile";
+import defaultAvatar from "assets/images/avatar.png";
 
 interface HeaderProps {
   switchChatMode: any;
@@ -15,7 +16,10 @@ interface HeaderProps {
 const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({ switchChatMode }, ref) => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
-  const { status, user } = useAppSelector((state) => state.root.currentUser);
+  const {
+    currentUser: { status, user },
+    avatar,
+  } = useAppSelector((state) => state.root);
   const [openProfile, setOpenProfile] = React.useState(false);
 
   const onOpenProfile = () => {
@@ -28,7 +32,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({ switchChatMode }
 
   React.useEffect(() => {
     if (user) {
-      dispatch(getUserAvatar(user.id));
+      //dispatch(getUserAvatar(user.id));
     }
   }, [user]);
 
@@ -75,7 +79,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({ switchChatMode }
 
       {user && (
         <UserProfile
-          userData={{ user, avatar: "" }}
+          userData={{ user, avatar: avatar || defaultAvatar }}
           setOpenProfile={setOpenProfile}
           openProfile={openProfile}
         />

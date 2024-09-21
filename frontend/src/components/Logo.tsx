@@ -49,12 +49,7 @@ const Logo: React.FC<LogoProps> = ({ src = "", size, isMain, isAbleToChange }) =
               height: defaultLogoSize,
             },
       ]}>
-      <Box
-        sx={{ width: 1, height: 1 }}
-        src={src ? src : avatarImage}
-        component="img"
-        alt="logo"
-      />
+      <Box sx={{ width: 1, height: 1 }} src={src ? src : avatarImage} component="img" alt="logo" />
       {isAbleToChange && (
         <ChangeLogoPlaceholder title="upload avatar" className="change-logo-placeholder">
           <ImageFileInput />

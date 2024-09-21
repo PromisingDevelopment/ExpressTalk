@@ -1,15 +1,17 @@
 import { Box, SxProps, useTheme } from "@mui/material";
-import React from "react";
+import React, { HTMLInputTypeAttribute } from "react";
 
 interface CustomInputProps {
   label: string;
   name: string;
+  inputId: string;
+  inputType?: HTMLInputTypeAttribute;
   onChange?: any;
   sx?: SxProps;
 }
 
 const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
-  ({ label, name, sx, onChange }, ref) => {
+  ({ label, name, sx, onChange, inputId, inputType }, ref) => {
     const theme = useTheme();
 
     return (
@@ -18,6 +20,9 @@ const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
         ref={ref}
         component="input"
         placeholder={label}
+        id={inputId}
+        type={inputType}
+        accept={inputType === "file" ? ".jpg,.jpeg,.png,.gif,.bmp,.webp" : undefined}
         name={name}
         sx={{
           width: 1,

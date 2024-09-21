@@ -74,13 +74,11 @@ export const getCurrentUser = createAsyncThunk<any, void>(
   }
 );
 
-export const getUserAvatar = createAsyncThunk<any, string>(
+export const getUserAvatar = createAsyncThunk<string, string>(
   "@@/getUserAvatar",
   async (userId, { rejectWithValue }) => {
     try {
       const { data } = await axios.get(userGetUrls.avatar(userId), { withCredentials: true });
-
-      console.log(data);
 
       return data.avatarString;
     } catch (error) {
