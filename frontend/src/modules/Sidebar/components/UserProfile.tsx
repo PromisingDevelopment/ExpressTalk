@@ -1,11 +1,43 @@
 import { Box, Button, Modal, Typography } from "@mui/material";
 import { CustomInput } from "components/CustomInput";
 import { Logo } from "components/Logo";
-import React from "react";
+import React, { HTMLInputTypeAttribute, StyleHTMLAttributes } from "react";
 import { IUser } from "types/IUser";
 import { GoBack } from "UI/GoBack";
 import ModalContent from "UI/ModalContent";
 import { SubmitButton } from "UI/SubmitButton";
+
+interface InputFieldData {
+  name: "name" | "login" | "avatar";
+  type: HTMLInputTypeAttribute;
+  id: string;
+  label: string;
+  style: any;
+}
+
+const inputFieldsData: InputFieldData[] = [
+  {
+    name: "name",
+    type: "text",
+    id: "edit-user-name-input",
+    label: "Input name",
+    style: { borderWidth: 3, marginTop: 1, ":focus": { borderColor: "#fff" } },
+  },
+  {
+    name: "login",
+    type: "text",
+    id: "edit-user-login-input",
+    label: "Input login",
+    style: { borderWidth: 3, marginTop: 1, ":focus": { borderColor: "#fff" } },
+  },
+  {
+    name: "avatar",
+    type: "file",
+    id: "edit-user-avatar-input",
+    label: "",
+    style: { border: 0, padding: 0, marginTop: 1 },
+  },
+];
 
 interface UserProfileProps {
   openProfile: boolean;
@@ -62,21 +94,18 @@ const UserProfile: React.FC<UserProfileProps> = ({ openProfile, setOpenProfile, 
   const editLayout = (
     <>
       <form>
-        {["name", "login", "avatar"].map((inputName) => (
+        {inputFieldsData.map((inputData) => (
           <Box sx={{ ":not(last-child)": { marginTop: 3 } }}>
-            <Box htmlFor={`edit-user-${inputName}-input`} component="label" sx={{ fontSize: 20 }}>
-              Edit {inputName}:
+            <Box htmlFor={inputData.id} component="label" sx={{ fontSize: 20 }}>
+              Edit {inputData.name}:
             </Box>
             <CustomInput
-              inputId={`edit-user-${inputName}-input`}
-              inputType={inputName === "avatar" ? "file" : "text"}
-              label={`Input ${inputName}`}
-              name={`edit-user-${inputName}-input`}
-              sx={
-                inputName === "avatar"
-                  ? { border: 0, padding: 0, marginTop: 1 }
-                  : { borderWidth: 3, marginTop: 1, ":focus": { borderColor: "#fff" } }
-              }
+              inputId={inputData.id}
+              inputType={inputData.type}
+              label={inputData.label}
+              name={inputData.id}
+              defaultValue={inputData.name !== "avatar" && userData.user[inputData.name]}
+              sx={inputData.style}
             />
           </Box>
         ))}

@@ -32,7 +32,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({ switchChatMode }
 
   React.useEffect(() => {
     if (user) {
-      //dispatch(getUserAvatar(user.id));
+      dispatch(getUserAvatar(user.id));
     }
   }, [user]);
 

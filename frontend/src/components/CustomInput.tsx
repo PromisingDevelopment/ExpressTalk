@@ -8,10 +8,11 @@ interface CustomInputProps {
   inputType?: HTMLInputTypeAttribute;
   onChange?: any;
   sx?: SxProps;
+  defaultValue?: any;
 }
 
 const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
-  ({ label, name, sx, onChange, inputId, inputType }, ref) => {
+  ({ label, name, sx, onChange, inputId, inputType, defaultValue }, ref) => {
     const theme = useTheme();
 
     return (
@@ -19,6 +20,7 @@ const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
         onChange={onChange}
         ref={ref}
         component="input"
+        defaultValue={defaultValue}
         placeholder={label}
         id={inputId}
         type={inputType}
