@@ -24,7 +24,7 @@ const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
         placeholder={label}
         id={inputId}
         type={inputType}
-        accept={inputType === "file" ? ".jpg,.jpeg,.png,.gif,.bmp,.webp" : undefined}
+        accept={inputType === "file" ? ".jpg,.jpeg,.png,.webp" : undefined}
         name={name}
         sx={{
           width: 1,

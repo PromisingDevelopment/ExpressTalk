@@ -10,7 +10,7 @@ interface InitialState {
     user: IUser | null;
     errorCode: number | null;
   };
-  avatar: string | null;
+  avatarUrl: string | null;
   currentChatId: string | null;
   isCreatedNewChat: boolean;
   currentChatType: CurrentChatType;
@@ -22,7 +22,7 @@ const initialState: InitialState = {
     user: null,
     errorCode: null,
   },
-  avatar: null,
+  avatarUrl: null,
   currentChatId: null,
   isCreatedNewChat: false,
   currentChatType: "privateChat",
@@ -80,7 +80,7 @@ export const getUserAvatar = createAsyncThunk<string, string>(
     try {
       const { data } = await axios.get(userGetUrls.avatar(userId), { withCredentials: true });
 
-      return data.avatarString;
+      return data;
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -91,7 +91,7 @@ export const editCurrentUser = createAsyncThunk<any, { name: string; login: stri
   "@@/editCurrentUser",
   async (newUserData, { rejectWithValue }) => {
     try {
-      const { data } = await axios.post(userPostUrls.edit, newUserData);
+      const { data } = await axios.post(userPostUrls.edit, newUserData, { withCredentials: true });
 
       return data;
     } catch (error) {
@@ -100,13 +100,15 @@ export const editCurrentUser = createAsyncThunk<any, { name: string; login: stri
   }
 );
 
-export const editAvatar = createAsyncThunk<string, string>(
+export const editUserAvatar = createAsyncThunk<string, any>(
   "@@/editAvatar",
-  async (id, { rejectWithValue }) => {
+  async (formData, { rejectWithValue }) => {
     try {
-      const { data } = await axios.post(userPostUrls.avatar, id);
+      const { data } = await axios.post(userPostUrls.avatar, formData, {
+        withCredentials: true,
+      });
 
-      return data;
+      return data.imageId;
     } catch (error) {
       return rejectWithValue(error);
     }
