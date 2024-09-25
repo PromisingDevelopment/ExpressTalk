@@ -6,12 +6,13 @@ import { ImageFileInput } from "./ImageFileInput";
 
 interface LogoProps {
   size: number;
-  src?: string; // change to required
+  ownSize?: object;
+  src: string;
   isMain?: boolean;
   isAbleToChange?: boolean;
 }
 
-const Logo: React.FC<LogoProps> = ({ src = "", size, isMain, isAbleToChange }) => {
+const Logo: React.FC<LogoProps> = ({ src, size, isMain, isAbleToChange, ownSize }) => {
   const mainLogoSize = {
     lg: size,
     md: 45,
@@ -39,7 +40,9 @@ const Logo: React.FC<LogoProps> = ({ src = "", size, isMain, isAbleToChange }) =
             opacity: 0.7,
           },
         },
-        isMain
+        ownSize
+          ? { width: ownSize, height: ownSize }
+          : isMain
           ? {
               width: mainLogoSize,
               height: mainLogoSize,
@@ -49,7 +52,12 @@ const Logo: React.FC<LogoProps> = ({ src = "", size, isMain, isAbleToChange }) =
               height: defaultLogoSize,
             },
       ]}>
-      <Box sx={{ width: 1, height: 1 }} src={src ? src : avatarImage} component="img" alt="logo" />
+      <Box
+        sx={{ width: 1, height: 1, objectFit: "cover" }}
+        src={src ? src : avatarImage}
+        component="img"
+        alt="logo"
+      />
       {isAbleToChange && (
         <ChangeLogoPlaceholder title="upload avatar" className="change-logo-placeholder">
           <ImageFileInput />

@@ -11,6 +11,7 @@ interface InitialState {
     errorCode: number | null;
   };
   avatarUrl: string | null;
+  avatarId: string | null;
   currentChatId: string | null;
   isCreatedNewChat: boolean;
   currentChatType: CurrentChatType;
@@ -23,6 +24,7 @@ const initialState: InitialState = {
     errorCode: null,
   },
   avatarUrl: null,
+  avatarId: null,
   currentChatId: null,
   isCreatedNewChat: false,
   currentChatType: "privateChat",
@@ -57,6 +59,38 @@ const rootSlice = createSlice({
       .addCase(getCurrentUser.rejected, (state, action: PayloadAction<any>) => {
         state.currentUser.status = "error";
         state.currentUser.errorCode = action.payload.response?.status || null;
+      })
+
+      .addCase(editCurrentUser.fulfilled, (state, action: PayloadAction<any>) => {
+        console.log("user fulfilled", action.payload);
+
+        state.currentUser.status = "fulfilled";
+        state.currentUser.user = action.payload;
+      })
+      .addCase(editCurrentUser.pending, (state) => {
+        state.currentUser.status = "loading";
+      })
+      .addCase(editCurrentUser.rejected, (state, action: PayloadAction<any>) => {
+        state.currentUser.status = "error";
+        state.currentUser.errorCode = action.payload.response?.status || null;
+      })
+
+      .addCase(getUserAvatar.fulfilled, (state, action: PayloadAction<any>) => {
+        const byteArray = new Uint8Array(action.payload);
+        const blob = new Blob([byteArray], { type: "image/png" });
+        const imageUrl = URL.createObjectURL(blob);
+
+        state.avatarUrl = imageUrl;
+      })
+      .addCase(getUserAvatar.rejected, (state, action: PayloadAction<any>) => {
+        console.log("get avatar error: ", action.payload);
+      })
+
+      .addCase(editUserAvatar.fulfilled, (state, action: PayloadAction<any>) => {
+        state.avatarId = action.payload;
+      })
+      .addCase(editUserAvatar.rejected, (state, action: PayloadAction<any>) => {
+        console.log("edit avatar error: ", action.payload);
       });
   },
 });
@@ -78,7 +112,10 @@ export const getUserAvatar = createAsyncThunk<string, string>(
   "@@/getUserAvatar",
   async (userId, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(userGetUrls.avatar(userId), { withCredentials: true });
+      const { data } = await axios.get(userGetUrls.avatar(userId), {
+        withCredentials: true,
+        responseType: "arraybuffer",
+      });
 
       return data;
     } catch (error) {
@@ -92,6 +129,7 @@ export const editCurrentUser = createAsyncThunk<any, { name: string; login: stri
   async (newUserData, { rejectWithValue }) => {
     try {
       const { data } = await axios.post(userPostUrls.edit, newUserData, { withCredentials: true });
+      console.log("user edited", data);
 
       return data;
     } catch (error) {
@@ -100,7 +138,7 @@ export const editCurrentUser = createAsyncThunk<any, { name: string; login: stri
   }
 );
 
-export const editUserAvatar = createAsyncThunk<string, any>(
+export const editUserAvatar = createAsyncThunk<any, any>(
   "@@/editAvatar",
   async (formData, { rejectWithValue }) => {
     try {

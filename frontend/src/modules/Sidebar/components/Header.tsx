@@ -8,6 +8,7 @@ import { CreateNewGroup } from "./CreateNewGroup";
 import { Logout } from "./Logout";
 import { UserProfile } from "./UserProfile";
 import defaultAvatar from "assets/images/avatar.png";
+import { userGetUrls } from "config";
 
 interface HeaderProps {
   switchChatMode: any;
@@ -19,6 +20,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({ switchChatMode }
   const {
     currentUser: { status, user },
     avatarUrl,
+    avatarId,
   } = useAppSelector((state) => state.root);
   const [openProfile, setOpenProfile] = React.useState(false);
 
@@ -34,9 +36,12 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({ switchChatMode }
     if (user) {
       dispatch(getUserAvatar(user.id));
     }
-  }, [user]);
+  }, [user, avatarId]);
 
-  console.log(avatarUrl);
+  //const avatarSrc = user ? userGetUrls.avatar(user.id) : defaultAvatar;
+  const avatarSrc = avatarUrl || defaultAvatar;
+
+  //console.log(avatarUrl);
 
   return (
     <Box
@@ -65,7 +70,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({ switchChatMode }
           gap: { md: 2, xs: 1 },
         }}
         onClick={onOpenProfile}>
-        <Logo isMain size={64} />
+        <Logo src={avatarSrc} isMain size={64} />
         <Typography
           sx={{
             fontSize: { lg: 24, md: 18, sm: 16, xs: 14 },
@@ -81,7 +86,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({ switchChatMode }
 
       {user && (
         <UserProfile
-          userData={{ user, avatar: avatarUrl || defaultAvatar }}
+          userData={{ user, avatar: avatarSrc }}
           setOpenProfile={setOpenProfile}
           openProfile={openProfile}
         />
