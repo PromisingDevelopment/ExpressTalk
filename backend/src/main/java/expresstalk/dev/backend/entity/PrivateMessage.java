@@ -19,20 +19,15 @@ public class PrivateMessage extends Message {
     @JoinColumn(name = "senderId", referencedColumnName = "id")
     private PrivateChatAccount sender;
 
-    @ManyToOne
-    @JoinColumn(name = "receiverId", referencedColumnName = "id")
-    private PrivateChatAccount receiver;
-
     @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "privateChatId", referencedColumnName = "id")
     @JsonIgnore
     private PrivateChat privateChat;
 
-    public PrivateMessage(PrivateChatAccount sender, PrivateChatAccount receiver, PrivateChat privateChat, String content, Date createdAt) {
+    public PrivateMessage(PrivateChatAccount sender, PrivateChat privateChat, String content, Date createdAt) {
         super(content, createdAt);
         this.sender = sender;
-        this.receiver = receiver;
         this.privateChat = privateChat;
     }
 }

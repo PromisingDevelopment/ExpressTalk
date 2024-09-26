@@ -2,7 +2,6 @@ package expresstalk.dev.backend.service;
 
 import expresstalk.dev.backend.dto.request.SendChatMessageDto;
 import expresstalk.dev.backend.dto.request.SendFileDto;
-import expresstalk.dev.backend.dto.response.GetGroupChatDto;
 import expresstalk.dev.backend.entity.*;
 import expresstalk.dev.backend.enums.GroupChatRole;
 import expresstalk.dev.backend.exception.ChatNotFoundException;
@@ -13,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
@@ -46,6 +44,7 @@ public class GroupChatService {
             if(!(adminAccount.getGroupChatRole() == GroupChatRole.ADMIN)) throw new UserNotAdminException();
 
             groupChat.getMembers().add(memberAccount);
+            member.getGroupChatAccounts().add(memberAccount);
 
             groupChatAccountRepository.save(memberAccount);
             groupChatRepository.save(groupChat);
@@ -157,15 +156,14 @@ public class GroupChatService {
         userRepository.save(member);
     }
 
-    public List<User> getOtherUsersOfChat(User currentUser, GroupChat groupChat) {
-        List<GroupChatAccount> userAccounts = groupChat.getMembers();
+    public List<User> getUsersOfGroupChat(GroupChat groupChat) {
         List<User> users = new ArrayList<>();
-        for(GroupChatAccount account : userAccounts) {
+
+        for (GroupChatAccount account : groupChat.getMembers()) {
             users.add(account.getUser());
         }
-        return users.stream()
-                .filter((User user)-> !user.getId().equals(currentUser.getId()))
-                .collect(Collectors.toList());
+
+        return users;
     }
 
     public GroupChatAccount verifyAndGetGroupChatAccount(User user, GroupChat groupChat) {

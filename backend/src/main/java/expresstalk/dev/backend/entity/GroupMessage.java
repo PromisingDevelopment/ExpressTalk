@@ -16,10 +16,6 @@ import java.util.UUID;
 @Getter
 @Setter
 public class GroupMessage extends Message {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
     @ManyToOne
     @JoinColumn(name = "senderId", referencedColumnName = "id")
     private GroupChatAccount sender;

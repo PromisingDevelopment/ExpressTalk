@@ -49,11 +49,12 @@ public class WebSocketPrivateChatController {
             User receiver = privateChatService.getSecondUserOfChat(sender, privateChat);
             PrivateMessage privateMessage = privateChatService.saveMessage(sendChatMessageDto, sender, receiver);
             PrivateChatMessageDto privateChatMessageDto = new PrivateChatMessageDto(
+                    privateMessage.getId(),
                     privateMessage.getCreatedAt(),
                     privateMessage.getContent(),
+                    privateMessage.getAttachedFile(),
                     sender.getLogin(),
-                    sender.getId(),
-                    privateMessage.getAttachedFile()
+                    sender.getId()
             );
             LastMessageDto lastMessageDto = new LastMessageDto(chatId,privateMessage.getContent());
 
