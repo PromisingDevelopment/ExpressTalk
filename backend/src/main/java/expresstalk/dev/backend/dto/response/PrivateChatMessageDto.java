@@ -6,10 +6,11 @@ import java.util.Date;
 import java.util.UUID;
 
 public record PrivateChatMessageDto(
+        UUID chatId,
         Date createdAt,
         String content,
+        AttachedFile attachedFile,
         String senderLogin,
-        UUID senderId,
-        AttachedFile attachedFile
+        UUID senderId
 ) {
 }

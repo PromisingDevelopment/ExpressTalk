@@ -7,12 +7,13 @@ import java.util.Date;
 import java.util.UUID;
 
 public record GroupChatMessageDto(
+        UUID chatId,
         Date createdAt,
         String content,
+        AttachedFile attachedFile,
         String senderLogin,
-        GroupChatRole senderRole,
         UUID senderId,
-        AttachedFile attachedFile
+        GroupChatRole senderRole
 ) {
 }
 

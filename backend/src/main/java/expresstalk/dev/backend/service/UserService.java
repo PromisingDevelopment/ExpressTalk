@@ -66,7 +66,7 @@ public class UserService {
     }
 
     @Transactional
-    public ImageId setAvatarImage(User user, MultipartFile avatarImage) {
+    public void setAvatarImage(User user, MultipartFile avatarImage) {
         byte[] data;
         try {
             ImageUtils.validateImage(avatarImage);
@@ -90,8 +90,6 @@ public class UserService {
         user.setAvatarFile(avatarFileEntity);
         avatarFileRepository.save(avatarFileEntity);
         userRepository.save(user);
-
-        return new ImageId(avatarFileEntity.getId());
     }
 
     @Transactional

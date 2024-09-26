@@ -89,11 +89,11 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User is not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ImageId setAvatarImage(@RequestParam("avatarImage") MultipartFile avatarImage, HttpServletRequest request) {
+    public void setAvatarImage(@RequestParam("avatarImage") MultipartFile avatarImage, HttpServletRequest request) {
         UUID userId = sessionService.getUserIdFromSession(request);
         User user = userService.findById(userId);
 
-        return userService.setAvatarImage(user, avatarImage);
+        userService.setAvatarImage(user, avatarImage);
     }
 
     @GetMapping("/avatar/{userStrId}")

@@ -73,7 +73,6 @@ public class PrivateChatService {
         PrivateChatAccount receiverAccount = verifyAndGetPrivateChatAccount(receiver, privateChat);
         PrivateMessage privateMessage = new PrivateMessage(
                 senderAccount,
-                receiverAccount,
                 privateChat,
                 sendChatMessageDto.content(),
                 new Date(Long.parseLong(sendChatMessageDto.createdAt()))
