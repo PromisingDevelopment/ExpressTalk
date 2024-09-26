@@ -6,6 +6,7 @@ import { Header } from "./Header";
 import { NoChat } from "./NoChat";
 import { WriteMessage } from "./WriteMessage";
 import { getCurrentChat } from "../store/currentChatSlice";
+import { getSecondMember } from "helpers/getSecondMember";
 
 interface CurrentChatProps {}
 
@@ -13,11 +14,11 @@ const CurrentChat: React.FC<CurrentChatProps> = () => {
   const dispatch = useAppDispatch();
   const currentChat = useAppSelector((state) => state.currentChat.currentChat);
   const currentGroupChat = useAppSelector((state) => state.currentChat.currentGroupChat);
-  const { currentChatId, currentUser, isCreatedNewChat, currentChatType } =
-    useAppSelector((state) => state.root);
-  const secondMember = currentChat?.members.find(
-    (member) => member.user.login !== currentUser.user?.login
+  const { currentChatId, currentUser, isCreatedNewChat, currentChatType } = useAppSelector(
+    (state) => state.root
   );
+
+  const secondMember = getSecondMember(currentChat?.members, currentUser.user);
 
   React.useEffect(() => {
     if (isCreatedNewChat) return;

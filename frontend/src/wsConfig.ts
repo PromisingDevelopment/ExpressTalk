@@ -64,11 +64,25 @@ export function connect(chatId: string, isPrivate: boolean) {
       const system_msg = JSON.parse(res.body);
       console.log("/group_chat/system_messages/", system_msg);
     });
+    chatClient.subscribe(`/group_chat/remove_member/${chatId}/errors`, (error) => {
+      console.log(JSON.parse(error.body));
+    });
   };
 
   const onConnectPrivate = () => {
     chatClient.subscribe(`/private_chat/messages/${chatId}`, (message) => {
+      //const {attachedFile, content, createdAt, senderId, senderLogin} = JSON.parse(message.body);
       const data = JSON.parse(message.body);
+
+      //const newMessage = {
+      //  attachedFile,
+      //  content,
+      //  createdAt,
+      //  id: 'nothing',
+      //  receiver : {id: "nothing", user: {}},
+      //  sender : {id: "nothing", user: {}}
+      //}
+
       console.log("/private_chat/messages/", data);
       store.dispatch(updateCurrentChatMessages({ data, type: "privateChat" }));
     });
@@ -106,8 +120,7 @@ export function subscribeLastMessages(userId: string) {
     store.dispatch(updateLastMessage(lastMessage));
   };
 
-  const onConnect = () =>
-    sidebarClient.subscribe(`/chat/last_message/${userId}`, handleLastMessage);
+  const onConnect = () => sidebarClient.subscribe(`/chat/last_message/${userId}`, handleLastMessage);
 
   sidebarClient.configure({
     brokerURL: wsServerURL,
@@ -131,11 +144,7 @@ export function disconnect() {
 }
 
 // SEND MESSAGES -----------------------------------------------------
-export function privateChatSendMessage(
-  message: string,
-  chatId: string,
-  createdAt: number
-) {
+export function privateChatSendMessage(message: string, chatId: string, createdAt: number) {
   chatClient.publish({
     destination: `/app/private_chat/send_message`,
     body: JSON.stringify({
@@ -176,11 +185,7 @@ export function removeGroupMember(chatId: string, memberId: string) {
 }
 
 // ROLES ------------------------------------------------------------
-export function setMemberRole(
-  chatId: string,
-  userToGiveRoleId: string,
-  groupChatRole: MemberRoles
-) {
+export function setMemberRole(chatId: string, userToGiveRoleId: string, groupChatRole: MemberRoles) {
   chatClient.publish({
     destination: `/app/group_chat/set_role`,
     body: JSON.stringify({

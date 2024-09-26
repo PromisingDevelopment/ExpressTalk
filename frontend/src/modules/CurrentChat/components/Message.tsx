@@ -15,10 +15,9 @@ interface MessageProps {
 }
 
 const Message: React.FC<MessageProps> = (props) => {
-  const { isMine, createdAt, content, senderLogin, isGroupMessage, isSystemMessage } =
-    props;
+  const { isMine, createdAt, content, senderLogin, isGroupMessage, isSystemMessage } = props;
 
-  const isLowContent = content.length < 20;
+  const isLowContent = (content?.length || 0) < 20;
   const isShownLogin = Boolean(isGroupMessage && !isMine && senderLogin);
   //const isAnon = Boolean(content && !senderId);
   const isAnon = isSystemMessage;
@@ -34,9 +33,7 @@ const Message: React.FC<MessageProps> = (props) => {
         isShownLogin={isShownLogin}>
         {isShownLogin && <StyledName>{senderLogin}</StyledName>}
         <StyledContent isAnon={isAnon}>{content}</StyledContent>
-        {!isAnon && createdAt && (
-          <StyledDate>{getCurrentTimeString(createdAt)}</StyledDate>
-        )}
+        {!isAnon && createdAt && <StyledDate>{getCurrentTimeString(createdAt)}</StyledDate>}
       </StyledMessageWrapper>
     </StyledMessageContainer>
   );
