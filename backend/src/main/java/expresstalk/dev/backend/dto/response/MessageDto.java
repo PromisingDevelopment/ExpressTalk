@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.UUID;
 
 public record MessageDto(
-        UUID chatId,
+        UUID messageId,
         Date createdAt,
         String content
 ) {

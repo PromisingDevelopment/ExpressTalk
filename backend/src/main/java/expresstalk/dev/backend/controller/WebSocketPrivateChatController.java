@@ -48,7 +48,7 @@ public class WebSocketPrivateChatController {
 
             User receiver = privateChatService.getSecondUserOfChat(sender, privateChat);
             PrivateMessage privateMessage = privateChatService.saveMessage(sendChatMessageDto, sender, receiver);
-            PrivateMessageDto privateMessageDto = privateChatService.getPrivateMessageDto(privateChat, privateMessage);
+            PrivateMessageDto privateMessageDto = privateChatService.getPrivateMessageDto(privateMessage);
             LastMessageDto lastMessageDto = new LastMessageDto(chatId,privateMessage.getContent());
 
             simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
