@@ -7,50 +7,30 @@ import { IMessage } from "types/IMessage";
 
 interface MessageProps {
   isMine?: boolean;
-  isGroupMessage?: boolean;
   messageObj: IMessage;
 }
 
 const Message: React.FC<MessageProps> = (props) => {
-  const { messageObj, isGroupMessage, isMine } = props;
+  const { messageObj, isMine } = props;
 
-  if (messageObj.privateMessageDetailsDto) {
-    const {
-      isSystemMessage,
-      messageDto: { content, createdAt, messageId },
-      privateMessageDetailsDto: { attachedFile, senderId, senderLogin },
-    } = messageObj;
-
-    const isLowContent = content.length < 20;
-
-    // ! remove isShownLogin anywhere
+  const renderMessage = (messageObj: IMessage, isMine?: boolean) => {
+    const { isSystemMessage, messageDto, privateMessageDetailsDto, groupMessageDetailsDto } = messageObj;
+    const { content, createdAt, messageId } = messageDto;
+    const { senderLogin, attachedFile, senderId } =
+      !isSystemMessage && privateMessageDetailsDto ? privateMessageDetailsDto : groupMessageDetailsDto || {};
 
     return (
       <StyledMessageContainer isSystem={isSystemMessage} isMine={isMine}>
-        <StyledMessageWrapper isMine={isMine} isSystem={isSystemMessage} isLowContent={isLowContent}>
-          <StyledName>{senderLogin}</StyledName>
+        <StyledMessageWrapper isMine={isMine} isSystem={isSystemMessage}>
+          {!isSystemMessage && <StyledName>{senderLogin}</StyledName>}
           <StyledContent isSystem={isSystemMessage}>{content}</StyledContent>
           {!isSystemMessage && createdAt && <StyledDate>{getCurrentTimeString(createdAt)}</StyledDate>}
         </StyledMessageWrapper>
       </StyledMessageContainer>
     );
-  } else {
-    return <></>;
-  }
+  };
 
-  //return (
-  //  <StyledMessageContainer isSystem={isSystem} isMine={isMine}>
-  //    <StyledMessageWrapper
-  //      isMine={isMine}
-  //      isSystem={isSystem}
-  //      isLowContent={isLowContent}
-  //      isShownLogin={isShownLogin}>
-  //      {isShownLogin && <StyledName>{senderLogin}</StyledName>}
-  //      <StyledContent isSystem={isSystem}>{content}</StyledContent>
-  //      {!isSystem && createdAt && <StyledDate>{getCurrentTimeString(createdAt)}</StyledDate>}
-  //    </StyledMessageWrapper>
-  //  </StyledMessageContainer>
-  //);
+  return renderMessage(messageObj, isMine);
 };
 
 const StyledMessageContainer = styled("div")<{ isMine?: boolean; isSystem?: boolean }>(
@@ -73,10 +53,9 @@ const StyledMessageContainer = styled("div")<{ isMine?: boolean; isSystem?: bool
 
 const StyledMessageWrapper = styled("div")<{
   isMine?: boolean;
-  isLowContent?: boolean;
   isShownLogin?: boolean;
   isSystem?: boolean;
-}>(({ theme, isMine, isLowContent, isShownLogin, isSystem }) =>
+}>(({ theme, isMine, isSystem }) =>
   theme.unstable_sx([
     {
       bgcolor: "primary.main",
@@ -128,20 +107,11 @@ const StyledMessageWrapper = styled("div")<{
             background: `url(${LeftMessageTailImage}) 0 0 / auto no-repeat`,
           },
         },
-    //isLowContent && !isSystem
-    //  ? {
-    //      p: ({ spacing }) => ({
-    //        md: spacing(1, 6.25, 1, 2.5),
-    //        xs: spacing(1, 6, 1, 2),
-    //      }),
-    //    }
-    //  : {},
-    isShownLogin
+    isSystem
       ? {
-          pt: {
-            md: 3,
-            xs: 3,
-          },
+          p: ({ spacing }) => ({
+            xs: spacing(0.5, 1.5),
+          }),
         }
       : {},
   ])
@@ -164,7 +134,7 @@ const StyledName = styled("span")(({ theme }) =>
 const StyledContent = styled("p")<{ isSystem?: boolean }>(({ theme, isSystem }) =>
   theme.unstable_sx([
     {
-      fontSize: isSystem ? { md: 14, xs: 14 } : { md: 18, xs: 16 },
+      fontSize: isSystem ? { xs: 14 } : { md: 18, xs: 16 },
       wordBreak: "break-all",
     },
   ])
