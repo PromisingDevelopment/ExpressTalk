@@ -3,7 +3,6 @@ package expresstalk.dev.backend.controller;
 import expresstalk.dev.backend.dto.request.*;
 import expresstalk.dev.backend.dto.response.GetGroupChatDto;
 import expresstalk.dev.backend.entity.GroupChat;
-import expresstalk.dev.backend.entity.Message;
 import expresstalk.dev.backend.entity.User;
 import expresstalk.dev.backend.service.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.TreeSet;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -60,14 +58,11 @@ public class GroupChatController {
 
         groupChatService.ensureUserExistsInChat(user, groupChat);
 
-        TreeSet<Message> sortedMessages = new TreeSet<>();
-        sortedMessages.addAll(groupChat.getMessages());
-        sortedMessages.addAll(groupChat.getSystemMessages());
 
         GetGroupChatDto getGroupChatDto = new GetGroupChatDto(
                 groupChat.getId(),
                 groupChat.getName(),
-                sortedMessages,
+                groupChatService.getGroupMessageDtos(groupChat),
                 groupChat.getMembers()
         );
 

@@ -50,7 +50,7 @@ public class PrivateChatController {
 
         GetPrivateChatDto getPrivateChatDto = new GetPrivateChatDto(
                 privateChat.getId(),
-                sortedMessages,
+                privateChatService.getPrivateMessageDtos(privateChat),
                 privateChat.getMembers()
         );
 

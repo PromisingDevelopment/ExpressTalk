@@ -2,6 +2,7 @@ package expresstalk.dev.backend.service;
 
 import expresstalk.dev.backend.dto.request.SendChatMessageDto;
 import expresstalk.dev.backend.dto.request.SendFileDto;
+import expresstalk.dev.backend.dto.response.*;
 import expresstalk.dev.backend.entity.*;
 import expresstalk.dev.backend.exception.*;
 import expresstalk.dev.backend.repository.*;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.TreeSet;
 import java.util.UUID;
 
 @Service
@@ -125,5 +127,53 @@ public class PrivateChatService {
         if(account == null) throw new UserAbsentInChatException(user.getId());
 
         return account;
+    }
+
+    public PrivateMessageDto getPrivateMessageDto(PrivateChat privateChat, PrivateMessage privateMessage) {
+        MessageDto messageDto = new MessageDto(
+                privateChat.getId(),
+                privateMessage.getCreatedAt(),
+                privateMessage.getContent()
+        );
+
+        PrivateMessageDetailsDto groupMessageDetailsDto = new PrivateMessageDetailsDto(
+                privateMessage.getAttachedFile(),
+                privateMessage.getSender().getUser().getLogin(),
+                privateMessage.getSender().getUser().getId()
+        );
+
+        return new PrivateMessageDto(
+                messageDto,
+                groupMessageDetailsDto,
+                false
+        );
+    }
+
+    public PrivateMessageDto getPrivateMessageDto(PrivateChat privateChat, SystemMessage privateMessage) {
+        MessageDto messageDto = new MessageDto(
+                privateChat.getId(),
+                privateMessage.getCreatedAt(),
+                privateMessage.getContent()
+        );
+
+        return new PrivateMessageDto(
+                messageDto,
+                null,
+                true
+        );
+    }
+
+    public TreeSet<PrivateMessageDto> getPrivateMessageDtos(PrivateChat privateChat) {
+        TreeSet<PrivateMessageDto> groupMessageDtos = new TreeSet<>();
+
+        for (PrivateMessage message : privateChat.getMessages()) {
+            groupMessageDtos.add(getPrivateMessageDto(privateChat, message));
+        }
+
+        for (SystemMessage message : privateChat.getSystemMessages()) {
+            groupMessageDtos.add(getPrivateMessageDto(privateChat, message));
+        }
+
+        return groupMessageDtos;
     }
 }

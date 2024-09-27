@@ -1,6 +1,7 @@
 package expresstalk.dev.backend.entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,6 +25,7 @@ public class SystemMessage extends Message {
 
     @ManyToOne
     @JoinColumn(name = "chatId", referencedColumnName = "id")
+    @JsonIgnore
     private Chat chat;
 
     public SystemMessage(String content, Date createdAt, Chat chat) {
