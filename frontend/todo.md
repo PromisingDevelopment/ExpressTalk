@@ -1,9 +1,9 @@
-(A) Critical fixes
+(A) Critical fixes {cm:2024-09-27}
   slice last message to max long {cm:2024-09-27}
   change data type in private chats {cm:2024-09-27}
   change incomming data in private chats {cm:2024-09-27}
   change data type in group chats {cm:2024-09-27}
-  change incomming data in group chats
+  change incomming data in group chats {cm:2024-09-27}
 (B) Group tasks
   edit group name feature
   remove group feature

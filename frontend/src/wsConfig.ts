@@ -43,13 +43,9 @@ export function connect(chatId: string, isPrivate: boolean) {
       const json = JSON.parse(data.body);
       const members = json.members;
 
-      console.log("updated_members", json);
+      console.log("/group_chat/updated_members", json);
 
       store.dispatch(updateGroupMembers(members));
-    });
-    chatClient.subscribe(`/group_chat/add/${chatId}/errors`, (data) => {
-      const error = JSON.parse(data.body);
-      console.log("group_chat/add errors: ", error);
     });
     chatClient.subscribe(`/group_chat/messages/${chatId}/errors`, (data) => {
       const error = JSON.parse(data.body);
@@ -62,6 +58,10 @@ export function connect(chatId: string, isPrivate: boolean) {
     });
     chatClient.subscribe(`/group_chat/remove_member/${chatId}/errors`, (error) => {
       console.log(JSON.parse(error.body));
+    });
+    chatClient.subscribe(`/group_chat/add_member/${chatId}/errors`, (data) => {
+      const error = JSON.parse(data.body);
+      console.log("group_chat/add errors: ", error);
     });
   };
 
