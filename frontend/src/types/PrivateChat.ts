@@ -1,8 +1,8 @@
-import { Message } from "./Message";
+import { IMessage } from "./IMessage";
 
 export interface PrivateChat {
   id: string;
-  messages: Message[];
+  messages: IMessage[];
   members: PrivateMember[];
 }
 

@@ -1,10 +1,10 @@
-import { Message } from "./Message";
+import { IMessage } from "./IMessage";
 
 export interface GroupChat {
   id: string;
   systemMessages: any; // прибрати
   name: string;
-  messages: Message<GroupChatMember, null>[];
+  messages: IMessage[];
   members: GroupChatMember[];
 }
 

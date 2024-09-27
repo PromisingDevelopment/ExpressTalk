@@ -26,7 +26,7 @@ interface GroupMessage {
   privateMessageDetailsDto?: never;
 }
 
-export type Message = (PrivateMessage | GroupMessage) & {
+export type IMessage = (PrivateMessage | GroupMessage) & {
   isSystemMessage: boolean;
   messageDto: {
     content: string;
