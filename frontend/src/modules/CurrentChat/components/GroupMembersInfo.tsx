@@ -35,10 +35,7 @@ const GroupMembersInfo: React.FC<GroupMembersInfoProps> = ({ members, chatId }) 
     setRoleValue(value);
   };
 
-  const handleSubmit = async (
-    e: React.FormEvent<HTMLFormElement>,
-    userToGiveRoleId: string
-  ) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, userToGiveRoleId: string) => {
     e.preventDefault();
     setIsDisabled(true);
 
@@ -48,9 +45,9 @@ const GroupMembersInfo: React.FC<GroupMembersInfoProps> = ({ members, chatId }) 
     closeModal();
   };
 
-  React.useEffect(() => {
-    console.log("group members", members);
-  }, [members]);
+  //React.useEffect(() => {
+  //  console.log("group members", members);
+  //}, [members]);
 
   return (
     <StyledWrapper>
@@ -63,12 +60,7 @@ const GroupMembersInfo: React.FC<GroupMembersInfoProps> = ({ members, chatId }) 
             <PopoverItem key={member.id}>
               <h4>{member.user.login}</h4>
               <span>{member.user.status}</span>
-              <CustomIconButton
-                isSmall
-                label="add role"
-                Icon={AddRoleIcon}
-                onClick={openModal}
-              />
+              <CustomIconButton isSmall label="add role" Icon={AddRoleIcon} onClick={openModal} />
               <Modal onClose={closeModal} open={open}>
                 <ModalContent
                   isSmallMargin

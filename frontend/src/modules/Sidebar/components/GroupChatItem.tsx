@@ -53,7 +53,15 @@ const GroupChatItem: React.FC<GroupChatItemProps> = (props) => {
           }}>
           {name}
         </Typography>
-        <Typography sx={{ fontSize: 12, color: "#6A73A6" }}>
+        <Typography
+          sx={{
+            fontSize: 12,
+            color: "#6A73A6",
+            width: { lg: 370, md: 280, sm: 230, xs: 180 },
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+          }}>
           {lastMessage || "Chat is empty so far"}
         </Typography>
       </Box>

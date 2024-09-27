@@ -59,7 +59,17 @@ const PrivateChatItem: React.FC<PrivateChatItemProps> = ({
           }}>
           {receiverLogin}
         </Typography>
-        <Typography sx={{ fontSize: 12, color: "#6A73A6" }}>{lastMessage}</Typography>
+        <Typography
+          sx={{
+            fontSize: 12,
+            color: "#6A73A6",
+            width: { lg: 370, md: 280, sm: 230, xs: 180 },
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+          }}>
+          {lastMessage || "Chat is empty so far"}
+        </Typography>
       </Box>
     </Button>
   );

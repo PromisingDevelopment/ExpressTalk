@@ -1,4 +1,5 @@
 (A) Critical fixes
+  slice last message to max long {cm:2024-09-27}
   change data type in private chats {cm:2024-09-27}
   change incomming data in private chats {cm:2024-09-27}
   change data type in group chats

@@ -59,7 +59,7 @@ const SidebarContent = styled("div")`
   display: flex;
   flex-direction: column;
   position: relative;
-  flexgrow: 1;
+  flex-grow: 1;
   background: #1f274e;
 `;
 

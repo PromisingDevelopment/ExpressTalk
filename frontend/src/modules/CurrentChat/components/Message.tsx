@@ -80,7 +80,6 @@ const StyledMessageWrapper = styled("div")<{
   theme.unstable_sx([
     {
       bgcolor: "primary.main",
-      //width: "fit-content",
       minWidth: 120,
       maxWidth: 348,
       p: ({ spacing }) => ({
