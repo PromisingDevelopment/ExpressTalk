@@ -2,7 +2,7 @@ import { Message } from "./Message";
 
 export interface PrivateChat {
   id: string;
-  messages: Message<PrivateMember, PrivateMember>[];
+  messages: Message[];
   members: PrivateMember[];
 }
 
