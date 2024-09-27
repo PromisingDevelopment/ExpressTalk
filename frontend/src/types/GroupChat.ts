@@ -2,22 +2,19 @@ import { IMessage } from "./IMessage";
 
 export interface GroupChat {
   id: string;
-  systemMessages: any; // прибрати
   name: string;
   messages: IMessage[];
   members: GroupChatMember[];
 }
 
 export interface GroupChatMember {
-  id: string;
+  groupChat: GroupChat;
   groupChatRole: "ADMIN" | "MEMBER";
-  groupMessages: any; // прибрати
-  groupChat: string; // прибрати
+  id: string;
   user: {
-    avatarFile: any; // додати
     id: string;
-    name: string;
     login: string;
+    name: string;
     status: "ONLINE" | "OFFLINE";
   };
 }
