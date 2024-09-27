@@ -3,44 +3,58 @@ import LeftMessageTailImage from "assets/images/left-message-tail.svg";
 import RightMessageTailImage from "assets/images/right-message-tail.svg";
 import { getCurrentTimeString } from "helpers/getCurrentTimeString";
 import React from "react";
+import { IMessage } from "types/IMessage";
 
 interface MessageProps {
-  content: string;
-  createdAt?: string;
   isMine?: boolean;
-  senderLogin?: string;
   isGroupMessage?: boolean;
-  isSystemMessage?: boolean;
-  //message: PrivateMessage
+  messageObj: IMessage;
 }
 
 const Message: React.FC<MessageProps> = (props) => {
-  const { isMine, createdAt, content, senderLogin, isGroupMessage, isSystemMessage } = props;
+  const { messageObj, isGroupMessage, isMine } = props;
 
-  const isLowContent = (content?.length || 0) < 20;
-  const isShownLogin = Boolean(isGroupMessage && !isMine && senderLogin);
-  //const isAnon = Boolean(content && !senderId);
-  const isAnon = isSystemMessage;
-  //console.log("isShownLogin", isShownLogin);
-  //console.log(isGroupMessage, !isMine, senderLogin);
+  if (messageObj.privateMessageDetailsDto) {
+    const {
+      isSystemMessage,
+      messageDto: { content, createdAt, messageId },
+      privateMessageDetailsDto: { attachedFile, senderId, senderLogin },
+    } = messageObj;
 
-  return (
-    <StyledMessageContainer isAnon={isAnon} isMine={isMine}>
-      <StyledMessageWrapper
-        isMine={isMine}
-        isAnon={isAnon}
-        isLowContent={isLowContent}
-        isShownLogin={isShownLogin}>
-        {isShownLogin && <StyledName>{senderLogin}</StyledName>}
-        <StyledContent isAnon={isAnon}>{content}</StyledContent>
-        {!isAnon && createdAt && <StyledDate>{getCurrentTimeString(createdAt)}</StyledDate>}
-      </StyledMessageWrapper>
-    </StyledMessageContainer>
-  );
+    const isLowContent = content.length < 20;
+
+    // ! remove isShownLogin anywhere
+
+    return (
+      <StyledMessageContainer isSystem={isSystemMessage} isMine={isMine}>
+        <StyledMessageWrapper isMine={isMine} isSystem={isSystemMessage} isLowContent={isLowContent}>
+          <StyledName>{senderLogin}</StyledName>
+          <StyledContent isSystem={isSystemMessage}>{content}</StyledContent>
+          {!isSystemMessage && createdAt && <StyledDate>{getCurrentTimeString(createdAt)}</StyledDate>}
+        </StyledMessageWrapper>
+      </StyledMessageContainer>
+    );
+  } else {
+    return <></>;
+  }
+
+  //return (
+  //  <StyledMessageContainer isSystem={isSystem} isMine={isMine}>
+  //    <StyledMessageWrapper
+  //      isMine={isMine}
+  //      isSystem={isSystem}
+  //      isLowContent={isLowContent}
+  //      isShownLogin={isShownLogin}>
+  //      {isShownLogin && <StyledName>{senderLogin}</StyledName>}
+  //      <StyledContent isSystem={isSystem}>{content}</StyledContent>
+  //      {!isSystem && createdAt && <StyledDate>{getCurrentTimeString(createdAt)}</StyledDate>}
+  //    </StyledMessageWrapper>
+  //  </StyledMessageContainer>
+  //);
 };
 
-const StyledMessageContainer = styled("div")<{ isMine?: boolean; isAnon?: boolean }>(
-  ({ theme, isMine, isAnon }) =>
+const StyledMessageContainer = styled("div")<{ isMine?: boolean; isSystem?: boolean }>(
+  ({ theme, isMine, isSystem }) =>
     theme.unstable_sx([
       {
         paddingX: 5,
@@ -53,7 +67,7 @@ const StyledMessageContainer = styled("div")<{ isMine?: boolean; isAnon?: boolea
       },
 
       isMine ? { alignItems: "flex-end" } : {},
-      isAnon ? { alignItems: "center" } : {},
+      isSystem ? { alignItems: "center" } : {},
     ])
 );
 
@@ -61,16 +75,16 @@ const StyledMessageWrapper = styled("div")<{
   isMine?: boolean;
   isLowContent?: boolean;
   isShownLogin?: boolean;
-  isAnon?: boolean;
-}>(({ theme, isMine, isLowContent, isShownLogin, isAnon }) =>
+  isSystem?: boolean;
+}>(({ theme, isMine, isLowContent, isShownLogin, isSystem }) =>
   theme.unstable_sx([
     {
       bgcolor: "primary.main",
-      width: "fit-content",
+      //width: "fit-content",
       minWidth: 120,
       maxWidth: 348,
       p: ({ spacing }) => ({
-        md: spacing(1, 6.25, 1, 2.5),
+        md: spacing(0.5, 6.25, 1, 2.5),
         xs: spacing(1, 1, 3, 2),
       }),
 
@@ -87,6 +101,7 @@ const StyledMessageWrapper = styled("div")<{
         transform: "translateY(100%)",
       },
     },
+
     isMine
       ? {
           borderRadius: "10px 10px 0 10px",
@@ -97,7 +112,7 @@ const StyledMessageWrapper = styled("div")<{
             background: `url(${RightMessageTailImage}) 0 0 / auto no-repeat`,
           },
         }
-      : isAnon
+      : isSystem
       ? {
           borderRadius: "10px",
           background: "rgba(53, 63, 117, .7 )",
@@ -114,14 +129,14 @@ const StyledMessageWrapper = styled("div")<{
             background: `url(${LeftMessageTailImage}) 0 0 / auto no-repeat`,
           },
         },
-    isLowContent && !isAnon
-      ? {
-          p: ({ spacing }) => ({
-            md: spacing(1, 6.25, 1, 2.5),
-            xs: spacing(1, 6, 1, 2),
-          }),
-        }
-      : {},
+    //isLowContent && !isSystem
+    //  ? {
+    //      p: ({ spacing }) => ({
+    //        md: spacing(1, 6.25, 1, 2.5),
+    //        xs: spacing(1, 6, 1, 2),
+    //      }),
+    //    }
+    //  : {},
     isShownLogin
       ? {
           pt: {
@@ -135,18 +150,22 @@ const StyledMessageWrapper = styled("div")<{
 
 const StyledName = styled("span")(({ theme }) =>
   theme.unstable_sx({
-    position: "absolute",
-    top: 4,
-    fontWeight: 500,
+    width: 1,
+    display: "inline-block",
     fontSize: 14,
+    lineHeight: 1.2,
+    fontWeight: 500,
     color: "#9fa8da",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
   })
 );
 
-const StyledContent = styled("p")<{ isAnon?: boolean }>(({ theme, isAnon }) =>
+const StyledContent = styled("p")<{ isSystem?: boolean }>(({ theme, isSystem }) =>
   theme.unstable_sx([
     {
-      fontSize: isAnon ? { md: 14, xs: 14 } : { md: 18, xs: 16 },
+      fontSize: isSystem ? { md: 14, xs: 14 } : { md: 18, xs: 16 },
       wordBreak: "break-all",
     },
   ])

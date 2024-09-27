@@ -11,9 +11,7 @@ const ChatBlock: React.FC<ChatBlockProps> = () => {
   const chatBlockRef = React.useRef<HTMLDivElement | null>(null);
 
   const currentChatType = useAppSelector((state) => state.root.currentChatType);
-  const { currentChat, currentGroupChat, errorMessage } = useAppSelector(
-    (state) => state.currentChat
-  );
+  const { currentChat, currentGroupChat, errorMessage } = useAppSelector((state) => state.currentChat);
   const { user } = useAppSelector((state) => state.root.currentUser);
 
   const privateLayout = (
@@ -22,9 +20,9 @@ const ChatBlock: React.FC<ChatBlockProps> = () => {
         currentChat &&
         currentChat.messages.map((message, i) => (
           <Message
-            key={message.content + message.createdAt + i}
-            {...message}
-            isMine={message.senderId === user.id}
+            messageObj={message}
+            key={message.messageDto.messageId}
+            isMine={message.privateMessageDetailsDto?.senderId === user.id}
           />
         ))}
     </>
@@ -35,10 +33,10 @@ const ChatBlock: React.FC<ChatBlockProps> = () => {
         currentGroupChat &&
         currentGroupChat.messages.map((message, i) => (
           <Message
-            key={message.content + message.createdAt + i}
-            {...message}
             isGroupMessage
-            isMine={message.senderId === user.id}
+            messageObj={message}
+            key={message.messageDto.messageId}
+            isMine={message.groupMessageDetailsDto?.senderId === user.id}
           />
         ))}
     </>
