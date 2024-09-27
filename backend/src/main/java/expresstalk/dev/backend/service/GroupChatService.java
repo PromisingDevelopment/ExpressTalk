@@ -207,9 +207,9 @@ public class GroupChatService {
         return groupMessage;
     }
 
-    public GroupMessageDto getGroupMessageDto(GroupChat groupChat, GroupMessage groupMessage) {
+    public GroupMessageDto getGroupMessageDto(GroupMessage groupMessage) {
         MessageDto messageDto = new MessageDto(
-                groupChat.getId(),
+                groupMessage.getId(),
                 groupMessage.getCreatedAt(),
                 groupMessage.getContent()
         );
@@ -228,9 +228,9 @@ public class GroupChatService {
         );
     }
 
-    public GroupMessageDto getGroupMessageDto(GroupChat groupChat, SystemMessage groupMessage) {
+    public GroupMessageDto getGroupMessageDto(SystemMessage groupMessage) {
         MessageDto messageDto = new MessageDto(
-                groupChat.getId(),
+                groupMessage.getId(),
                 groupMessage.getCreatedAt(),
                 groupMessage.getContent()
         );
@@ -246,11 +246,11 @@ public class GroupChatService {
         TreeSet<GroupMessageDto> groupMessageDtos = new TreeSet<>();
 
         for (GroupMessage message : groupChat.getMessages()) {
-            groupMessageDtos.add(getGroupMessageDto(groupChat, message));
+            groupMessageDtos.add(getGroupMessageDto(message));
         }
 
         for (SystemMessage message : groupChat.getSystemMessages()) {
-            groupMessageDtos.add(getGroupMessageDto(groupChat, message));
+            groupMessageDtos.add(getGroupMessageDto(message));
         }
 
         return groupMessageDtos;

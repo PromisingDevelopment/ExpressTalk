@@ -50,7 +50,7 @@ public class WebSocketGroupChatController {
             GroupChat groupChat = groupChatService.getChat(chatId);
             groupChatService.ensureUserExistsInChat(sender, groupChat);
             GroupMessage groupMessage = groupChatService.saveMessage(sender, sendChatMessageDto);
-            GroupMessageDto groupMessageDto = groupChatService.getGroupMessageDto(groupChat, groupMessage);
+            GroupMessageDto groupMessageDto = groupChatService.getGroupMessageDto(groupMessage);
             List<User> receivers = groupChatService.getUsersOfGroupChat(groupChat);
 
             for(User receiver : receivers) {
@@ -80,7 +80,7 @@ public class WebSocketGroupChatController {
             groupChatService.addMember(admin, member, groupChat);
             String addMemberMessage = admin.getLogin() + " has added " + member.getLogin();
             SystemMessage systemMessage = chatService.saveSystemMessage(addMemberMessage, groupChat);
-            GroupMessageDto groupMessageDto = groupChatService.getGroupMessageDto(groupChat, systemMessage);
+            GroupMessageDto groupMessageDto = groupChatService.getGroupMessageDto(systemMessage);
             UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
             List<User> receivers = groupChatService.getUsersOfGroupChat(groupChat);
 
@@ -112,7 +112,7 @@ public class WebSocketGroupChatController {
             groupChat = groupChatService.getChat(chatId);
             String removeMemberMessage = admin.getLogin() + " has removed " + member.getLogin();
             SystemMessage systemMessage = chatService.saveSystemMessage(removeMemberMessage, groupChat);
-            GroupMessageDto groupMessageDto = groupChatService.getGroupMessageDto(groupChat, systemMessage);
+            GroupMessageDto groupMessageDto = groupChatService.getGroupMessageDto(systemMessage);
             UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
             List<User> receivers = groupChatService.getUsersOfGroupChat(groupChat);
 
@@ -142,7 +142,7 @@ public class WebSocketGroupChatController {
             groupChatService.setRole(admin, changingUser, setUserRoleInGroupChatDto.groupChatRole(), groupChat);
             String changedRoleMessage = changingUser.getLogin() + " is now " + setUserRoleInGroupChatDto.groupChatRole();
             SystemMessage systemMessage = chatService.saveSystemMessage(changedRoleMessage, groupChat);
-            GroupMessageDto groupMessageDto = groupChatService.getGroupMessageDto(groupChat, systemMessage);
+            GroupMessageDto groupMessageDto = groupChatService.getGroupMessageDto(systemMessage);
             UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
             List<User> receivers = groupChatService.getUsersOfGroupChat(groupChat);
 
@@ -207,7 +207,7 @@ public class WebSocketGroupChatController {
             groupChatService.leave(member, groupChat);
             String leftMessage = member.getLogin() + " left the chat";
             SystemMessage systemMessage = chatService.saveSystemMessage(leftMessage, groupChat);
-            GroupMessageDto groupMessageDto = groupChatService.getGroupMessageDto(groupChat, systemMessage);
+            GroupMessageDto groupMessageDto = groupChatService.getGroupMessageDto(systemMessage);
             UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
             List<User> receivers = groupChatService.getUsersOfGroupChat(groupChat);
 

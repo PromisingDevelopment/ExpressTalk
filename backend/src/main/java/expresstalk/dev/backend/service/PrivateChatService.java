@@ -129,9 +129,9 @@ public class PrivateChatService {
         return account;
     }
 
-    public PrivateMessageDto getPrivateMessageDto(PrivateChat privateChat, PrivateMessage privateMessage) {
+    public PrivateMessageDto getPrivateMessageDto(PrivateMessage privateMessage) {
         MessageDto messageDto = new MessageDto(
-                privateChat.getId(),
+                privateMessage.getId(),
                 privateMessage.getCreatedAt(),
                 privateMessage.getContent()
         );
@@ -149,9 +149,9 @@ public class PrivateChatService {
         );
     }
 
-    public PrivateMessageDto getPrivateMessageDto(PrivateChat privateChat, SystemMessage privateMessage) {
+    public PrivateMessageDto getPrivateMessageDto(SystemMessage privateMessage) {
         MessageDto messageDto = new MessageDto(
-                privateChat.getId(),
+                privateMessage.getId(),
                 privateMessage.getCreatedAt(),
                 privateMessage.getContent()
         );
@@ -167,11 +167,11 @@ public class PrivateChatService {
         TreeSet<PrivateMessageDto> groupMessageDtos = new TreeSet<>();
 
         for (PrivateMessage message : privateChat.getMessages()) {
-            groupMessageDtos.add(getPrivateMessageDto(privateChat, message));
+            groupMessageDtos.add(getPrivateMessageDto(message));
         }
 
         for (SystemMessage message : privateChat.getSystemMessages()) {
-            groupMessageDtos.add(getPrivateMessageDto(privateChat, message));
+            groupMessageDtos.add(getPrivateMessageDto(message));
         }
 
         return groupMessageDtos;
