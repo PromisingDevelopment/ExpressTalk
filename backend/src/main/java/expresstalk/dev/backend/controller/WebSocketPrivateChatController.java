@@ -2,7 +2,7 @@ package expresstalk.dev.backend.controller;
 
 import expresstalk.dev.backend.dto.request.SendChatMessageDto;
 import expresstalk.dev.backend.dto.response.LastMessageDto;
-import expresstalk.dev.backend.dto.response.PrivateChatMessageDto;
+import expresstalk.dev.backend.dto.response.PrivateMessageDto;
 import expresstalk.dev.backend.entity.PrivateChat;
 import expresstalk.dev.backend.entity.PrivateMessage;
 import expresstalk.dev.backend.entity.User;
@@ -48,19 +48,12 @@ public class WebSocketPrivateChatController {
 
             User receiver = privateChatService.getSecondUserOfChat(sender, privateChat);
             PrivateMessage privateMessage = privateChatService.saveMessage(sendChatMessageDto, sender, receiver);
-            PrivateChatMessageDto privateChatMessageDto = new PrivateChatMessageDto(
-                    privateMessage.getId(),
-                    privateMessage.getCreatedAt(),
-                    privateMessage.getContent(),
-                    privateMessage.getAttachedFile(),
-                    sender.getLogin(),
-                    sender.getId()
-            );
+            PrivateMessageDto privateMessageDto = privateChatService.getPrivateMessageDto(privateChat, privateMessage);
             LastMessageDto lastMessageDto = new LastMessageDto(chatId,privateMessage.getContent());
 
             simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             simpMessagingTemplate.convertAndSend("/chat/last_message/" + sender.getId(), lastMessageDto);
-            simpMessagingTemplate.convertAndSend("/private_chat/messages/" + sendChatMessageDto.chatId(), privateChatMessageDto);
+            simpMessagingTemplate.convertAndSend("/private_chat/messages/" + sendChatMessageDto.chatId(), privateMessageDto);
         } catch (Exception ex) {
             simpMessagingTemplate.convertAndSend("/private_chat/messages/" + sendChatMessageDto.chatId() + "/errors", ex.getMessage());
         }

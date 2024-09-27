@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public record GetPrivateChatDto(
         UUID id,
-        TreeSet<Message> messages,
+        TreeSet<PrivateMessageDto> messages,
         List<PrivateChatAccount> members
 ) {
 }

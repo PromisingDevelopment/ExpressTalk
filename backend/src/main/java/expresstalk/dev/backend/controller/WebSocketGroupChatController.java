@@ -1,7 +1,7 @@
 package expresstalk.dev.backend.controller;
 
 import expresstalk.dev.backend.dto.request.*;
-import expresstalk.dev.backend.dto.response.GroupChatMessageDto;
+import expresstalk.dev.backend.dto.response.GroupMessageDto;
 import expresstalk.dev.backend.dto.response.LastMessageDto;
 import expresstalk.dev.backend.dto.response.UpdatedMembersDto;
 import expresstalk.dev.backend.entity.GroupChat;
@@ -50,15 +50,7 @@ public class WebSocketGroupChatController {
             GroupChat groupChat = groupChatService.getChat(chatId);
             groupChatService.ensureUserExistsInChat(sender, groupChat);
             GroupMessage groupMessage = groupChatService.saveMessage(sender, sendChatMessageDto);
-            GroupChatMessageDto groupChatMessageDto = new GroupChatMessageDto(
-                    groupMessage.getId(),
-                    groupMessage.getCreatedAt(),
-                    groupMessage.getContent(),
-                    groupMessage.getAttachedFile(),
-                    groupMessage.getSender().getUser().getLogin(),
-                    sender.getId(),
-                    groupMessage.getSender().getGroupChatRole()
-            );
+            GroupMessageDto groupMessageDto = groupChatService.getGroupMessageDto(groupChat, groupMessage);
             List<User> receivers = groupChatService.getUsersOfGroupChat(groupChat);
 
             for(User receiver : receivers) {
@@ -66,7 +58,7 @@ public class WebSocketGroupChatController {
                 simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             }
 
-            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + chatId, groupChatMessageDto);
+            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + chatId, groupMessageDto);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             simpMessagingTemplate.convertAndSend("/group_chat/messages/" + sendChatMessageDto.chatId() + "/errors", ex.getMessage());
@@ -88,6 +80,7 @@ public class WebSocketGroupChatController {
             groupChatService.addMember(admin, member, groupChat);
             String addMemberMessage = admin.getLogin() + " has added " + member.getLogin();
             SystemMessage systemMessage = chatService.saveSystemMessage(addMemberMessage, groupChat);
+            GroupMessageDto groupMessageDto = groupChatService.getGroupMessageDto(groupChat, systemMessage);
             UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
             List<User> receivers = groupChatService.getUsersOfGroupChat(groupChat);
 
@@ -95,7 +88,7 @@ public class WebSocketGroupChatController {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,addMemberMessage);
                 simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             }
-            simpMessagingTemplate.convertAndSend("/group_chat/system_messages/" + chatId, systemMessage);
+            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + chatId, groupMessageDto);
             simpMessagingTemplate.convertAndSend("/group_chat/updated_members/" + chatId, updatedMembersDto);
         } catch (Exception ex) {
             simpMessagingTemplate.convertAndSend("/group_chat/add_member/" + addUserToGroupChatDto.chatId() + "/errors", ex.getMessage());
@@ -119,6 +112,7 @@ public class WebSocketGroupChatController {
             groupChat = groupChatService.getChat(chatId);
             String removeMemberMessage = admin.getLogin() + " has removed " + member.getLogin();
             SystemMessage systemMessage = chatService.saveSystemMessage(removeMemberMessage, groupChat);
+            GroupMessageDto groupMessageDto = groupChatService.getGroupMessageDto(groupChat, systemMessage);
             UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
             List<User> receivers = groupChatService.getUsersOfGroupChat(groupChat);
 
@@ -126,7 +120,7 @@ public class WebSocketGroupChatController {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,removeMemberMessage);
                 simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             }
-            simpMessagingTemplate.convertAndSend("/group_chat/system_messages/" + chatId, systemMessage);
+            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + chatId, groupMessageDto);
             simpMessagingTemplate.convertAndSend("/group_chat/updated_members/" + chatId, updatedMembersDto);
         } catch (Exception ex) {
             simpMessagingTemplate.convertAndSend("/group_chat/remove_member/" + removeUserFromGroupChatDto.chatId() + "/errors", ex.getMessage());
@@ -148,6 +142,7 @@ public class WebSocketGroupChatController {
             groupChatService.setRole(admin, changingUser, setUserRoleInGroupChatDto.groupChatRole(), groupChat);
             String changedRoleMessage = changingUser.getLogin() + " is now " + setUserRoleInGroupChatDto.groupChatRole();
             SystemMessage systemMessage = chatService.saveSystemMessage(changedRoleMessage, groupChat);
+            GroupMessageDto groupMessageDto = groupChatService.getGroupMessageDto(groupChat, systemMessage);
             UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
             List<User> receivers = groupChatService.getUsersOfGroupChat(groupChat);
 
@@ -155,7 +150,7 @@ public class WebSocketGroupChatController {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,changedRoleMessage);
                 simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             }
-            simpMessagingTemplate.convertAndSend("/group_chat/system_messages/" + chatId, systemMessage);
+            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + chatId, groupMessageDto);
             simpMessagingTemplate.convertAndSend("/group_chat/updated_members/" + chatId, updatedMembersDto);
         } catch (Exception ex) {
             simpMessagingTemplate.convertAndSend("/group_chat/set_role/" + setUserRoleInGroupChatDto.chatId() + "/errors", ex.getMessage());
@@ -212,6 +207,7 @@ public class WebSocketGroupChatController {
             groupChatService.leave(member, groupChat);
             String leftMessage = member.getLogin() + " left the chat";
             SystemMessage systemMessage = chatService.saveSystemMessage(leftMessage, groupChat);
+            GroupMessageDto groupMessageDto = groupChatService.getGroupMessageDto(groupChat, systemMessage);
             UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
             List<User> receivers = groupChatService.getUsersOfGroupChat(groupChat);
 
@@ -219,7 +215,7 @@ public class WebSocketGroupChatController {
                 LastMessageDto lastMessageDto = new LastMessageDto(chatId,leftMessage);
                 simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
             }
-            simpMessagingTemplate.convertAndSend("/group_chat/system_messages/" + chatId, systemMessage);
+            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + chatId, groupMessageDto);
             simpMessagingTemplate.convertAndSend("/group_chat/updated_members/" + chatId, updatedMembersDto);
         } catch (Exception exception) {
             simpMessagingTemplate.convertAndSend("/group_chat/left/" + chatStrId + "/errors", exception.getMessage());

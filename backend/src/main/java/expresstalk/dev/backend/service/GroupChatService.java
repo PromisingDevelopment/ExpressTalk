@@ -2,6 +2,9 @@ package expresstalk.dev.backend.service;
 
 import expresstalk.dev.backend.dto.request.SendChatMessageDto;
 import expresstalk.dev.backend.dto.request.SendFileDto;
+import expresstalk.dev.backend.dto.response.GroupMessageDto;
+import expresstalk.dev.backend.dto.response.GroupMessageDetailsDto;
+import expresstalk.dev.backend.dto.response.MessageDto;
 import expresstalk.dev.backend.entity.*;
 import expresstalk.dev.backend.enums.GroupChatRole;
 import expresstalk.dev.backend.exception.ChatNotFoundException;
@@ -202,5 +205,54 @@ public class GroupChatService {
         groupMessageRepository.save(groupMessage);
 
         return groupMessage;
+    }
+
+    public GroupMessageDto getGroupMessageDto(GroupChat groupChat, GroupMessage groupMessage) {
+        MessageDto messageDto = new MessageDto(
+                groupChat.getId(),
+                groupMessage.getCreatedAt(),
+                groupMessage.getContent()
+        );
+
+        GroupMessageDetailsDto groupMessageDetailsDto = new GroupMessageDetailsDto(
+                groupMessage.getAttachedFile(),
+                groupMessage.getSender().getUser().getLogin(),
+                groupMessage.getSender().getUser().getId(),
+                groupMessage.getSender().getGroupChatRole()
+        );
+
+        return new GroupMessageDto(
+                messageDto,
+                groupMessageDetailsDto,
+                false
+        );
+    }
+
+    public GroupMessageDto getGroupMessageDto(GroupChat groupChat, SystemMessage groupMessage) {
+        MessageDto messageDto = new MessageDto(
+                groupChat.getId(),
+                groupMessage.getCreatedAt(),
+                groupMessage.getContent()
+        );
+
+        return new GroupMessageDto(
+                messageDto,
+                null,
+                true
+        );
+    }
+
+    public TreeSet<GroupMessageDto> getGroupMessageDtos(GroupChat groupChat) {
+        TreeSet<GroupMessageDto> groupMessageDtos = new TreeSet<>();
+
+        for (GroupMessage message : groupChat.getMessages()) {
+            groupMessageDtos.add(getGroupMessageDto(groupChat, message));
+        }
+
+        for (SystemMessage message : groupChat.getSystemMessages()) {
+            groupMessageDtos.add(getGroupMessageDto(groupChat, message));
+        }
+
+        return groupMessageDtos;
     }
 }
