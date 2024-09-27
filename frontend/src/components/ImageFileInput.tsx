@@ -1,28 +1,11 @@
 import { styled } from "@mui/material";
-import { useAppDispatch } from "hooks/redux";
 import React from "react";
-import { editUserAvatar } from "redux/rootSlice";
 
-interface ImageFileInputProps {}
+interface ImageFileInputProps {
+  onUploadImage: any;
+}
 
-const ImageFileInput: React.FC<ImageFileInputProps> = ({}) => {
-  const dispatch = useAppDispatch();
-
-  const onUploadImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-
-    if (files) {
-      //* sending new avatar
-
-      const avatar = files[0];
-
-      const formData = new FormData();
-      formData.append("avatarImage", avatar);
-
-      dispatch(editUserAvatar(formData));
-    }
-  };
-
+const ImageFileInput: React.FC<ImageFileInputProps> = ({ onUploadImage }) => {
   return <StyledInput onChange={onUploadImage} type="file" accept=".jpg, .jpeg, .png, .svg" />;
 };
 

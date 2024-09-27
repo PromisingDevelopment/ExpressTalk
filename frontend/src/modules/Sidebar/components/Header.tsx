@@ -20,7 +20,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({ switchChatMode }
   const {
     currentUser: { status, user },
     avatarUrl,
-    avatarId,
+    avatarUploaded,
   } = useAppSelector((state) => state.root);
   const [openProfile, setOpenProfile] = React.useState(false);
 
@@ -33,15 +33,12 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(({ switchChatMode }
   }, []);
 
   React.useEffect(() => {
-    if (user && avatarId) {
+    if (user && avatarUploaded) {
       dispatch(getUserAvatar(user.id));
     }
-  }, [user, avatarId]);
+  }, [user, avatarUploaded]);
 
-  //const avatarSrc = user ? userGetUrls.avatar(user.id) : defaultAvatar;
   const avatarSrc = avatarUrl || defaultAvatar;
-
-  //console.log(avatarUrl);
 
   return (
     <Box

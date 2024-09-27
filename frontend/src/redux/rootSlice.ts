@@ -11,7 +11,7 @@ interface InitialState {
     errorCode: number | null;
   };
   avatarUrl: string | null;
-  avatarId: string | null;
+  avatarUploaded: boolean | null;
   currentChatId: string | null;
   isCreatedNewChat: boolean;
   currentChatType: CurrentChatType;
@@ -24,7 +24,7 @@ const initialState: InitialState = {
     errorCode: null,
   },
   avatarUrl: null,
-  avatarId: null,
+  avatarUploaded: null,
   currentChatId: null,
   isCreatedNewChat: false,
   currentChatType: "privateChat",
@@ -87,7 +87,7 @@ const rootSlice = createSlice({
       })
 
       .addCase(editUserAvatar.fulfilled, (state, action: PayloadAction<any>) => {
-        state.avatarId = action.payload;
+        state.avatarUploaded = true;
       })
       .addCase(editUserAvatar.rejected, (state, action: PayloadAction<any>) => {
         console.log("edit avatar error: ", action.payload);
@@ -142,11 +142,9 @@ export const editUserAvatar = createAsyncThunk<any, any>(
   "@@/editAvatar",
   async (formData, { rejectWithValue }) => {
     try {
-      const { data } = await axios.post(userPostUrls.avatar, formData, {
+      await axios.post(userPostUrls.avatar, formData, {
         withCredentials: true,
       });
-
-      return data.imageId;
     } catch (error) {
       return rejectWithValue(error);
     }

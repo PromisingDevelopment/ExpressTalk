@@ -130,23 +130,30 @@ export function disconnect() {
 }
 
 // SEND MESSAGES -----------------------------------------------------
-export function privateChatSendMessage(message: string, chatId: string, createdAt: number) {
+export function privateChatSendMessage(
+  content: string,
+  chatId: string,
+  createdAt: number,
+  sendFileDto?: FormData
+) {
   chatClient.publish({
     destination: `/app/private_chat/send_message`,
     body: JSON.stringify({
       chatId,
-      content: message,
-      createdAt: createdAt,
+      content,
+      createdAt,
+      sendFileDto,
     }),
   });
 }
-export function sendGroupMessage(content: string, chatId: string, createdAt: number) {
+export function sendGroupMessage(content: string, chatId: string, createdAt: number, sendFileDto?: FormData) {
   chatClient.publish({
     destination: `/app/group_chat/send_message`,
     body: JSON.stringify({
       chatId,
-      content: content,
-      createdAt: createdAt,
+      content,
+      createdAt,
+      sendFileDto,
     }),
   });
 }

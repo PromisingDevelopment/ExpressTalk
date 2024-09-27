@@ -1,5 +1,5 @@
 import AddRoleIcon from "@mui/icons-material/FaceRetouchingNatural";
-import { Modal, styled } from "@mui/material";
+import { Box, Modal, styled } from "@mui/material";
 import { FormControlLabel, Radio, RadioGroup } from "@mui/material";
 import React from "react";
 import { GroupChatMember } from "types/GroupChat";
@@ -23,7 +23,8 @@ const GroupMembersInfo: React.FC<GroupMembersInfoProps> = ({ members, chatId }) 
   const closeModal = () => {
     setOpen(false);
   };
-  const openModal = () => {
+  const openModal = (role: MemberRoles) => {
+    setRoleValue(role);
     setOpen(true);
   };
 
@@ -45,9 +46,9 @@ const GroupMembersInfo: React.FC<GroupMembersInfoProps> = ({ members, chatId }) 
     closeModal();
   };
 
-  //React.useEffect(() => {
-  //  console.log("group members", members);
-  //}, [members]);
+  React.useEffect(() => {
+    console.log("group members", members);
+  }, [members]);
 
   return (
     <StyledWrapper>
@@ -59,8 +60,16 @@ const GroupMembersInfo: React.FC<GroupMembersInfoProps> = ({ members, chatId }) 
           {members.map((member) => (
             <PopoverItem key={member.id}>
               <h4>{member.user.login}</h4>
-              <span>{member.user.status}</span>
-              <CustomIconButton isSmall label="add role" Icon={AddRoleIcon} onClick={openModal} />
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                <span>{member.user.status}</span>
+                <span>{member.groupChatRole}</span>
+              </Box>
+              <CustomIconButton
+                isSmall
+                label="add role"
+                Icon={AddRoleIcon}
+                onClick={() => openModal(MemberRoles[member.groupChatRole])}
+              />
               <Modal onClose={closeModal} open={open}>
                 <ModalContent
                   isSmallMargin

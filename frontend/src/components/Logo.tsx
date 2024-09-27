@@ -3,6 +3,8 @@ import { Box, styled } from "@mui/material";
 import avatarImage from "assets/images/avatar.png";
 import React from "react";
 import { ImageFileInput } from "./ImageFileInput";
+import { useAppDispatch } from "hooks/redux";
+import { editUserAvatar } from "redux/rootSlice";
 
 interface LogoProps {
   size: number;
@@ -13,6 +15,8 @@ interface LogoProps {
 }
 
 const Logo: React.FC<LogoProps> = ({ src, size, isMain, isAbleToChange, ownSize }) => {
+  const dispatch = useAppDispatch();
+
   const mainLogoSize = {
     lg: size,
     md: 45,
@@ -22,6 +26,19 @@ const Logo: React.FC<LogoProps> = ({ src, size, isMain, isAbleToChange, ownSize 
     lg: size,
     sm: 40,
     xs: 35,
+  };
+
+  const onUploadImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+
+    if (files) {
+      const avatar = files[0];
+
+      const formData = new FormData();
+      formData.append("avatarImage", avatar);
+
+      dispatch(editUserAvatar(formData));
+    }
   };
 
   return (
@@ -60,7 +77,7 @@ const Logo: React.FC<LogoProps> = ({ src, size, isMain, isAbleToChange, ownSize 
       />
       {isAbleToChange && (
         <ChangeLogoPlaceholder title="upload avatar" className="change-logo-placeholder">
-          <ImageFileInput />
+          <ImageFileInput onUploadImage={onUploadImage} />
           <ChangeAvatarIcon />
         </ChangeLogoPlaceholder>
       )}

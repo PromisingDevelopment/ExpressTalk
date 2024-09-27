@@ -15,6 +15,8 @@ const WriteMessage: React.FC<WriteMessageProps> = ({ chatId }) => {
   const [isHiddenAttachFile, setIsHiddenAttachFile] = React.useState(false);
   const writeMessageInputRef = React.useRef<HTMLInputElement>(null);
   const currentChatType = useAppSelector((state) => state.root.currentChatType);
+  const [uploadedImage, setUploadedImage] = React.useState<FormData | null>(null);
+  const [previewImageSrc, setPreviewImageSrc] = React.useState<string | null>(null);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,9 +28,9 @@ const WriteMessage: React.FC<WriteMessageProps> = ({ chatId }) => {
       const createdAt = new Date().getTime();
 
       if (currentChatType === "privateChat") {
-        privateChatSendMessage(lastMessage, chatId, createdAt);
+        privateChatSendMessage(lastMessage, chatId, createdAt, uploadedImage || undefined);
       } else {
-        sendGroupMessage(lastMessage, chatId, createdAt);
+        sendGroupMessage(lastMessage, chatId, createdAt, uploadedImage || undefined);
       }
 
       writeMessageInput.value = "";
@@ -39,6 +41,43 @@ const WriteMessage: React.FC<WriteMessageProps> = ({ chatId }) => {
     setIsHiddenAttachFile(e.target.value !== "");
   };
 
+  const onUploadImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+
+    if (files) {
+      const image = files[0];
+
+      const formData = new FormData();
+      formData.append("sendFileDto", image);
+
+      setUploadedImage(formData);
+
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        if (e.target) {
+          setPreviewImageSrc(e.target.result as string);
+        }
+      };
+      reader.onerror = (err) => {
+        console.log(err);
+      };
+
+      if (image) {
+        reader.readAsDataURL(image);
+      }
+    }
+  };
+
+  const onRemoveImage = () => {
+    setPreviewImageSrc(null);
+    setUploadedImage(null);
+  };
+
+  React.useEffect(() => {
+    onRemoveImage();
+  }, [chatId]);
+
   return (
     <Box
       onSubmit={onSubmit}
@@ -46,11 +85,51 @@ const WriteMessage: React.FC<WriteMessageProps> = ({ chatId }) => {
       sx={{
         bgcolor: "#1F274E",
         height: 80,
+        position: "relative",
         display: "flex",
         alignItems: "center",
         px: { lg: 4.5, xs: 1.5 },
         gap: 2,
       }}>
+      {previewImageSrc && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: -10,
+            left: 20,
+            width: 80,
+            height: 80,
+            borderRadius: 2,
+            overflow: "hidden",
+            background: "#222B5A",
+            transform: "translateY(-100%)",
+            img: {
+              width: 1,
+              height: 1,
+              objectFit: "cover",
+            },
+          }}>
+          <Box
+            component="button"
+            onClick={onRemoveImage}
+            sx={{
+              background: "#fff",
+              color: "primary.main",
+              position: "absolute",
+              top: 0,
+              right: 0,
+              width: 25,
+              height: 25,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 1,
+            }}>
+            x
+          </Box>
+          <img src={previewImageSrc} alt="preview photo" />
+        </Box>
+      )}
       <Box
         sx={{
           flexGrow: 1,
@@ -61,6 +140,7 @@ const WriteMessage: React.FC<WriteMessageProps> = ({ chatId }) => {
           ref={writeMessageInputRef}
           label="Write a message"
           name="write-message-input"
+          inputId="write-message-input"
         />
 
         <IconButton
@@ -79,7 +159,7 @@ const WriteMessage: React.FC<WriteMessageProps> = ({ chatId }) => {
               pointerEvents: "none",
             },
           ]}>
-          <ImageFileInput />
+          <ImageFileInput onUploadImage={onUploadImage} />
           <AttachFileIcon
             sx={{
               fontSize: 30,

@@ -1,9 +1,8 @@
-(A) Critical fixes {cm:2024-09-27}
-  slice last message to max long {cm:2024-09-27}
-  change data type in private chats {cm:2024-09-27}
-  change incomming data in private chats {cm:2024-09-27}
-  change data type in group chats {cm:2024-09-27}
-  change incomming data in group chats {cm:2024-09-27}
+(A) Upload image in message {cm:2024-09-27}
+  Add handler and state to save image {cm:2024-09-27}
+  Add preview layout {cm:2024-09-27}
+  Add logic to see preview image dynamically {cm:2024-09-27}
+  Send image {cm:2024-09-27}
 (B) Group tasks
   edit group name feature
   remove group feature
