@@ -6,4 +6,5 @@ export {
   setCurrentChat,
   updateGroupMembers,
   resetChats,
+  updateGroupName,
 } from "./store/currentChatSlice";

@@ -4,7 +4,7 @@
   Add logic to see preview image dynamically {cm:2024-09-27}
   Send image {cm:2024-09-27}
 (B) Group tasks
-  edit group name feature
+  edit group name feature {cm:2024-09-30}
   remove group feature
   leave group feature
 (C) Change Avatar

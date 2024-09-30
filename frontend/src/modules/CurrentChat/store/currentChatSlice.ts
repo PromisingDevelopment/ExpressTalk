@@ -19,11 +19,7 @@ const initialState: InitialState = {
   errorMessage: null,
 };
 
-const narrowChatType = (
-  type: CurrentChatType,
-  privateCallback: any,
-  groupCallback: any
-) => {
+const narrowChatType = (type: CurrentChatType, privateCallback: any, groupCallback: any) => {
   switch (type) {
     case "privateChat":
       privateCallback();
@@ -38,10 +34,7 @@ const currentChatSlice = createSlice({
   name: "@@currentChat",
   initialState,
   reducers: {
-    setCurrentChat: (
-      state,
-      action: PayloadAction<{ data: any; type: CurrentChatType }>
-    ) => {
+    setCurrentChat: (state, action: PayloadAction<{ data: any; type: CurrentChatType }>) => {
       const type = action.payload.type;
 
       narrowChatType(
@@ -50,10 +43,7 @@ const currentChatSlice = createSlice({
         () => (state.currentGroupChat = action.payload.data)
       );
     },
-    updateCurrentChatMessages: (
-      state,
-      action: PayloadAction<{ data: any; type: CurrentChatType }>
-    ) => {
+    updateCurrentChatMessages: (state, action: PayloadAction<{ data: any; type: CurrentChatType }>) => {
       const type = action.payload.type;
 
       narrowChatType(
@@ -65,6 +55,11 @@ const currentChatSlice = createSlice({
     updateGroupMembers: (state, action: PayloadAction<GroupChatMember[]>) => {
       if (state.currentGroupChat) {
         state.currentGroupChat.members = action.payload;
+      }
+    },
+    updateGroupName: (state, action: PayloadAction<string>) => {
+      if (state.currentGroupChat) {
+        state.currentGroupChat.name = action.payload;
       }
     },
     resetChats: (state) => {
@@ -102,32 +97,27 @@ const currentChatSlice = createSlice({
       })
       .addCase(getCurrentChat.rejected, (state, action: PayloadAction<any>) => {
         state.status = "error";
-        state.errorMessage =
-          action.payload.response?.data?.message || action.payload.message;
+        state.errorMessage = action.payload.response?.data?.message || action.payload.message;
       });
   },
 });
 
-export const getCurrentChat = createAsyncThunk<
-  any,
-  { id: string; type: CurrentChatType }
->("@@currentChat/getCurrentChat", async ({ id, type }, { rejectWithValue }) => {
-  try {
-    const { data } = await axios.get(chatGetUrls[type](id), {
-      withCredentials: true,
-    });
+export const getCurrentChat = createAsyncThunk<any, { id: string; type: CurrentChatType }>(
+  "@@currentChat/getCurrentChat",
+  async ({ id, type }, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.get(chatGetUrls[type](id), {
+        withCredentials: true,
+      });
 
-    return { data, type };
-  } catch (error) {
-    rejectWithValue(error);
+      return { data, type };
+    } catch (error) {
+      rejectWithValue(error);
+    }
   }
-});
+);
 
-export const {
-  setCurrentChat,
-  updateCurrentChatMessages,
-  resetChats,
-  updateGroupMembers,
-} = currentChatSlice.actions;
+export const { setCurrentChat, updateCurrentChatMessages, resetChats, updateGroupMembers, updateGroupName } =
+  currentChatSlice.actions;
 
 export default currentChatSlice.reducer;

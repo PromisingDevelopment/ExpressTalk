@@ -84,7 +84,12 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
       <Modal open={openModal} onClose={onCloseModal}>
         <ModalContent title={label} onCloseModal={onCloseModal}>
           <form onSubmit={handleSubmit}>
-            <CustomInput ref={userIdInputRef} label={inputLabel} name={inputName} />
+            <CustomInput
+              inputId="action-modal-input"
+              ref={userIdInputRef}
+              label={inputLabel}
+              name={inputName}
+            />
             {isEmpty && (
               <Typography variant="body1" color="error.main" mt={0.5}>
                 This field is required!

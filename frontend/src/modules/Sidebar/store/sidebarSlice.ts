@@ -1,8 +1,8 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import { chatDeleteUrls, chatGetUrls } from "config";
-import { CurrentChatType } from "types/CurrentChatType";
 import { ChatsListObj } from "../types/ChatsListObj";
+import { ChatsListType } from "types/ChatsListType";
 
 interface InitialState {
   chatsList: {
@@ -36,32 +36,37 @@ const sidebarSlice = createSlice({
       state.chatsList.errorMessage = null;
       state.chatsList.errorCode = null;
     },
+    updateNameGroupInList: (state, action: PayloadAction<{ chatId: string; groupName: string }>) => {
+      const groupChats = state.chatsList.list?.groupChats;
+      const { chatId, groupName } = action.payload;
+
+      const groupChat = groupChats?.find((chat: any) => chat.id === chatId);
+
+      if (groupChat && groupName) {
+        groupChat.name = groupName;
+      }
+    },
     updateLastMessage: (
       state,
       action: PayloadAction<{
         lastMessage: string;
         chatId: string;
-        chatType: CurrentChatType;
+        chatsType: ChatsListType;
       }>
     ) => {
       const chatsList = state.chatsList.list;
       const lastMessage = action.payload.lastMessage;
       const chatId = action.payload.chatId;
-      const chatType = action.payload.chatType;
+      const chatsType = action.payload.chatsType;
 
       if (!chatsList) return;
 
       const findChat = (chat: any) => chat.id === chatId;
 
-      const privateChat = chatsList.privateChats.find(findChat);
-      const groupChat = chatsList.groupChats.find(findChat);
+      const chat = chatsList[chatsType].find(findChat);
 
-      if (privateChat) {
-        privateChat.lastMessage = lastMessage;
-      }
-
-      if (groupChat) {
-        groupChat.lastMessage = lastMessage;
+      if (chat) {
+        chat.lastMessage = lastMessage;
       }
     },
   },
@@ -109,5 +114,6 @@ export const logout = createAsyncThunk<void, void>("@@sidebar/logout", async (_,
   }
 });
 
-export const { setSidebarOpen, resetChatListError, updateLastMessage } = sidebarSlice.actions;
+export const { setSidebarOpen, resetChatListError, updateLastMessage, updateNameGroupInList } =
+  sidebarSlice.actions;
 export default sidebarSlice.reducer;

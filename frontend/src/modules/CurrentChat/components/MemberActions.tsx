@@ -5,7 +5,7 @@ import { ModalLayout } from "components/ModalLayout";
 import { useAppSelector } from "hooks/redux";
 import React from "react";
 import CustomIconButton from "UI/CustomIconButton";
-import { addGroupMember, removeGroupMember } from "wsConfig";
+import { addGroupMember, editGroupName, removeGroupMember } from "wsConfig";
 
 interface MemberActionsProps {}
 
@@ -34,6 +34,12 @@ const MemberActions: React.FC<MemberActionsProps> = () => {
     }
   };
 
+  const onEditGroupName = (groupName: string) => {
+    if (groupId) {
+      editGroupName(groupId, groupName);
+    }
+  };
+
   return (
     <>
       <CustomIconButton Icon={MoreIcon} label="Show actions" onClick={openMenu} />
@@ -56,6 +62,16 @@ const MemberActions: React.FC<MemberActionsProps> = () => {
             inputName="input-member-login"
             label="Remove a member"
             onSubmit={(login: string) => onSubmit(login, "remove")}
+          />
+        </MenuItem>
+        <MenuItem>
+          <ModalLayout
+            withoutIcon
+            closeMenu={closeMenu}
+            inputLabel="Input new name of the group"
+            inputName="input-name-group"
+            label="Edit group name"
+            onSubmit={(groupName: string) => onEditGroupName(groupName)}
           />
         </MenuItem>
       </Menu>

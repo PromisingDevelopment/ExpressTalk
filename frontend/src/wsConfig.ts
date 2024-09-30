@@ -1,9 +1,10 @@
 import { Client } from "@stomp/stompjs";
 import { wsServerURL } from "config";
-import { updateCurrentChatMessages, updateGroupMembers } from "modules/CurrentChat";
-import { updateLastMessage } from "modules/Sidebar";
+import { updateCurrentChatMessages, updateGroupMembers, updateGroupName } from "modules/CurrentChat";
+import { updateLastMessage, updateNameGroupInList } from "modules/Sidebar";
 import { store } from "redux/store";
 import SockJS from "sockjs-client";
+import { ChatsListType } from "types/ChatsListType";
 import { CurrentChatType } from "types/CurrentChatType";
 import { MemberRoles } from "types/MemberRoles";
 
@@ -63,6 +64,17 @@ export function connect(chatId: string, isPrivate: boolean) {
       const error = JSON.parse(data.body);
       console.log("group_chat/add errors: ", error);
     });
+    chatClient.subscribe(`/group_chat/edited/${chatId}`, (data) => {
+      const editedGroup = JSON.parse(data.body);
+      const groupName = editedGroup.name;
+
+      store.dispatch(updateGroupName(editedGroup.name));
+      store.dispatch(updateNameGroupInList({ chatId, groupName }));
+    });
+    chatClient.subscribe(`/group_chat/edited/${chatId}/errors`, (data) => {
+      const error = JSON.parse(data.body);
+      console.log("group_chat/edited errors: ", error);
+    });
   };
 
   const onConnectPrivate = () => {
@@ -84,7 +96,7 @@ export function connect(chatId: string, isPrivate: boolean) {
       return socket;
     },
     debug: (str) => {
-      console.log("debug: ", str);
+      //console.log("debug: ", str);
     },
   });
 
@@ -97,13 +109,9 @@ export function subscribeLastMessages(userId: string) {
 
   const handleLastMessage = (data: any) => {
     const json = JSON.parse(data.body);
-    const chatType = store.getState().root.currentChatType;
+    const chatsType = store.getState().root.currentChatType + "s";
 
-    const lastMessage = {
-      ...json,
-      chatType,
-    };
-    store.dispatch(updateLastMessage(lastMessage));
+    store.dispatch(updateLastMessage({ ...json, chatsType }));
   };
 
   const onConnect = () => sidebarClient.subscribe(`/chat/last_message/${userId}`, handleLastMessage);
@@ -176,7 +184,6 @@ export function removeGroupMember(chatId: string, memberId: string) {
     }),
   });
 }
-
 // ROLES ------------------------------------------------------------
 export function setMemberRole(chatId: string, userToGiveRoleId: string, groupChatRole: MemberRoles) {
   chatClient.publish({
@@ -185,6 +192,16 @@ export function setMemberRole(chatId: string, userToGiveRoleId: string, groupCha
       chatId,
       userToGiveRoleId,
       groupChatRole,
+    }),
+  });
+}
+
+export function editGroupName(chatId: string, groupName: string) {
+  chatClient.publish({
+    destination: "/app/group_chat/edit",
+    body: JSON.stringify({
+      chatId,
+      groupName,
     }),
   });
 }
