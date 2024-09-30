@@ -1,11 +1,14 @@
 import { Box, Button, Typography, useTheme } from "@mui/material";
+import axios from "axios";
 import { Logo } from "components/Logo";
+import { userGetUrls } from "config";
 import React from "react";
 
 interface PrivateChatItemProps {
   onClick: any;
   logoSrc?: string;
   receiverLogin: string;
+  receiverId: string;
   lastMessage: string;
   active?: boolean;
 }
@@ -13,6 +16,7 @@ interface PrivateChatItemProps {
 const PrivateChatItem: React.FC<PrivateChatItemProps> = ({
   lastMessage,
   receiverLogin,
+  receiverId,
   onClick,
   logoSrc = "",
   active = false,

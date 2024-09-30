@@ -9,11 +9,7 @@ import { GroupChatItem } from "./GroupChatItem";
 import { PrivateChatItem } from "./PrivateChatItem";
 import { getChatsList, resetChatListError, setSidebarOpen } from "../store/sidebarSlice";
 import { GroupChatListItem } from "../types/GroupChatListItem";
-import {
-  setCurrentChatId,
-  setCurrentChatType,
-  setIsCreatedNewChat,
-} from "redux/rootSlice";
+import { setCurrentChatId, setCurrentChatType, setIsCreatedNewChat } from "redux/rootSlice";
 
 interface ChatListProps {
   currentChatMode: number;
@@ -21,11 +17,7 @@ interface ChatListProps {
   subtractedHeight: number;
 }
 
-const ChatList: React.FC<ChatListProps> = ({
-  currentChatMode,
-  filterChatsValue,
-  subtractedHeight,
-}) => {
+const ChatList: React.FC<ChatListProps> = ({ currentChatMode, filterChatsValue, subtractedHeight }) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [chatId, setChatId] = React.useState<string>();
@@ -103,7 +95,7 @@ const ChatList: React.FC<ChatListProps> = ({
   React.useEffect(() => {
     const currentUserId = currentUser.user?.id;
 
-    if (chatId && currentUserId) {
+    if (chatId) {
       dispatch(setCurrentChatId(chatId));
       connect(chatId, isPrivateConnect);
     }
@@ -113,17 +105,13 @@ const ChatList: React.FC<ChatListProps> = ({
     if (isPrivateChatsList) {
       if (chatsList.list?.privateChats.length === 0) {
         return (
-          <AlertMessage>
-            Private chats list is empty. It's the best time to create a new chat
-          </AlertMessage>
+          <AlertMessage>Private chats list is empty. It's the best time to create a new chat</AlertMessage>
         );
       }
     } else {
       if (chatsList.list?.groupChats.length === 0) {
         return (
-          <AlertMessage>
-            Group chats list is empty. It's the best time to create a new chat
-          </AlertMessage>
+          <AlertMessage>Group chats list is empty. It's the best time to create a new chat</AlertMessage>
         );
       }
     }

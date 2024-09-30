@@ -1,7 +1,6 @@
 import React from "react";
-import { Box } from "@mui/material";
+import { Box, styled, Typography } from "@mui/material";
 import { CustomLink } from "../../UI/CustomLink";
-import { Title } from "../../UI/Title";
 
 interface HomeAuthProps {}
 
@@ -15,7 +14,11 @@ const HomeAuth: React.FC<HomeAuthProps> = () => {
         flexDirection: "column",
         alignItems: "center",
       }}>
-      <Title size="large">Express Talk</Title>
+      <StyledH1>Express Talk</StyledH1>
+      <StyledP>
+        Welcome to ExpressTalk! <br />
+        Sign up to start conversations :)
+      </StyledP>
       <CustomLink to="/auth/sign-in" background="grey" sx={{ mb: 4 }}>
         Sign in
       </CustomLink>
@@ -25,5 +28,25 @@ const HomeAuth: React.FC<HomeAuthProps> = () => {
     </Box>
   );
 };
+
+const StyledH1 = styled("h1")`
+  font-size: 46px;
+  font-weight: 700;
+  margin-bottom: 16px;
+
+  @media (max-width: 900px) {
+    font-size: 40px;
+  }
+  @media (max-width: 767px) {
+    font-size: 36px;
+  }
+  @media (max-width: 600px) {
+    font-size: 32px;
+  }
+`;
+
+const StyledP = styled("p")`
+  margin-bottom: 40px;
+`;
 
 export { HomeAuth };

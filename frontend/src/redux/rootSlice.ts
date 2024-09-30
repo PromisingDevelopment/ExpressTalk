@@ -89,6 +89,9 @@ const rootSlice = createSlice({
       .addCase(editUserAvatar.fulfilled, (state, action: PayloadAction<any>) => {
         state.avatarUploaded = true;
       })
+      .addCase(editUserAvatar.pending, (state, action: PayloadAction<any>) => {
+        state.avatarUploaded = false;
+      })
       .addCase(editUserAvatar.rejected, (state, action: PayloadAction<any>) => {
         console.log("edit avatar error: ", action.payload);
       });
