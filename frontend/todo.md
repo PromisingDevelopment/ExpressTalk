@@ -5,11 +5,11 @@
   Send image {cm:2024-09-27}
 (B) Group tasks
   edit group name feature {cm:2024-09-30}
-  remove group feature
+  remove group feature {cm:2024-10-03}
     Add new MenuItem in Menu {cm:2024-10-03}
     Add click handler {cm:2024-10-03}
     Add RemoveGroup func in wsConfig {cm:2024-10-03}
-  leave group feature {cm:2024-10-03}
+  leave group feature
 (C) Change Avatar
   Add validation to avatar size
   Add validation to supported formats

@@ -4,5 +4,6 @@ export {
   setSidebarOpen,
   updateNameGroupInList,
   resetChatListError,
+  filterChatsList,
   default as sidebarReducer,
 } from "./store/sidebarSlice";
