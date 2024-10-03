@@ -9,10 +9,11 @@ interface CustomInputProps {
   onChange?: any;
   sx?: SxProps;
   defaultValue?: any;
+  autoFocus?: boolean;
 }
 
 const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
-  ({ label, name, sx, onChange, inputId, inputType, defaultValue }, ref) => {
+  ({ label, name, sx, onChange, inputId, inputType, defaultValue, autoFocus }, ref) => {
     const theme = useTheme();
 
     return (
@@ -26,6 +27,7 @@ const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
         type={inputType}
         accept={inputType === "file" ? ".jpg,.jpeg,.png,.webp" : undefined}
         name={name}
+        autoFocus={autoFocus}
         sx={{
           width: 1,
           height: 48,

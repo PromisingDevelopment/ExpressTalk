@@ -24,6 +24,7 @@ const ModalContent = React.forwardRef<HTMLDivElement, ModalContentProps>(
                 [breakpoints.down("sm")]: {
                   fontSize: 30,
                   mb: isSmallMargin ? "16px !important" : 4,
+                  pr: 6,
                 },
                 [breakpoints.down(450)]: {
                   fontSize: 24,
@@ -52,24 +53,22 @@ const StyledContainer = styled("div")(({ theme: { breakpoints, spacing } }) => (
   },
 }));
 
-const StyledWrapper = styled("div")(
-  ({ theme: { spacing, shape, breakpoints, palette } }) => ({
-    paddingLeft: spacing(2),
-    paddingRight: spacing(2),
-    width: "100%",
-    background: palette.primary.dark,
-    position: "relative",
-    padding: spacing(4, 8, 8),
-    borderRadius: shape.borderRadius * 3,
-    [breakpoints.down("sm")]: {
-      padding: spacing(4, 2, 5),
-      borderRadius: shape.borderRadius * 1,
-    },
-    [breakpoints.down(450)]: {
-      padding: spacing(4, 1, 5),
-    },
-  })
-);
+const StyledWrapper = styled("div")(({ theme: { spacing, shape, breakpoints, palette } }) => ({
+  paddingLeft: spacing(2),
+  paddingRight: spacing(2),
+  width: "100%",
+  background: palette.primary.dark,
+  position: "relative",
+  padding: spacing(4, 8, 8),
+  borderRadius: shape.borderRadius * 3,
+  [breakpoints.down("sm")]: {
+    padding: spacing(4, 2, 5),
+    borderRadius: shape.borderRadius * 1,
+  },
+  [breakpoints.down(450)]: {
+    padding: spacing(4, 1, 5),
+  },
+}));
 
 const CenteredWrapper = styled("div")(({ theme: { spacing } }) => ({
   position: "absolute",
@@ -100,12 +99,13 @@ const CenteredWrapper = styled("div")(({ theme: { spacing } }) => ({
 
 const CloseButton = styled(IconButton)`
   position: absolute;
-  top: 20px;
-  right: 20px;
-  @media (max-width: 400px) {
+  top: 10px;
+  right: 10px;
+  @media (max-width: 600px) {
     right: 5px;
-    top: 15px;
-
+    top: 5px;
+  }
+  @media (max-width: 400px) {
     svg {
       font-size: 35px;
     }

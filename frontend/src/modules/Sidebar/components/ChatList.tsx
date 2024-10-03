@@ -93,8 +93,6 @@ const ChatList: React.FC<ChatListProps> = ({ currentChatMode, filterChatsValue, 
   }, [currentChatMode]);
 
   React.useEffect(() => {
-    const currentUserId = currentUser.user?.id;
-
     if (chatId) {
       dispatch(setCurrentChatId(chatId));
       connect(chatId, isPrivateConnect);
@@ -153,6 +151,7 @@ const ChatList: React.FC<ChatListProps> = ({ currentChatMode, filterChatsValue, 
     <Box
       sx={{
         overflowY: "auto",
+        overflowX: "hidden",
         flexGrow: 0,
         height: listHeight,
         width: 1,
