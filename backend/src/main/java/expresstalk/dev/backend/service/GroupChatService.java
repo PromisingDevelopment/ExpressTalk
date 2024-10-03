@@ -11,6 +11,7 @@ import expresstalk.dev.backend.exception.ChatNotFoundException;
 import expresstalk.dev.backend.exception.UserAbsentInChatException;
 import expresstalk.dev.backend.exception.UserNotAdminException;
 import expresstalk.dev.backend.repository.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,7 @@ public class GroupChatService {
     private final GroupMessageRepository groupMessageRepository;
     private final UserRepository userRepository;
     private final AttachedFileRepository attachedFileRepository;
+    private final SystemMessageRepository systemMessageRepository;
 
     public void ensureUserExistsInChat(User user, GroupChat groupChat) {
         verifyAndGetGroupChatAccount(user, groupChat);
@@ -101,26 +103,48 @@ public class GroupChatService {
         return groupChat;
     }
 
+    @Transactional
     public GroupChat removeChat(User admin, GroupChat groupChat) {
         GroupChatAccount adminAccount = verifyAndGetGroupChatAccount(admin, groupChat);
-        if(!(adminAccount.getGroupChatRole() == GroupChatRole.ADMIN)) throw new UserNotAdminException();
+        if (!(adminAccount.getGroupChatRole() == GroupChatRole.ADMIN)) throw new UserNotAdminException();
 
-        for(GroupChatAccount account : groupChat.getMembers()) {
+        List<GroupChatAccount> accounts = new ArrayList<>(groupChat.getMembers());
+        for (GroupChatAccount account : accounts) {
             User user = account.getUser();
 
             int userAccountId = IntStream.range(0, user.getGroupChatAccounts().size())
                     .filter(i -> user.getGroupChatAccounts().get(i).getId().equals(account.getId()))
                     .findFirst().orElse(-1);
-            int groupMemberId = IntStream.range(0, user.getGroupChatAccounts().size())
+            int groupMemberId = IntStream.range(0, groupChat.getMembers().size())
                     .filter(i -> groupChat.getMembers().get(i).getId().equals(account.getId()))
                     .findFirst().orElse(-1);
 
             user.getGroupChatAccounts().remove(userAccountId);
             groupChat.getMembers().remove(groupMemberId);
+            account.setGroupChat(null);
 
+            groupChatAccountRepository.save(account);
+            groupChatRepository.save(groupChat);
             userRepository.save(user);
+
+            Set<GroupMessage> groupMessages = account.getGroupMessages();
+            for (GroupMessage groupMessage : groupMessages) {
+                groupMessage.setSender(null);
+                groupMessage.setGroupChat(null);
+                groupMessageRepository.save(groupMessage);
+            }
+
+            groupMessageRepository.deleteAll(groupMessages);
             groupChatAccountRepository.delete(account);
         }
+
+        List<SystemMessage> systemMessages = groupChat.getSystemMessages();
+        for (SystemMessage systemMessage : systemMessages) {
+            systemMessage.setChat(null);
+            systemMessageRepository.save(systemMessage);
+        }
+
+        systemMessageRepository.deleteAll(systemMessages);
 
         groupChatRepository.delete(groupChat);
 

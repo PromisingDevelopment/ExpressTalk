@@ -190,7 +190,8 @@ public class WebSocketGroupChatController {
 
             simpMessagingTemplate.convertAndSend("/group_chat/removed/" + chatId, true);
         } catch (Exception exception) {
-            simpMessagingTemplate.convertAndSend("/group_chat/removed/" + chatStrId + "/errors", exception.getMessage());
+            throw exception;
+//            simpMessagingTemplate.convertAndSend("/group_chat/removed/" + chatStrId + "/errors", exception.getMessage());
         }
     }
 
