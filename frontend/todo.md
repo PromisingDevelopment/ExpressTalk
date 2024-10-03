@@ -6,7 +6,7 @@
 (B) Group tasks
   edit group name feature {cm:2024-09-30}
   remove group feature
-    Add new MenuItem in Menu
+    Add new MenuItem in Menu {cm:2024-10-03}
     Add click handler
     Add RemoveGroup func in wsConfig
   leave group feature {cm:2024-10-03}

@@ -44,6 +44,9 @@ const MemberActions: React.FC<MemberActionsProps> = () => {
       leaveGroup(groupId);
     }
   };
+
+  const onRemoveGroup = () => {};
+
   const onMenuItemClick = (e: React.MouseEvent, index: number) => {
     (e.currentTarget as HTMLElement).blur();
     setModalOpenIndex(index);
@@ -72,9 +75,15 @@ const MemberActions: React.FC<MemberActionsProps> = () => {
       onSubmit: (groupName: string) => onEditGroupName(groupName),
     },
     {
-      label: "Are you sure you want to leave the group",
+      label: "Are you sure you want to LEAVE the group",
       buttonLabel: "Leave the group",
       onSubmit: onLeaveGroup,
+      withoutInput: true,
+    },
+    {
+      label: "Are you sure you want to REMOVE the group",
+      buttonLabel: "Remove the group",
+      onSubmit: onRemoveGroup,
       withoutInput: true,
     },
   ];
