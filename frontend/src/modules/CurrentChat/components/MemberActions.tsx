@@ -1,28 +1,29 @@
-import MoreIcon from "@mui/icons-material/MoreVert";
-import { Menu, MenuItem } from "@mui/material";
-import { getMemberByLogin } from "axios/getMemberByLogin";
-import { ModalLayout } from "components/ModalLayout";
-import { useAppSelector } from "hooks/redux";
 import React from "react";
+import MoreIcon from "@mui/icons-material/MoreVert";
+import { Box, Menu, MenuItem, Modal, styled, TextField, Typography } from "@mui/material";
+import { useAppSelector } from "hooks/redux";
 import CustomIconButton from "UI/CustomIconButton";
-import { addGroupMember, editGroupName, removeGroupMember } from "wsConfig";
+import { ModalLayout } from "components/ModalLayout";
+import { getMemberByLogin } from "axios/getMemberByLogin";
+import { addGroupMember, editGroupName, leaveGroup, removeGroupMember } from "wsConfig";
 
 interface MemberActionsProps {}
 
 const MemberActions: React.FC<MemberActionsProps> = () => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [open, setOpen] = React.useState(false);
+  const [menuOpen, setMenuOpen] = React.useState(false);
   const groupId = useAppSelector((state) => state.root.currentChatId);
 
+  const [modalOpenIndex, setModalOpenIndex] = React.useState<number | null>(null);
+
   const closeMenu = () => {
-    setOpen(false);
+    setMenuOpen(false);
   };
   const openMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(e.currentTarget);
-    setOpen(true);
+    setMenuOpen(true);
   };
-
-  const onSubmit = async (login: string, actionType: "add" | "remove") => {
+  const addOrRemoveUser = async (login: string, actionType: "add" | "remove") => {
     const { id: memberId } = await getMemberByLogin(login);
 
     if (memberId && groupId) {
@@ -33,48 +34,66 @@ const MemberActions: React.FC<MemberActionsProps> = () => {
       }
     }
   };
-
   const onEditGroupName = (groupName: string) => {
     if (groupId) {
       editGroupName(groupId, groupName);
     }
   };
+  const onLeaveGroup = () => {
+    if (groupId) {
+      leaveGroup(groupId);
+    }
+  };
+  const onMenuItemClick = (e: React.MouseEvent, index: number) => {
+    (e.currentTarget as HTMLElement).blur();
+    setModalOpenIndex(index);
+  };
+
+  const actionsData = [
+    {
+      label: "Add a new member",
+      buttonLabel: "Add member",
+      inputLabel: "Input a member login",
+      inputName: "input-add-member-login",
+      onSubmit: (login: string) => addOrRemoveUser(login, "add"),
+    },
+    {
+      label: "Remove a member",
+      buttonLabel: "Remove member",
+      inputLabel: "Input a member login",
+      inputName: "input-remove-member-login",
+      onSubmit: (login: string) => addOrRemoveUser(login, "remove"),
+    },
+    {
+      label: "Edit group name",
+      buttonLabel: "Edit group name",
+      inputLabel: "Input new name of the group",
+      inputName: "input-name-group",
+      onSubmit: (groupName: string) => onEditGroupName(groupName),
+    },
+    {
+      label: "Are you sure you want to leave the group",
+      buttonLabel: "Leave the group",
+      onSubmit: onLeaveGroup,
+      withoutInput: true,
+    },
+  ];
 
   return (
     <>
       <CustomIconButton Icon={MoreIcon} label="Show actions" onClick={openMenu} />
-      <Menu open={open} onClose={closeMenu} anchorEl={anchorEl}>
-        <MenuItem>
-          <ModalLayout
-            withoutIcon
-            closeMenu={closeMenu}
-            inputLabel="Input a member login"
-            inputName="input-member-login"
-            label="Add a new member"
-            onSubmit={(login: string) => onSubmit(login, "add")}
-          />
-        </MenuItem>
-        <MenuItem>
-          <ModalLayout
-            withoutIcon
-            closeMenu={closeMenu}
-            inputLabel="Input a member login"
-            inputName="input-member-login"
-            label="Remove a member"
-            onSubmit={(login: string) => onSubmit(login, "remove")}
-          />
-        </MenuItem>
-        <MenuItem>
-          <ModalLayout
-            withoutIcon
-            closeMenu={closeMenu}
-            inputLabel="Input new name of the group"
-            inputName="input-name-group"
-            label="Edit group name"
-            onSubmit={(groupName: string) => onEditGroupName(groupName)}
-          />
-        </MenuItem>
+      <Menu open={menuOpen} onClose={closeMenu} anchorEl={anchorEl}>
+        {actionsData.map((actionData, i) => (
+          <MenuItem onClick={(e) => onMenuItemClick(e, i)}>{actionData.buttonLabel}</MenuItem>
+        ))}
       </Menu>
+      {actionsData.map((actionData, i) => (
+        <ModalLayout
+          stateWithIndex={{ setValue: setModalOpenIndex, value: modalOpenIndex === i }}
+          closeMenu={closeMenu}
+          {...actionData}
+        />
+      ))}
     </>
   );
 };

@@ -6,7 +6,7 @@
 (B) Group tasks
   edit group name feature {cm:2024-09-30}
   remove group feature
-  leave group feature
+  leave group feature {cm:2024-10-03}
 (C) Change Avatar
   Add validation to avatar size
   Add validation to supported formats
