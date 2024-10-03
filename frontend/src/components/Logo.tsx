@@ -5,6 +5,7 @@ import React from "react";
 import { ImageFileInput } from "./ImageFileInput";
 import { useAppDispatch } from "hooks/redux";
 import { editUserAvatar } from "redux/rootSlice";
+import { AVATAR_SIZE } from "constants/AVATAR_SIZE";
 
 interface LogoProps {
   size: number;
@@ -33,6 +34,11 @@ const Logo: React.FC<LogoProps> = ({ src, size, isMain, isAbleToChange, ownSize 
 
     if (files) {
       const avatar = files[0];
+
+      if (avatar.size > AVATAR_SIZE) {
+        alert("Maximum upload size exceeded. Please, take another picture");
+        return;
+      }
 
       const formData = new FormData();
       formData.append("avatarImage", avatar);
