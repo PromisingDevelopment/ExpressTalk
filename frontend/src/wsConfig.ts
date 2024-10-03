@@ -75,6 +75,14 @@ export function connect(chatId: string, isPrivate: boolean) {
       const error = JSON.parse(data.body);
       console.log("group_chat/edited errors: ", error);
     });
+    chatClient.subscribe(`/group_chat/removed/${chatId}`, (data) => {
+      const json = JSON.parse(data.body);
+      console.log("group_chat/removed: ", json);
+    });
+    chatClient.subscribe(`/group_chat/removed/${chatId}/errors`, (data) => {
+      const error = JSON.parse(data.body);
+      console.log("group_chat/removed errors: ", error);
+    });
   };
 
   const onConnectPrivate = () => {
@@ -209,5 +217,11 @@ export function editGroupName(chatId: string, groupName: string) {
 export function leaveGroup(chatId: string) {
   chatClient.publish({
     destination: `/app/leave/${chatId}`,
+  });
+}
+
+export function removeGroup(chatId: string) {
+  chatClient.publish({
+    destination: `/app/remove/${chatId}`,
   });
 }

@@ -5,7 +5,7 @@ import { useAppSelector } from "hooks/redux";
 import CustomIconButton from "UI/CustomIconButton";
 import { ModalLayout } from "components/ModalLayout";
 import { getMemberByLogin } from "axios/getMemberByLogin";
-import { addGroupMember, editGroupName, leaveGroup, removeGroupMember } from "wsConfig";
+import { addGroupMember, editGroupName, leaveGroup, removeGroup, removeGroupMember } from "wsConfig";
 
 interface MemberActionsProps {}
 
@@ -44,6 +44,13 @@ const MemberActions: React.FC<MemberActionsProps> = () => {
       leaveGroup(groupId);
     }
   };
+
+  const onRemoveGroup = () => {
+    if (groupId) {
+      removeGroup(groupId);
+    }
+  };
+
   const onMenuItemClick = (e: React.MouseEvent, index: number) => {
     (e.currentTarget as HTMLElement).blur();
     setModalOpenIndex(index);
@@ -72,9 +79,15 @@ const MemberActions: React.FC<MemberActionsProps> = () => {
       onSubmit: (groupName: string) => onEditGroupName(groupName),
     },
     {
-      label: "Are you sure you want to leave the group",
+      label: "Are you sure you want to LEAVE the group",
       buttonLabel: "Leave the group",
       onSubmit: onLeaveGroup,
+      withoutInput: true,
+    },
+    {
+      label: "Are you sure you want to REMOVE the group",
+      buttonLabel: "Remove the group",
+      onSubmit: onRemoveGroup,
       withoutInput: true,
     },
   ];
@@ -84,11 +97,14 @@ const MemberActions: React.FC<MemberActionsProps> = () => {
       <CustomIconButton Icon={MoreIcon} label="Show actions" onClick={openMenu} />
       <Menu open={menuOpen} onClose={closeMenu} anchorEl={anchorEl}>
         {actionsData.map((actionData, i) => (
-          <MenuItem onClick={(e) => onMenuItemClick(e, i)}>{actionData.buttonLabel}</MenuItem>
+          <MenuItem key={i} onClick={(e) => onMenuItemClick(e, i)}>
+            {actionData.buttonLabel}
+          </MenuItem>
         ))}
       </Menu>
       {actionsData.map((actionData, i) => (
         <ModalLayout
+          key={i}
           stateWithIndex={{ setValue: setModalOpenIndex, value: modalOpenIndex === i }}
           closeMenu={closeMenu}
           {...actionData}
