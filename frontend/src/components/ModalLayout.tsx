@@ -1,7 +1,6 @@
-import { Button, Modal, styled, Typography } from "@mui/material";
+import { Box, Button, Modal, styled, Typography } from "@mui/material";
 import { CustomInput } from "components/CustomInput";
-import { error } from "console";
-import React, { useEffect } from "react";
+import React from "react";
 import CustomIconButton from "UI/CustomIconButton";
 import { SubmitButton } from "UI/SubmitButton";
 import ModalContent from "../UI/ModalContent";
@@ -9,21 +8,26 @@ import ModalContent from "../UI/ModalContent";
 interface ModalLayoutProps {
   onSubmit: any;
   label: string;
-  inputLabel: string;
-  inputName: string;
+  buttonLabel?: string;
+  inputLabel?: string;
+  inputName?: string;
   Icon?: any;
-  withoutIcon?: boolean;
   closeMenu?: any;
+  stateWithIndex?: {
+    value: boolean;
+    setValue: any;
+  };
 }
 
 const ModalLayout: React.FC<ModalLayoutProps> = ({
   onSubmit,
   label,
+  buttonLabel,
   inputLabel,
   inputName,
   Icon,
-  withoutIcon,
   closeMenu,
+  stateWithIndex,
 }) => {
   const [openModal, setOpenModal] = React.useState(false);
   const [isEmpty, setIsEmpty] = React.useState(false);
@@ -31,20 +35,17 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
   const userIdInputRef = React.useRef<HTMLInputElement | null>(null);
   const [isDisabled, setIsDisabled] = React.useState(false);
 
-  const hideFocus = () => {
-    (document.activeElement as HTMLElement).blur();
+  const handleMenuItemClick = (e: React.MouseEvent) => {
+    (e.currentTarget as HTMLElement).blur();
   };
 
   const onOpenModal = () => {
     setOpenModal(true);
-    setTimeout(() => {
-      userIdInputRef.current?.focus();
-    }, 0);
   };
   const onCloseModal = () => {
     setOpenModal(false);
-    setTimeout(hideFocus, 300);
 
+    if (stateWithIndex) stateWithIndex.setValue(null);
     if (closeMenu) closeMenu();
   };
 
@@ -71,42 +72,89 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
     setIsDisabled(false);
   };
 
-  return (
-    <>
-      {withoutIcon ? (
-        <Typography fontSize={16} onClick={onOpenModal}>
-          {label}
+  const onConfirm = () => {
+    onSubmit();
+    onCloseModal();
+  };
+
+  const inputLayout = (
+    <form onSubmit={handleSubmit}>
+      <CustomInput
+        autoFocus
+        inputId="action-modal-input"
+        ref={userIdInputRef}
+        label={inputLabel || ""}
+        name={inputName || ""}
+      />
+      {isEmpty && (
+        <Typography variant="body1" color="error.main" mt={0.5}>
+          This field is required!
         </Typography>
-      ) : (
-        <CustomIconButton label={label} onClick={onOpenModal} Icon={Icon} />
+      )}
+      {errorMessage && (
+        <Typography variant="body1" color="error.main" mt={0.5}>
+          {errorMessage.toString()}
+        </Typography>
       )}
 
-      <Modal open={openModal} onClose={onCloseModal}>
-        <ModalContent title={label} onCloseModal={onCloseModal}>
-          <form onSubmit={handleSubmit}>
-            <CustomInput
-              inputId="action-modal-input"
-              ref={userIdInputRef}
-              label={inputLabel}
-              name={inputName}
-            />
-            {isEmpty && (
-              <Typography variant="body1" color="error.main" mt={0.5}>
-                This field is required!
-              </Typography>
-            )}
-            {errorMessage && (
-              <Typography variant="body1" color="error.main" mt={0.5}>
-                {errorMessage.toString()}
-              </Typography>
-            )}
+      <SubmitButton disabled={isDisabled} label={"submit"} />
+    </form>
+  );
 
-            <SubmitButton disabled={isDisabled} label={label} />
-          </form>
+  const confirmLayout = (
+    <Box sx={{ display: "flex", gap: 2 }}>
+      <StyledButton variant="contained" onClick={onConfirm}>
+        confirm
+      </StyledButton>
+      <StyledButton onClick={onCloseModal} isCancel variant="contained">
+        cancel
+      </StyledButton>
+    </Box>
+  );
+
+  const openButton = (
+    <Button sx={{ color: "#fff" }} onMouseDown={handleMenuItemClick} onClick={onOpenModal}>
+      {buttonLabel}
+    </Button>
+  );
+
+  const openButtonWithIcon = <CustomIconButton label={label} onClick={onOpenModal} Icon={Icon} />;
+
+  return (
+    <>
+      {!stateWithIndex && (Icon ? openButtonWithIcon : openButton)}
+
+      <Modal open={stateWithIndex ? stateWithIndex.value : openModal} onClose={onCloseModal}>
+        <ModalContent title={label} onCloseModal={onCloseModal}>
+          {inputLabel && inputName ? inputLayout : confirmLayout}
         </ModalContent>
       </Modal>
     </>
   );
 };
+
+const StyledButton = styled(Button, {
+  shouldForwardProp: (props) => props !== "isCancel",
+})<{ isCancel?: boolean }>`
+  box-shadow: none;
+  font-size: 24px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  flex: 1 1 50%;
+  background: ${({ isCancel }) => (isCancel ? "#fff" : "#f44336")};
+  color: ${({ isCancel }) => (isCancel ? "#2B3464" : "#fff")};
+  transition: opacity 0.3s ease 0s;
+  &:hover {
+    opacity: 0.8;
+    background: ${({ isCancel }) => (isCancel ? "#fff" : "#f44336")};
+    color: ${({ isCancel }) => (isCancel ? "#2B3464" : "#fff")};
+  }
+  @media (max-width: 600px) {
+    font-size: 16px;
+    margin-top: 16px;
+    padding-top: 12px;
+    padding-top: 12px;
+  }
+`;
 
 export { ModalLayout };

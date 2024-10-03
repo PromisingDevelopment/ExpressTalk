@@ -7,11 +7,7 @@ import { setCurrentChat } from "modules/CurrentChat";
 import React from "react";
 import { connect } from "wsConfig";
 import { setSidebarOpen } from "../store/sidebarSlice";
-import {
-  setCurrentChatId,
-  setCurrentChatType,
-  setIsCreatedNewChat,
-} from "redux/rootSlice";
+import { setCurrentChatId, setCurrentChatType, setIsCreatedNewChat } from "redux/rootSlice";
 
 interface CreateNewChatProps {
   switchChatMode: any;

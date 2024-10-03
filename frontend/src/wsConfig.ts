@@ -205,3 +205,9 @@ export function editGroupName(chatId: string, groupName: string) {
     }),
   });
 }
+
+export function leaveGroup(chatId: string) {
+  chatClient.publish({
+    destination: `/app/leave/${chatId}`,
+  });
+}

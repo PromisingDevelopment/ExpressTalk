@@ -6,8 +6,12 @@
 (B) Group tasks
   edit group name feature {cm:2024-09-30}
   remove group feature
-  leave group feature
+    Add new MenuItem in Menu
+    Add click handler
+    Add RemoveGroup func in wsConfig
+  leave group feature {cm:2024-10-03}
 (C) Change Avatar
   Add validation to avatar size
   Add validation to supported formats
   Add right format to getUserAvatar in Blob
+  Add logo in CurrentChat
