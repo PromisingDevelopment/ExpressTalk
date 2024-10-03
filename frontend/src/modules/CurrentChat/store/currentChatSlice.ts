@@ -62,9 +62,13 @@ const currentChatSlice = createSlice({
         state.currentGroupChat.name = action.payload;
       }
     },
-    resetChats: (state) => {
-      state.currentChat = null;
-      state.currentGroupChat = null;
+    resetChats: (state, action: PayloadAction<"currentChat" | "currentGroupChat" | undefined>) => {
+      if (action.payload) {
+        state[action.payload] = null;
+      } else {
+        state.currentChat = null;
+        state.currentGroupChat = null;
+      }
     },
   },
 

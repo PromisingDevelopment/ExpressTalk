@@ -170,7 +170,7 @@ const ChatList: React.FC<ChatListProps> = ({ currentChatMode, filterChatsValue, 
         ? privateChatsList?.map((chat, i) => (
             <PrivateChatItem
               onClick={() => onClickChat(i, chat.id)}
-              key={i}
+              key={chat.id}
               {...chat}
               active={currentChatIndex === i || currentChatId === chat.id}
             />
@@ -178,7 +178,7 @@ const ChatList: React.FC<ChatListProps> = ({ currentChatMode, filterChatsValue, 
         : groupChatsList?.map((chat, i) => (
             <GroupChatItem
               onClick={() => onClickGroup(i, chat.id)}
-              key={i}
+              key={chat.id}
               {...chat}
               active={groupIndex === i || currentChatId === chat.id}
             />

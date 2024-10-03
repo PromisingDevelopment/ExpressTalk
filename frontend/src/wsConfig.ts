@@ -1,10 +1,14 @@
 import { Client } from "@stomp/stompjs";
 import { wsServerURL } from "config";
-import { updateCurrentChatMessages, updateGroupMembers, updateGroupName } from "modules/CurrentChat";
-import { updateLastMessage, updateNameGroupInList } from "modules/Sidebar";
+import {
+  resetChats,
+  updateCurrentChatMessages,
+  updateGroupMembers,
+  updateGroupName,
+} from "modules/CurrentChat";
+import { filterChatsList, updateLastMessage, updateNameGroupInList } from "modules/Sidebar";
 import { store } from "redux/store";
 import SockJS from "sockjs-client";
-import { ChatsListType } from "types/ChatsListType";
 import { CurrentChatType } from "types/CurrentChatType";
 import { MemberRoles } from "types/MemberRoles";
 
@@ -77,7 +81,11 @@ export function connect(chatId: string, isPrivate: boolean) {
     });
     chatClient.subscribe(`/group_chat/removed/${chatId}`, (data) => {
       const json = JSON.parse(data.body);
-      console.log("group_chat/removed: ", json);
+
+      console.log("group_chat/removed: ", json, chatId);
+
+      store.dispatch(resetChats("currentGroupChat"));
+      store.dispatch(filterChatsList(chatId));
     });
     chatClient.subscribe(`/group_chat/removed/${chatId}/errors`, (data) => {
       const error = JSON.parse(data.body);
@@ -118,6 +126,8 @@ export function subscribeLastMessages(userId: string) {
   const handleLastMessage = (data: any) => {
     const json = JSON.parse(data.body);
     const chatsType = store.getState().root.currentChatType + "s";
+
+    console.log(json);
 
     store.dispatch(updateLastMessage({ ...json, chatsType }));
   };
@@ -216,12 +226,12 @@ export function editGroupName(chatId: string, groupName: string) {
 
 export function leaveGroup(chatId: string) {
   chatClient.publish({
-    destination: `/app/leave/${chatId}`,
+    destination: `/app/group_chat/leave/${chatId}`,
   });
 }
 
 export function removeGroup(chatId: string) {
   chatClient.publish({
-    destination: `/app/remove/${chatId}`,
+    destination: `/app/group_chat/remove/${chatId}`,
   });
 }

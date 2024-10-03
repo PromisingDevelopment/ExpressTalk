@@ -28,6 +28,15 @@ const sidebarSlice = createSlice({
   name: "@@sidebar",
   initialState,
   reducers: {
+    filterChatsList: (state, action: PayloadAction<string>) => {
+      const groupId = action.payload;
+
+      if (!state.chatsList.list) return;
+
+      const filteredGroupChats = state.chatsList.list.groupChats.filter(({ id }) => id !== groupId);
+
+      state.chatsList.list.groupChats = filteredGroupChats;
+    },
     setSidebarOpen: (state, action: PayloadAction<boolean>) => {
       state.sidebarOpen = action.payload;
     },
@@ -114,6 +123,11 @@ export const logout = createAsyncThunk<void, void>("@@sidebar/logout", async (_,
   }
 });
 
-export const { setSidebarOpen, resetChatListError, updateLastMessage, updateNameGroupInList } =
-  sidebarSlice.actions;
+export const {
+  setSidebarOpen,
+  resetChatListError,
+  updateLastMessage,
+  updateNameGroupInList,
+  filterChatsList,
+} = sidebarSlice.actions;
 export default sidebarSlice.reducer;
