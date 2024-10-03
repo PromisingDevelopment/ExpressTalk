@@ -77,7 +77,7 @@ const rootSlice = createSlice({
 
       .addCase(getUserAvatar.fulfilled, (state, action: PayloadAction<any>) => {
         const byteArray = new Uint8Array(action.payload);
-        const blob = new Blob([byteArray], { type: "image/png" });
+        const blob = new Blob([byteArray]);
         const imageUrl = URL.createObjectURL(blob);
 
         state.avatarUrl = imageUrl;

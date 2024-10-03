@@ -8,6 +8,6 @@
   remove group feature
   leave group feature {cm:2024-10-03}
 (C) Change Avatar
-  Add validation to avatar size
-  Add validation to supported formats
-  Add right format to getUserAvatar in Blob
+  Add validation to avatar size {cm:2024-10-03}
+  Add validation to supported formats {cm:2024-10-03}
+  Get avatars from other chats
