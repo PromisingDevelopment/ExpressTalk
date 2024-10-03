@@ -7,8 +7,8 @@
   edit group name feature {cm:2024-09-30}
   remove group feature
     Add new MenuItem in Menu {cm:2024-10-03}
-    Add click handler
-    Add RemoveGroup func in wsConfig
+    Add click handler {cm:2024-10-03}
+    Add RemoveGroup func in wsConfig {cm:2024-10-03}
   leave group feature {cm:2024-10-03}
 (C) Change Avatar
   Add validation to avatar size
