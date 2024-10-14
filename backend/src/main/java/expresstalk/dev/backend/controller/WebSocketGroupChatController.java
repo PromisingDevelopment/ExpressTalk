@@ -190,36 +190,7 @@ public class WebSocketGroupChatController {
 
             simpMessagingTemplate.convertAndSend("/group_chat/removed/" + chatId, true);
         } catch (Exception exception) {
-            throw exception;
-//            simpMessagingTemplate.convertAndSend("/group_chat/removed/" + chatStrId + "/errors", exception.getMessage());
-        }
-    }
-
-    @MessageMapping("/group_chat/leave/{chatStrId}")
-    private void leave(@DestinationVariable String chatStrId, Message<?> message) {
-        try {
-            MessageHeaders headers = message.getHeaders();
-            HttpSession session = (HttpSession) SimpMessageHeaderAccessor.getSessionAttributes(headers).get("session");
-
-            UUID chatId = chatService.verifyAndGetChatUUID(chatStrId);
-            UUID userId = sessionService.getUserIdFromSession(session);
-            User member = userService.findById(userId);
-            GroupChat groupChat = groupChatService.getChat(chatId);
-            groupChatService.leave(member, groupChat);
-            String leftMessage = member.getLogin() + " left the chat";
-            SystemMessage systemMessage = chatService.saveSystemMessage(leftMessage, groupChat);
-            GroupMessageDto groupMessageDto = groupChatService.getGroupMessageDto(systemMessage);
-            UpdatedMembersDto updatedMembersDto = new UpdatedMembersDto(chatId, groupChat.getMembers());
-            List<User> receivers = groupChatService.getUsersOfGroupChat(groupChat);
-
-            for(User receiver : receivers) {
-                LastMessageDto lastMessageDto = new LastMessageDto(chatId,leftMessage);
-                simpMessagingTemplate.convertAndSend("/chat/last_message/" + receiver.getId(), lastMessageDto);
-            }
-            simpMessagingTemplate.convertAndSend("/group_chat/messages/" + chatId, groupMessageDto);
-            simpMessagingTemplate.convertAndSend("/group_chat/updated_members/" + chatId, updatedMembersDto);
-        } catch (Exception exception) {
-            simpMessagingTemplate.convertAndSend("/group_chat/left/" + chatStrId + "/errors", exception.getMessage());
+            simpMessagingTemplate.convertAndSend("/group_chat/removed/" + chatStrId + "/errors", exception.getMessage());
         }
     }
 }

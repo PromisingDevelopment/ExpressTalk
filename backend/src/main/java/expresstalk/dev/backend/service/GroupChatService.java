@@ -29,6 +29,14 @@ public class GroupChatService {
     private final AttachedFileRepository attachedFileRepository;
     private final SystemMessageRepository systemMessageRepository;
 
+    private boolean isThereAdmins(GroupChat groupChat) {
+        for (GroupChatAccount account : groupChat.getMembers()) {
+            if(account.getGroupChatRole() == GroupChatRole.ADMIN) return true;
+        }
+
+        return false;
+    }
+
     public void ensureUserExistsInChat(User user, GroupChat groupChat) {
         verifyAndGetGroupChatAccount(user, groupChat);
     }
@@ -138,35 +146,17 @@ public class GroupChatService {
             groupChatAccountRepository.delete(account);
         }
 
+        groupChat.setMembers(null);
+
         List<SystemMessage> systemMessages = groupChat.getSystemMessages();
         for (SystemMessage systemMessage : systemMessages) {
             systemMessage.setChat(null);
             systemMessageRepository.save(systemMessage);
+            systemMessageRepository.delete(systemMessage);
         }
 
-        systemMessageRepository.deleteAll(systemMessages);
-
+        groupChat.setSystemMessages(null);
         groupChatRepository.delete(groupChat);
-
-        return groupChat;
-    }
-
-    public GroupChat leave(User member, GroupChat groupChat) {
-        GroupChatAccount account = verifyAndGetGroupChatAccount(member, groupChat);
-
-        int userAccountId = IntStream.range(0, member.getGroupChatAccounts().size())
-                .filter(i -> member.getGroupChatAccounts().get(i).getId().equals(account.getId()))
-                .findFirst().orElse(-1);
-        int groupMemberId = IntStream.range(0, member.getGroupChatAccounts().size())
-                .filter(i -> groupChat.getMembers().get(i).getId().equals(account.getId()))
-                .findFirst().orElse(-1);
-
-        member.getGroupChatAccounts().remove(userAccountId);
-        groupChat.getMembers().remove(groupMemberId);
-
-        userRepository.save(member);
-        groupChatRepository.save(groupChat);
-        groupChatAccountRepository.delete(account);
 
         return groupChat;
     }
